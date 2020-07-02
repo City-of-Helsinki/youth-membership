@@ -1,0 +1,41 @@
+version: '3.7'
+services:
+    postgres:
+        image: helsinkitest/postgis:11-2.5-alpine
+        restart: on-failure
+        environment:
+            POSTGRES_USER: youth_membership
+            POSTGRES_PASSWORD: youth_membership
+            POSTGRES_DB: youth_membership
+        ports:
+            - 5436:5432
+        volumes:
+          - pgdata:/var/lib/postgresql/data
+        container_name: youth-membership-db
+
+    django:
+        build:
+            context: .
+            target: development
+        env_file:
+            - docker-compose.env.yaml
+        environment:
+            DATABASE_URL: postgres://youth_membership:youth_membership@youth-membership-db/youth_membership
+            DATABASE_HOST: "youth-membership-db"
+        volumes:
+            - .:/app
+            - django-media-volume:/var/media/
+        ports:
+            - "8081:8000"
+        depends_on:
+            - postgres
+        container_name: youth-membership-backend
+
+volumes:
+        pgdata:
+            driver: local
+        django-media-volume:
+
+networks:
+    default:
+        name: helsinki
