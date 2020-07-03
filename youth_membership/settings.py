@@ -160,9 +160,8 @@ INSTALLED_APPS = [
     "import_export",
     # Local apps
     "users",
-    # "youths",
+    "youths",
     "common_utils",
-    # "utils",
 ]
 
 MIDDLEWARE = [
