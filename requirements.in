@@ -11,6 +11,7 @@ django-ilmoitin
 django-import-export
 django-parler
 django-reversion
+django-sequences
 djangorestframework
 graphene-django
 graphene-federation

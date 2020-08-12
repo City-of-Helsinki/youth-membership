@@ -1,6 +1,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
+from youths.models import YouthProfile
 from youths.tests.factories import AdditionalContactPersonFactory
 
 
@@ -62,11 +63,8 @@ def test_serialize_additional_contact_person():
 
 
 def test_membership_number_is_generated_for_new_profile(settings, youth_profile):
-    # TODO YM-280
-    # expected_number = str(youth_profile.pk).zfill(
-    #     settings.YOUTH_MEMBERSHIP_NUMBER_LENGTH
-    # )
-    expected_number = "1"
+    sequence_value = YouthProfile.membership_number_sequence.get_last_value()
+    expected_number = str(sequence_value).zfill(settings.YOUTH_MEMBERSHIP_NUMBER_LENGTH)
 
     # Post save signal sets the membership number
     assert youth_profile.membership_number == expected_number
@@ -78,16 +76,14 @@ def test_membership_number_is_generated_for_new_profile(settings, youth_profile)
 
 def test_membership_number_is_generated_for_existing_profile(settings, youth_profile):
     """If membership number is empty, it will be generated."""
-
-    # TODO YM-280
-    # expected_number = str(youth_profile.pk).zfill(
-    #     settings.YOUTH_MEMBERSHIP_NUMBER_LENGTH
-    # )
-    expected_number = "1"
+    original_number = YouthProfile.membership_number_sequence.get_last_value()
 
     youth_profile.membership_number = ""
     youth_profile.save()
 
+    new_number = YouthProfile.membership_number_sequence.get_last_value()
+    expected_number = str(new_number).zfill(settings.YOUTH_MEMBERSHIP_NUMBER_LENGTH)
+    assert original_number < new_number
     assert youth_profile.membership_number == expected_number
 
 

@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import timezone
 from django_ilmoitin.utils import send_notification
 from enumfields import EnumField
+from sequences import Sequence
 
 from common_utils.models import SerializableMixin, UUIDModel
 
@@ -67,6 +68,9 @@ class YouthProfile(UUIDModel, SerializableMixin):
     )
     approved_time = models.DateTimeField(null=True, blank=True, editable=False)
     photo_usage_approved = models.NullBooleanField()
+
+    # Source sequence of integer values for a membership number.
+    membership_number_sequence = Sequence("membership_number")
 
     def make_approvable(self):
         self.approval_token = uuid.uuid4()

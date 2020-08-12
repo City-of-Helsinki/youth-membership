@@ -1,4 +1,4 @@
-# from django.conf import settings
+from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -14,12 +14,10 @@ def generate_membership_number(sender, instance: YouthProfile, created, **kwargs
     """
     if created or not instance.membership_number:
 
-        # TODO YM-280 How to generate membership_number without autoincrementing id?
-        membership_number = "1"
-
-        # membership_number = str(instance.pk).zfill(
-        #     settings.YOUTH_MEMBERSHIP_NUMBER_LENGTH
-        # )
+        membership_number_raw = YouthProfile.membership_number_sequence.get_next_value()
+        membership_number = str(membership_number_raw).zfill(
+            settings.YOUTH_MEMBERSHIP_NUMBER_LENGTH
+        )
         instance.membership_number = membership_number
         sender.objects.filter(pk=instance.pk).update(
             membership_number=membership_number

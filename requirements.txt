@@ -27,7 +27,8 @@ django-import-export==2.2.0  # via -r requirements.in
 django-mailer==2.0.1      # via django-ilmoitin
 django-parler==1.9.2      # via -r requirements.in, django-ilmoitin
 django-reversion==3.0.7   # via -r requirements.in
-django==2.2.14            # via -r requirements.in, django-admin-sortable, django-anymail, django-cors-headers, django-filter, django-graphql-jwt, django-guardian, django-helusers, django-ilmoitin, django-import-export, django-mailer, django-reversion, djangorestframework, drf-oidc-auth, graphene-django
+django-sequences==2.5     # via -r requirements.in
+django==2.2.14            # via -r requirements.in, django-admin-sortable, django-anymail, django-cors-headers, django-filter, django-graphql-jwt, django-guardian, django-helusers, django-ilmoitin, django-import-export, django-mailer, django-reversion, django-sequences, djangorestframework, drf-oidc-auth, graphene-django
 djangorestframework==3.11.0  # via -r requirements.in, drf-oidc-auth
 drf-oidc-auth==0.10.0     # via django-helusers
 ecdsa==0.15               # via python-jose
