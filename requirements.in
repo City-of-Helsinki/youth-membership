@@ -5,7 +5,6 @@ django-enumfields
 django-environ
 django-filter
 django-graphql-jwt
-django-guardian
 django-helusers
 django-ilmoitin
 django-import-export

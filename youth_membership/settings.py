@@ -156,7 +156,6 @@ INSTALLED_APPS = [
     "django_ilmoitin",
     "mailer",
     "graphene_django",
-    # "guardian",
     "adminsortable",
     "import_export",
     # Local apps
@@ -228,7 +227,6 @@ AUTHENTICATION_BACKENDS = [
     "helusers.tunnistamo_oidc.TunnistamoOIDCAuth",
     "django.contrib.auth.backends.ModelBackend",
     "common_utils.oidc.GraphQLApiTokenAuthentication",
-    # "guardian.backends.ObjectPermissionBackend",
 ]
 
 # Django-parler
