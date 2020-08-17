@@ -1,9 +1,11 @@
 import pytest
+from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 
 from youths.models import YouthProfile
 from youths.tests.factories import AdditionalContactPersonFactory
-from youths.utils import user_is_admin
+from youths.utils import generate_admin_group, user_is_admin
 
 
 def test_serialize_youth_profile(youth_profile):
@@ -115,3 +117,9 @@ def test_additional_contact_person_runs_full_clean_when_saving(youth_profile):
 )
 def test_user_is_admin(possible_admin_user, is_admin):
     assert user_is_admin(possible_admin_user) == is_admin
+
+
+def test_generate_admin_group():
+    generate_admin_group()
+    group = Group.objects.first()
+    assert group.name == settings.YOUTH_MEMBERSHIP_STAFF_GROUP

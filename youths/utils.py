@@ -1,11 +1,19 @@
 from datetime import date
 
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from graphql_relay import from_global_id
 
 from common_utils.exceptions import InvalidEmailFormatError
 from youths.models import AdditionalContactPerson, YouthProfile
+
+
+def generate_admin_group():
+    group, created = Group.objects.get_or_create(
+        name=settings.YOUTH_MEMBERSHIP_STAFF_GROUP
+    )
+    return group
 
 
 def user_is_admin(user):
