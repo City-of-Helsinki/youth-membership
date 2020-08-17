@@ -1,10 +1,11 @@
 import factory.random
 import pytest
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from graphene.test import Client as GraphQLClient
 
 from common_utils.views import SentryGraphQLView
-from users.factories import SuperuserFactory, UserFactory
+from users.factories import GroupFactory, SuperuserFactory, UserFactory
 from youth_membership.schema import schema
 
 
@@ -38,6 +39,18 @@ def superuser():
     return SuperuserFactory()
 
 
+@pytest.fixture
+def staff_group():
+    return GroupFactory(name=settings.YOUTH_MEMBERSHIP_STAFF_GROUP)
+
+
+@pytest.fixture
+def staff_user(staff_group):
+    user = UserFactory()
+    user.groups.add(staff_group)
+    return user
+
+
 def get_gql_client_with_error_formating():
     return GraphQLClient(schema, format_error=SentryGraphQLView.format_error)
 
@@ -59,6 +72,13 @@ def anon_user_gql_client(anon_user):
 def user_gql_client(user):
     gql_client = get_gql_client_with_error_formating()
     gql_client.user = user
+    return gql_client
+
+
+@pytest.fixture
+def staff_user_gql_client(staff_user):
+    gql_client = get_gql_client_with_error_formating()
+    gql_client.user = staff_user
     return gql_client
 
 

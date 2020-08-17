@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from youths.models import YouthProfile
 from youths.tests.factories import AdditionalContactPersonFactory
+from youths.utils import user_is_admin
 
 
 def test_serialize_youth_profile(youth_profile):
@@ -101,3 +102,16 @@ def test_additional_contact_person_runs_full_clean_when_saving(youth_profile):
     with pytest.raises(ValidationError):
         acp.email = "notanemail"
         acp.save()
+
+
+@pytest.mark.parametrize(
+    "possible_admin_user,is_admin",
+    [
+        (pytest.lazy_fixture("anon_user"), False),
+        (pytest.lazy_fixture("user"), False),
+        (pytest.lazy_fixture("superuser"), True),
+        (pytest.lazy_fixture("staff_user"), True),
+    ],
+)
+def test_user_is_admin(possible_admin_user, is_admin):
+    assert user_is_admin(possible_admin_user) == is_admin

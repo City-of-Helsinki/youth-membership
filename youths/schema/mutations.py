@@ -7,6 +7,7 @@ from graphene import relay
 from graphql_jwt.decorators import login_required
 from graphql_relay.node.node import from_global_id
 
+from ..decorators import staff_required
 from ..exceptions import (
     ApproverEmailCannotBeEmptyForMinorsError,
     CannotCreateYouthProfileIfUnder13YearsOldError,
@@ -192,8 +193,7 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
     youth_profile = graphene.Field(YouthProfileType)
 
     @classmethod
-    # TODO Redo permissions, YM-281
-    # @staff_required(required_permission="manage")
+    @staff_required
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
@@ -248,8 +248,7 @@ class UpdateYouthProfileMutation(relay.ClientIDMutation):
         youth_profile = UpdateYouthProfileInput(required=True)
 
     @classmethod
-    # TODO Redo permissions, YM-281
-    # @staff_required(required_permission="manage")
+    @staff_required
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
@@ -287,8 +286,7 @@ class RenewYouthProfileMutation(relay.ClientIDMutation):
     youth_profile = graphene.Field(YouthProfileType)
 
     @classmethod
-    # TODO Redo permissions, YM-281
-    # @staff_required(required_permission="manage")
+    @staff_required
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         youth_profile = YouthProfile.objects.get(
@@ -368,8 +366,7 @@ class CancelYouthProfileMutation(relay.ClientIDMutation):
     youth_profile = graphene.Field(YouthProfileType)
 
     @classmethod
-    # TODO Redo permissions, YM-281
-    # @staff_required(required_permission="manage")
+    @staff_required
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         youth_profile = YouthProfile.objects.get(

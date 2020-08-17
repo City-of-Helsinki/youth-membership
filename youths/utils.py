@@ -1,10 +1,19 @@
 from datetime import date
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from graphql_relay import from_global_id
 
 from common_utils.exceptions import InvalidEmailFormatError
 from youths.models import AdditionalContactPerson, YouthProfile
+
+
+def user_is_admin(user):
+    return user.is_active and (
+        user.is_superuser
+        or user.is_staff
+        or user.groups.filter(name=settings.YOUTH_MEMBERSHIP_STAFF_GROUP).exists()
+    )
 
 
 def calculate_age(birth_date):

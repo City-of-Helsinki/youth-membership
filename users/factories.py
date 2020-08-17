@@ -1,5 +1,6 @@
 import factory
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 
 User = get_user_model()
 
@@ -19,3 +20,8 @@ class SuperuserFactory(UserFactory):
 
     class Meta:
         model = User
+
+
+class GroupFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Group

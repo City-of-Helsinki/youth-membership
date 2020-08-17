@@ -299,6 +299,8 @@ YOUTH_MEMBERSHIP_SEASON_END_DATE = 31, 8
 # Month from which on the membership will last until the next year, instead of ending in the current year
 YOUTH_MEMBERSHIP_FULL_SEASON_START_MONTH = 5
 
+YOUTH_MEMBERSHIP_STAFF_GROUP = "youth_admin"
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

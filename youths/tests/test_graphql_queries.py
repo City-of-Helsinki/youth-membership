@@ -2,15 +2,13 @@ import uuid
 from datetime import date
 from string import Template
 
+import pytest
 from django.utils import timezone
 from freezegun import freeze_time
 from graphql_relay.node.node import to_global_id
 
+from common_utils.consts import PERMISSION_DENIED_ERROR
 from youths.tests.factories import YouthProfileFactory
-
-# TODO Redo permissions, YM-281
-# from guardian.shortcuts import assign_perm
-# from profiles.tests.factories import EmailFactory, ProfileWithPrimaryEmailFactory
 
 
 # TODO Check properly
@@ -33,7 +31,6 @@ def test_anon_user_query_should_fail(rf, youth_profile, anon_user_gql_client):
     assert dict(executed["data"]) == expected_data
 
 
-# TODO Check properly
 def test_normal_user_query_by_id_should_fail(rf, youth_profile, user_gql_client):
     request = rf.post("/graphql")
     request.user = user_gql_client.user
@@ -51,6 +48,9 @@ def test_normal_user_query_by_id_should_fail(rf, youth_profile, user_gql_client)
     expected_data = {"youthProfile": None}
     executed = user_gql_client.execute(query, context=request)
     assert dict(executed["data"]) == expected_data
+    assert (
+        executed["errors"][0].get("extensions").get("code") == PERMISSION_DENIED_ERROR
+    )
 
 
 def test_normal_user_can_query_own_youth_profile(rf, user_gql_client):
@@ -79,9 +79,17 @@ def test_normal_user_can_query_own_youth_profile(rf, user_gql_client):
     assert dict(executed["data"]) == expected_data
 
 
-def test_superuser_can_query_by_id(rf, youth_profile, superuser_gql_client):
+# Parametrize superuser + staff user
+@pytest.mark.parametrize(
+    "gql_client",
+    [
+        pytest.lazy_fixture("superuser_gql_client"),
+        pytest.lazy_fixture("staff_user_gql_client"),
+    ],
+)
+def test_staff_user_can_query_by_id(rf, youth_profile, gql_client):
     request = rf.post("/graphql")
-    request.user = superuser_gql_client.user
+    request.user = gql_client.user
 
     t = Template(
         """
@@ -94,7 +102,6 @@ def test_superuser_can_query_by_id(rf, youth_profile, superuser_gql_client):
         """
     )
     query = t.substitute(
-        # TODO There's no ProfileNode
         profileId=to_global_id(type="YouthProfileType", id=youth_profile.pk)
     )
     expected_data = {
@@ -104,7 +111,7 @@ def test_superuser_can_query_by_id(rf, youth_profile, superuser_gql_client):
             "schoolClass": youth_profile.school_class,
         }
     }
-    executed = superuser_gql_client.execute(query, context=request)
+    executed = gql_client.execute(query, context=request)
     assert dict(executed["data"]) == expected_data
 
 

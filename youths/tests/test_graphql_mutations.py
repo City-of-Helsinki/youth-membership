@@ -16,10 +16,6 @@ from youths.consts import (
 from youths.enums import YouthLanguage
 from youths.tests.factories import YouthProfileFactory
 
-# TODO Redo permissions, YM-281
-# from guardian.shortcuts import assign_perm
-# from profiles.tests.factories import EmailFactory, ProfileWithPrimaryEmailFactory
-
 
 def test_normal_user_can_create_youth_profile_mutation(rf, user_gql_client):
     request = rf.post("/graphql")
@@ -499,12 +495,9 @@ def test_user_cannot_update_youth_profile_with_photo_usage_field_if_under_15_yea
 
 
 def test_staff_user_can_update_youth_profile_with_photo_usage_field_if_under_15_years_old(
-    rf, user_gql_client,  # group
+    rf, staff_user_gql_client
 ):
-    user = user_gql_client.user
-    # user.groups.add(group)
-    # TODO Redo permissions, YM-281
-    # assign_perm("can_manage_profiles", group, service)
+    user = staff_user_gql_client.user
     request = rf.post("/graphql")
     request.user = user
 
@@ -528,11 +521,10 @@ def test_staff_user_can_update_youth_profile_with_photo_usage_field_if_under_15_
     """
     )
     mutation = t.substitute(
-        # TODO There's no ProfileNode
         profile_id=to_global_id(type="YouthProfileType", id=youth_profile.pk),
         photo_usage_approved="true",
     )
-    executed = user_gql_client.execute(mutation, context=request)
+    executed = staff_user_gql_client.execute(mutation, context=request)
 
     youth_profile.refresh_from_db()
     assert "errors" not in executed
@@ -651,8 +643,6 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
 ):
     request = rf.post("/graphql")
     request.user = user_gql_client.user
-    # profile = ProfileFactory(user=user_gql_client.user)
-    # EmailFactory(primary=True, profile=profile)
 
     # Let's create a youth profile in the 2020
     with freeze_time("2020-05-02"):
@@ -725,21 +715,17 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
 
 
 def test_youth_profile_expiration_should_be_renewable_by_staff_user(
-    rf, user_gql_client, anon_user_gql_client,  # group
+    rf, user, staff_user_gql_client, anon_user_gql_client
 ):
-    user = user_gql_client.user
-    # user.groups.add(group)
-    # TODO Redo permissions, YM-281
-    # assign_perm("can_manage_profiles", group, service)
+    staff_user = staff_user_gql_client.user
     request = rf.post("/graphql")
-    request.user = user
-    # EmailFactory(primary=True, profile=profile)
+    request.user = staff_user
 
     # Let's create a youth profile in the 2020
     with freeze_time("2020-05-02"):
         today = date.today()
         youth_profile = YouthProfileFactory(
-            # profile=profile,
+            user=user,
             approved_time=datetime.today(),
             birth_date=today.replace(year=today.year - 15),
         )
@@ -760,11 +746,10 @@ def test_youth_profile_expiration_should_be_renewable_by_staff_user(
         """
         )
         mutation = t.substitute(
-            # TODO There's no ProfileNode
             profile_id=to_global_id(type="YouthProfileType", id=youth_profile.pk),
         )
 
-        executed = user_gql_client.execute(mutation, context=request)
+        executed = staff_user_gql_client.execute(mutation, context=request)
         expected_data = {
             "renewYouthProfile": {"youthProfile": {"membershipStatus": "RENEWING"}}
         }
@@ -881,16 +866,11 @@ def test_should_not_be_able_to_renew_pending_youth_profile(rf, user_gql_client):
         )
 
 
-def test_staff_user_can_create_youth_profile(
-    rf, user_gql_client,  # group
-):
-    user = user_gql_client.user
+def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
+    user = staff_user_gql_client.user
 
     # TODO mock profile_id query from open-city-profile, YM-287
     profile_id = str(uuid.uuid4())
-    # user.groups.add(group)
-    # TODO Redo permissions, YM-281
-    # assign_perm("can_manage_profiles", group, service)
     request = rf.post("/graphql")
     request.user = user
     today = date.today()
@@ -940,7 +920,6 @@ def test_staff_user_can_create_youth_profile(
     """
     )
     query = t.substitute(
-        # TODO There's no ProfileNode
         profile_id=to_global_id(type="YouthProfileType", id=profile_id),
         birth_date=youth_profile_data["birth_date"],
         school_name=youth_profile_data["school_name"],
@@ -966,20 +945,17 @@ def test_staff_user_can_create_youth_profile(
             }
         }
     }
-    executed = user_gql_client.execute(query, context=request)
+    executed = staff_user_gql_client.execute(query, context=request)
     assert executed["data"] == expected_data
 
 
 def test_staff_user_can_create_youth_profile_for_under_13_years_old(
-    rf, user_gql_client,  # group
+    rf, staff_user_gql_client
 ):
     # TODO mock profile_id query from open-city-profile, YM-287
     profile_id = str(uuid.uuid4())
 
-    user = user_gql_client.user
-    # user.groups.add(group)
-    # TODO Redo permissions, YM-281
-    # assign_perm("can_manage_profiles", group, service)
+    user = staff_user_gql_client.user
     request = rf.post("/graphql")
     request.user = user
 
@@ -1012,7 +988,6 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     """
     )
     query = t.substitute(
-        # TODO There's no ProfileNode
         profile_id=to_global_id(type="YouthProfileType", id=profile_id),
         birth_date=youth_profile_data["birth_date"],
         approver_email=youth_profile_data["approver_email"],
@@ -1026,11 +1001,10 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
             }
         }
     }
-    executed = user_gql_client.execute(query, context=request)
+    executed = staff_user_gql_client.execute(query, context=request)
     assert executed["data"] == expected_data
 
 
-@pytest.mark.skip(reason="Redo permissions, YM-281")
 def test_normal_user_cannot_use_create_youth_profile_mutation(rf, user_gql_client):
     # TODO mock profile_id query from open-city-profile, YM-287
     profile_id = str(uuid.uuid4())
@@ -1068,7 +1042,6 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(rf, user_gql_clien
     """
     )
     query = t.substitute(
-        # TODO There's no ProfileNode
         profile_id=to_global_id(type="YouthProfileType", id=profile_id),
         birth_date=youth_profile_data["birth_date"],
         approver_email=youth_profile_data["approver_email"],
@@ -1080,19 +1053,15 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(rf, user_gql_clien
 
 
 def test_staff_user_can_cancel_youth_membership_on_selected_date(
-    rf, user_gql_client, youth_profile,  # group
+    rf, staff_user_gql_client, youth_profile
 ):
-    user = user_gql_client.user
-    # user.groups.add(group)
-    # TODO Redo permissions, YM-281
-    # assign_perm("can_manage_profiles", group, service)
+    user = staff_user_gql_client.user
     request = rf.post("/graphql")
     request.user = user
 
     today = date.today()
     expiration_date = today + timedelta(days=1)
     youth_profile_data = {
-        # TODO There's no ProfileNode
         "profile_id": to_global_id(type="YouthProfileType", id=youth_profile.pk),
         "expiration": expiration_date.strftime("%Y-%m-%d"),
     }
@@ -1122,22 +1091,18 @@ def test_staff_user_can_cancel_youth_membership_on_selected_date(
             "youthProfile": {"expiration": youth_profile_data["expiration"]}
         }
     }
-    executed = user_gql_client.execute(query, context=request)
+    executed = staff_user_gql_client.execute(query, context=request)
     assert executed["data"] == expected_data
 
 
 def test_staff_user_can_cancel_youth_membership_now(
-    rf, user_gql_client, youth_profile,  # group
+    rf, staff_user_gql_client, youth_profile
 ):
-    user = user_gql_client.user
-    # user.groups.add(group)
-    # TODO Redo permissions, YM-281
-    # assign_perm("can_manage_profiles", group, service)
+    user = staff_user_gql_client.user
     request = rf.post("/graphql")
     request.user = user
 
     youth_profile_data = {
-        # TODO There's no ProfileNode
         "profile_id": to_global_id(type="YouthProfileType", id=youth_profile.pk)
     }
 
@@ -1162,7 +1127,7 @@ def test_staff_user_can_cancel_youth_membership_now(
             "youthProfile": {"expiration": date.today().strftime("%Y-%m-%d")}
         }
     }
-    executed = user_gql_client.execute(query, context=request)
+    executed = staff_user_gql_client.execute(query, context=request)
     assert executed["data"] == expected_data
 
 

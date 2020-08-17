@@ -1,10 +1,11 @@
 import graphene
+from django.core.exceptions import PermissionDenied
 from django.utils.translation import ugettext_lazy as _
-from graphql import GraphQLError
 from graphql_jwt.decorators import login_required
 from graphql_relay.node.node import from_global_id
 
 from ..models import YouthProfile
+from ..utils import user_is_admin
 from .types import YouthProfileType
 
 
@@ -30,11 +31,11 @@ class Query(graphene.ObjectType):
     def resolve_youth_profile(self, info, **kwargs):
         profile_id = kwargs.get("profile_id")
 
-        if profile_id is not None and not info.context.user.is_superuser:
-            raise GraphQLError(_("Query by id not allowed for regular users."))
+        if profile_id is not None:
+            if user_is_admin(info.context.user):
+                return YouthProfile.objects.get(pk=from_global_id(profile_id)[1])
+            raise PermissionDenied(_("Query by id not allowed for regular users."))
 
-        if info.context.user.is_superuser:
-            return YouthProfile.objects.get(pk=from_global_id(profile_id)[1])
         return YouthProfile.objects.get(user=info.context.user)
 
     def resolve_youth_profile_by_approval_token(self, info, **kwargs):
