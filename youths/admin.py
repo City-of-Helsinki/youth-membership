@@ -2,11 +2,17 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from reversion.admin import VersionAdmin
 
-from youths.models import YouthProfile
+from youths.models import AdditionalContactPerson, YouthProfile
+
+
+class AdditionalContactPersonInline(admin.StackedInline):
+    model = AdditionalContactPerson
+    extra = 0
 
 
 @admin.register(YouthProfile)
 class YouthProfileAdmin(VersionAdmin):
+    inlines = (AdditionalContactPersonInline,)
     list_display = (
         "__str__",
         "membership_number",
