@@ -5,12 +5,12 @@ django-enumfields
 django-environ
 django-filter
 django-graphql-jwt
-django-guardian
 django-helusers
 django-ilmoitin
 django-import-export
 django-parler
 django-reversion
+django-sequences
 djangorestframework
 graphene-django
 graphene-federation
