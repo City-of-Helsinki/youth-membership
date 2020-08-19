@@ -510,7 +510,7 @@ def test_staff_user_can_update_youth_profile_with_photo_usage_field_if_under_15_
         """
         mutation {
             updateYouthProfile(input:{
-                profileId: \"${profile_id}\",
+                id: \"${id}\",
                 youthProfile: {
                     photoUsageApproved: ${photo_usage_approved}
                 }
@@ -521,7 +521,7 @@ def test_staff_user_can_update_youth_profile_with_photo_usage_field_if_under_15_
     """
     )
     mutation = t.substitute(
-        profile_id=to_global_id(type="YouthProfileType", id=youth_profile.pk),
+        id=to_global_id(type="YouthProfileNode", id=youth_profile.pk),
         photo_usage_approved="true",
     )
     executed = staff_user_gql_client.execute(mutation, context=request)
@@ -736,7 +736,7 @@ def test_youth_profile_expiration_should_be_renewable_by_staff_user(
             """
             mutation {
                 renewYouthProfile(input:{
-                    profileId: \"${profile_id}\"
+                    id: \"${id}\"
                 }) {
                     youthProfile {
                         membershipStatus
@@ -746,7 +746,7 @@ def test_youth_profile_expiration_should_be_renewable_by_staff_user(
         """
         )
         mutation = t.substitute(
-            profile_id=to_global_id(type="YouthProfileType", id=youth_profile.pk),
+            id=to_global_id(type="YouthProfileNode", id=youth_profile.pk),
         )
 
         executed = staff_user_gql_client.execute(mutation, context=request)
@@ -870,7 +870,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
     user = staff_user_gql_client.user
 
     # TODO mock profile_id query from open-city-profile, YM-287
-    profile_id = str(uuid.uuid4())
+    profile_id = to_global_id(type="YouthProfileNode", id=str(uuid.uuid4()))
     request = rf.post("/graphql")
     request.user = user
     today = date.today()
@@ -891,7 +891,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
         mutation {
             createYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
+                    id: \"${id}\",
                     youthProfile: {
                         birthDate: \"${birth_date}\",
                         schoolName: \"${school_name}\",
@@ -920,7 +920,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
     """
     )
     query = t.substitute(
-        profile_id=to_global_id(type="YouthProfileType", id=profile_id),
+        id=profile_id,
         birth_date=youth_profile_data["birth_date"],
         school_name=youth_profile_data["school_name"],
         school_class=youth_profile_data["school_class"],
@@ -953,7 +953,7 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     rf, staff_user_gql_client
 ):
     # TODO mock profile_id query from open-city-profile, YM-287
-    profile_id = str(uuid.uuid4())
+    profile_id = to_global_id(type="YouthProfileNode", id=str(uuid.uuid4()))
 
     user = staff_user_gql_client.user
     request = rf.post("/graphql")
@@ -971,7 +971,7 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
         mutation {
             createYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
+                    id: \"${id}\",
                     youthProfile: {
                         birthDate: \"${birth_date}\",
                         approverEmail: \"${approver_email}\",
@@ -988,7 +988,7 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     """
     )
     query = t.substitute(
-        profile_id=to_global_id(type="YouthProfileType", id=profile_id),
+        id=profile_id,
         birth_date=youth_profile_data["birth_date"],
         approver_email=youth_profile_data["approver_email"],
     )
@@ -1025,7 +1025,7 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(rf, user_gql_clien
         mutation {
             createYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
+                    id: \"${id}\",
                     youthProfile: {
                         birthDate: \"${birth_date}\",
                         approverEmail: \"${approver_email}\",
@@ -1042,7 +1042,7 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(rf, user_gql_clien
     """
     )
     query = t.substitute(
-        profile_id=to_global_id(type="YouthProfileType", id=profile_id),
+        id=to_global_id(type="YouthProfileNode", id=profile_id),
         birth_date=youth_profile_data["birth_date"],
         approver_email=youth_profile_data["approver_email"],
     )
@@ -1062,7 +1062,7 @@ def test_staff_user_can_cancel_youth_membership_on_selected_date(
     today = date.today()
     expiration_date = today + timedelta(days=1)
     youth_profile_data = {
-        "profile_id": to_global_id(type="YouthProfileType", id=youth_profile.pk),
+        "id": to_global_id(type="YouthProfileNode", id=youth_profile.pk),
         "expiration": expiration_date.strftime("%Y-%m-%d"),
     }
 
@@ -1071,7 +1071,7 @@ def test_staff_user_can_cancel_youth_membership_on_selected_date(
         mutation {
             cancelYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
+                    id: \"${id}\",
                     expiration: \"${expiration}\"
                 }
             ) {
@@ -1083,8 +1083,7 @@ def test_staff_user_can_cancel_youth_membership_on_selected_date(
     """
     )
     query = t.substitute(
-        profile_id=youth_profile_data["profile_id"],
-        expiration=youth_profile_data["expiration"],
+        id=youth_profile_data["id"], expiration=youth_profile_data["expiration"],
     )
     expected_data = {
         "cancelYouthProfile": {
@@ -1102,16 +1101,12 @@ def test_staff_user_can_cancel_youth_membership_now(
     request = rf.post("/graphql")
     request.user = user
 
-    youth_profile_data = {
-        "profile_id": to_global_id(type="YouthProfileType", id=youth_profile.pk)
-    }
-
     t = Template(
         """
         mutation {
             cancelYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
+                    id: \"${id}\",
                 }
             ) {
                 youthProfile {
@@ -1121,7 +1116,7 @@ def test_staff_user_can_cancel_youth_membership_now(
         }
     """
     )
-    query = t.substitute(profile_id=youth_profile_data["profile_id"],)
+    query = t.substitute(id=to_global_id(type="YouthProfileNode", id=youth_profile.pk))
     expected_data = {
         "cancelYouthProfile": {
             "youthProfile": {"expiration": date.today().strftime("%Y-%m-%d")}

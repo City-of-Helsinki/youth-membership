@@ -6,22 +6,23 @@ from graphql_relay.node.node import from_global_id
 
 from ..models import YouthProfile
 from ..utils import user_is_admin
-from .types import YouthProfileType
+from .types import YouthProfileNode
 
 
 class Query(graphene.ObjectType):
     # TODO: Add the complete list of error codes
     youth_profile = graphene.Field(
-        YouthProfileType,
-        profile_id=graphene.ID(),
-        description="Get a youth profile by youth profile ID.\n\n**NOTE:** Currently this requires `superuser` "
-        "credentials. This is going to be changed at one point so that service-specific staff "
-        "credentials and service type are used, just like the rest of the admin-type queries.\n\n"
-        "Possible error codes:\n\n* `TODO`",
+        YouthProfileNode,
+        id=graphene.ID(),
+        description="The ID of the object. Get a youth profile by youth profile ID.\n\n"
+        "**NOTE:** Currently this requires `superuser` credentials. This is going to be "
+        "changed at one point so that service-specific staff credentials and service type "
+        "are used, just like the rest of the admin-type queries.\n\nPossible error codes:\n\n"
+        "* `TODO`",
     )
     # TODO: Add the complete list of error codes
     youth_profile_by_approval_token = graphene.Field(
-        YouthProfileType,
+        YouthProfileNode,
         token=graphene.String(),
         description="Get a youth profile by approval token. \n\nDoesn't require authentication.\n\nPossible "
         "error codes:\n\n* `TODO`",
@@ -29,7 +30,7 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_youth_profile(self, info, **kwargs):
-        profile_id = kwargs.get("profile_id")
+        profile_id = kwargs.get("id")
 
         if profile_id is not None:
             if user_is_admin(info.context.user):

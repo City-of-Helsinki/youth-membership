@@ -20,7 +20,7 @@ from ..utils import (
     create_or_update_contact_persons,
     delete_contact_persons,
 )
-from .types import LanguageAtHome, YouthProfileType
+from .types import LanguageAtHome, YouthProfileNode
 
 # from django_ilmoitin.utils import send_notification
 # from ..enums import NotificationType
@@ -187,10 +187,10 @@ class CreateMyYouthProfileInput(YouthProfileFields):
 
 class CreateYouthProfileMutation(relay.ClientIDMutation):
     class Input:
-        profile_id = graphene.Argument(graphene.ID, required=True)
+        id = graphene.Argument(graphene.ID, required=True)
         youth_profile = CreateMyYouthProfileInput(required=True)
 
-    youth_profile = graphene.Field(YouthProfileType)
+    youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod
     @staff_required
@@ -199,8 +199,9 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
         input_data = input.get("youth_profile")
 
         # TODO Create youth profile with the given ID
-        profile_id = from_global_id(input.get("profile_id"))[1]
-        youth_profile = create_youth_profile(input_data, None, profile_id)
+        youth_profile = create_youth_profile(
+            input_data, None, from_global_id(input.get("id"))[1]
+        )
 
         return CreateYouthProfileMutation(youth_profile=youth_profile)
 
@@ -209,7 +210,7 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
     class Input:
         youth_profile = CreateMyYouthProfileInput(required=True)
 
-    youth_profile = graphene.Field(YouthProfileType)
+    youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod
     @login_required
@@ -244,7 +245,7 @@ class UpdateYouthProfileInput(YouthProfileFields):
 
 class UpdateYouthProfileMutation(relay.ClientIDMutation):
     class Input:
-        profile_id = graphene.Argument(graphene.ID, required=True)
+        id = graphene.Argument(graphene.ID, required=True)
         youth_profile = UpdateYouthProfileInput(required=True)
 
     @classmethod
@@ -253,9 +254,7 @@ class UpdateYouthProfileMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
 
-        youth_profile = YouthProfile.objects.get(
-            pk=from_global_id(input.get("profile_id"))[1]
-        )
+        youth_profile = YouthProfile.objects.get(pk=from_global_id(input.get("id"))[1])
         youth_profile = update_youth_profile(
             input_data, youth_profile, manage_permission=True
         )
@@ -266,7 +265,7 @@ class UpdateMyYouthProfileMutation(relay.ClientIDMutation):
     class Input:
         youth_profile = UpdateYouthProfileInput(required=True)
 
-    youth_profile = graphene.Field(YouthProfileType)
+    youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod
     @login_required
@@ -281,24 +280,22 @@ class UpdateMyYouthProfileMutation(relay.ClientIDMutation):
 
 class RenewYouthProfileMutation(relay.ClientIDMutation):
     class Input:
-        profile_id = graphene.Argument(graphene.ID, required=True)
+        id = graphene.Argument(graphene.ID, required=True)
 
-    youth_profile = graphene.Field(YouthProfileType)
+    youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod
     @staff_required
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        youth_profile = YouthProfile.objects.get(
-            pk=from_global_id(input.get("profile_id"))[1]
-        )
+        youth_profile = YouthProfile.objects.get(pk=from_global_id(input.get("id"))[1])
         youth_profile = renew_youth_profile(youth_profile)
 
         return RenewYouthProfileMutation(youth_profile=youth_profile)
 
 
 class RenewMyYouthProfileMutation(relay.ClientIDMutation):
-    youth_profile = graphene.Field(YouthProfileType)
+    youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod
     @login_required
@@ -320,7 +317,7 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
             description="The youth profile data to approve. This may contain modifications done by the approver.",
         )
 
-    youth_profile = graphene.Field(YouthProfileType)
+    youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod
     @transaction.atomic
@@ -356,22 +353,20 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
 
 class CancelYouthProfileMutation(relay.ClientIDMutation):
     class Input:
-        profile_id = graphene.Argument(
+        id = graphene.Argument(
             graphene.ID, required=True, description="Profile id of the youth profile"
         )
         expiration = graphene.Date(
             description="Optional value for expiration. If missing or blank, current date will be used"
         )
 
-    youth_profile = graphene.Field(YouthProfileType)
+    youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod
     @staff_required
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        youth_profile = YouthProfile.objects.get(
-            pk=from_global_id(input.get("profile_id"))[1]
-        )
+        youth_profile = YouthProfile.objects.get(pk=from_global_id(input.get("id"))[1])
         youth_profile = cancel_youth_profile(youth_profile, input)
 
         return CancelYouthProfileMutation(youth_profile=youth_profile)
@@ -383,7 +378,7 @@ class CancelMyYouthProfileMutation(relay.ClientIDMutation):
             description="Optional value for expiration. If missing or blank, current date will be used"
         )
 
-    youth_profile = graphene.Field(YouthProfileType)
+    youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod
     @login_required
@@ -399,7 +394,7 @@ class CancelMyYouthProfileMutation(relay.ClientIDMutation):
 class Mutation(graphene.ObjectType):
     # TODO: Complete the description
     create_youth_profile = CreateYouthProfileMutation.Field(
-        description="Creates a new youth profile and links it to the profile specified with profile_id argument.\n\n"
+        description="Creates a new youth profile and links it to the profile specified with the id argument.\n\n"
         "When the youth profile has been created, a notification is sent to the youth profile's approver "
         "whose contact information is given in the input.\n\nRequires elevated privileges.\n\nPossible error "
         "codes:\n\n* `TODO`"
@@ -413,7 +408,7 @@ class Mutation(graphene.ObjectType):
     )
     # TODO: Add the complete list of error codes
     update_youth_profile = UpdateYouthProfileMutation.Field(
-        description="Updates the youth profile which belongs to the profile specified in profile_id argument.\n\n"
+        description="Updates the youth profile which belongs to the profile specified in the id argument.\n\n"
         "The `resend_request_notification` parameter may be used to send a notification to the youth "
         "profile's approver whose contact information is in the youth profile.\n\nRequires elevated privileges."
         "\n\nPossible error codes:\n\n* `TODO`"

@@ -19,13 +19,13 @@ def test_anon_user_query_should_fail(rf, youth_profile, anon_user_gql_client):
     t = Template(
         """
         {
-            youthProfile(profileId: "${profileId}") {
+            youthProfile(id: "${id}") {
                 schoolClass
             }
         }
         """
     )
-    query = t.substitute(profileId=uuid.uuid4())
+    query = t.substitute(id=uuid.uuid4())
     expected_data = {"youthProfile": None}
     executed = anon_user_gql_client.execute(query, context=request)
     assert dict(executed["data"]) == expected_data
@@ -38,13 +38,13 @@ def test_normal_user_query_by_id_should_fail(rf, youth_profile, user_gql_client)
     t = Template(
         """
         {
-            youthProfile(profileId: "${profileId}") {
+            youthProfile(id: "${id}") {
                 schoolClass
             }
         }
         """
     )
-    query = t.substitute(profileId=uuid.uuid4())
+    query = t.substitute(id=uuid.uuid4())
     expected_data = {"youthProfile": None}
     executed = user_gql_client.execute(query, context=request)
     assert dict(executed["data"]) == expected_data
@@ -69,8 +69,7 @@ def test_normal_user_can_query_own_youth_profile(rf, user_gql_client):
     """
     expected_data = {
         "youthProfile": {
-            # TODO Change this to global id ?
-            "id": str(youth_profile.pk),
+            "id": to_global_id(type="YouthProfileNode", id=youth_profile.pk),
             "schoolClass": youth_profile.school_class,
             "membershipNumber": youth_profile.membership_number,
         }
@@ -94,20 +93,17 @@ def test_staff_user_can_query_by_id(rf, youth_profile, gql_client):
     t = Template(
         """
         {
-            youthProfile(profileId: "${profileId}") {
+            youthProfile(id: "${id}") {
                 id
                 schoolClass
             }
         }
         """
     )
-    query = t.substitute(
-        profileId=to_global_id(type="YouthProfileType", id=youth_profile.pk)
-    )
+    query = t.substitute(id=to_global_id(type="YouthProfileNode", id=youth_profile.pk))
     expected_data = {
         "youthProfile": {
-            # TODO Change this to global id ?
-            "id": str(youth_profile.pk),
+            "id": to_global_id(type="YouthProfileNode", id=youth_profile.pk),
             "schoolClass": youth_profile.school_class,
         }
     }

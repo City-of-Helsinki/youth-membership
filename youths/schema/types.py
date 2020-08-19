@@ -26,8 +26,7 @@ class MembershipStatus(graphene.Enum):
 # TODO Add separete ProfileNode with id for extending the open-city-profile profile (like in berth-reservations)
 
 
-class YouthProfileType(DjangoObjectType):
-
+class YouthProfileNode(DjangoObjectType):
     membership_number = graphene.String(
         source="membership_number", description="Youth's membership number"
     )
@@ -46,13 +45,14 @@ class YouthProfileType(DjangoObjectType):
     class Meta:
         model = YouthProfile
         exclude = ("approval_token", "language_at_home")
+        interfaces = (relay.Node,)
 
-    def resolve_renewable(self, info, **kwargs):
+    def resolve_renewable(self: YouthProfile, info, **kwargs):
         return bool(self.approved_time) and self.expiration != calculate_expiration(
             date.today()
         )
 
-    def resolve_membership_status(self, info, **kwargs):
+    def resolve_membership_status(self: YouthProfile, info, **kwargs):
         if self.expiration <= date.today():
             return MembershipStatus.EXPIRED
         elif self.approved_time and self.approved_time <= timezone.now():
