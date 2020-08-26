@@ -32,7 +32,12 @@ class Migration(migrations.Migration):
                         serialize=False,
                     ),
                 ),
-                ("membership_number", models.CharField(blank=True, max_length=16)),
+                (
+                    "membership_number",
+                    models.CharField(
+                        blank=True, help_text="Youth's membership number", max_length=16
+                    ),
+                ),
                 ("birth_date", models.DateField()),
                 ("school_name", models.CharField(blank=True, max_length=128)),
                 ("school_class", models.CharField(blank=True, max_length=10)),

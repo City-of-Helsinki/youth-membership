@@ -5,6 +5,7 @@ import reversion
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 from django_ilmoitin.utils import send_notification
 from enumfields import EnumField
 from sequences import Sequence
@@ -35,17 +36,14 @@ def calculate_expiration(from_date=None):
 @reversion.register()
 class YouthProfile(UUIDModel, SerializableMixin):
     # TODO YouthProfile PK should be the same as is the Profile PK
-
-    # Required info
     # TODO How to access Profile (backend) related information in new YouthProfile (backend)?
-    # profile = models.OneToOneField(
-    #     Profile, related_name="youth_profile", on_delete=models.CASCADE
-    # )
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE
     )
     # Post-save signal generates the membership number
-    membership_number = models.CharField(max_length=16, blank=True)
+    membership_number = models.CharField(
+        max_length=16, blank=True, help_text=_("Youth's membership number")
+    )
     birth_date = models.DateField()
     school_name = models.CharField(max_length=128, blank=True)
     school_class = models.CharField(max_length=10, blank=True)

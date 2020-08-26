@@ -9,23 +9,29 @@ from youths.tests.factories import (
     YouthProfileFactory,
 )
 
-ADDITIONAL_CONTACT_PERSONS_QUERY = """
-{
-    youthProfile {
-        additionalContactPersons {
-            edges {
-                node {
-                    id
-                    firstName
-                    lastName
-                    phone
-                    email
+ADDITIONAL_CONTACT_PERSONS_QUERY_BASE = Template(
+    """
+    {
+        ${query_object} {
+            additionalContactPersons {
+                edges {
+                    node {
+                        id
+                        firstName
+                        lastName
+                        phone
+                        email
+                    }
                 }
             }
         }
     }
-}
 """
+)
+
+ADDITIONAL_CONTACT_PERSONS_QUERY = ADDITIONAL_CONTACT_PERSONS_QUERY_BASE.substitute(
+    query_object="myYouthProfile"
+)
 
 
 UPDATE_MUTATION = Template(
@@ -34,7 +40,9 @@ UPDATE_MUTATION = Template(
         updateMyYouthProfile(input: $$input) ${query}
     }
     """
-).substitute(query=ADDITIONAL_CONTACT_PERSONS_QUERY)
+).substitute(
+    query=ADDITIONAL_CONTACT_PERSONS_QUERY_BASE.substitute(query_object="profile")
+)
 
 
 def test_normal_user_can_add_additional_contact_persons(rf, user_gql_client):
@@ -43,7 +51,7 @@ def test_normal_user_can_add_additional_contact_persons(rf, user_gql_client):
     request = rf.post("/graphql")
     request.user = user_gql_client.user
 
-    variables = {"input": {"youthProfile": {"addAdditionalContactPersons": [acpd]}}}
+    variables = {"input": {"profile": {"addAdditionalContactPersons": [acpd]}}}
     executed = user_gql_client.execute(
         UPDATE_MUTATION, context=request, variables=variables
     )
@@ -51,7 +59,7 @@ def test_normal_user_can_add_additional_contact_persons(rf, user_gql_client):
     acp = AdditionalContactPerson.objects.first()
     expected_data = {
         "updateMyYouthProfile": {
-            "youthProfile": {
+            "profile": {
                 "additionalContactPersons": {
                     "edges": [
                         {
@@ -78,7 +86,7 @@ def test_normal_user_can_remove_additional_contact_persons(rf, user_gql_client):
 
     variables = {
         "input": {
-            "youthProfile": {
+            "profile": {
                 "removeAdditionalContactPersons": [
                     to_global_id(type="AdditionalContactPersonNode", id=acp.pk)
                 ]
@@ -90,9 +98,7 @@ def test_normal_user_can_remove_additional_contact_persons(rf, user_gql_client):
     )
 
     expected_data = {
-        "updateMyYouthProfile": {
-            "youthProfile": {"additionalContactPersons": {"edges": []}}
-        }
+        "updateMyYouthProfile": {"profile": {"additionalContactPersons": {"edges": []}}}
     }
     assert dict(executed["data"]) == expected_data
 
@@ -106,7 +112,7 @@ def test_normal_user_can_update_additional_contact_persons(rf, user_gql_client):
 
     variables = {
         "input": {
-            "youthProfile": {
+            "profile": {
                 "updateAdditionalContactPersons": [
                     {
                         "id": to_global_id(
@@ -124,7 +130,7 @@ def test_normal_user_can_update_additional_contact_persons(rf, user_gql_client):
 
     expected_data = {
         "updateMyYouthProfile": {
-            "youthProfile": {
+            "profile": {
                 "additionalContactPersons": {
                     "edges": [
                         {
@@ -156,7 +162,7 @@ def test_normal_user_can_query_additional_contact_persons(
     )
 
     expected_data = {
-        "youthProfile": {
+        "myYouthProfile": {
             "additionalContactPersons": {
                 "edges": [
                     {

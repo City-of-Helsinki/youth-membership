@@ -1,13 +1,21 @@
 from datetime import date
 
+import django_filters
 import graphene
+from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from django.utils.translation import override
+from django.utils.translation import ugettext_lazy as _
 from graphene import relay
 from graphene_django.types import DjangoObjectType
+from graphene_federation import extend, external
+from graphql_jwt.decorators import login_required
+
+from common_utils.graphql import CountConnection
 
 from ..enums import YouthLanguage
 from ..models import AdditionalContactPerson, calculate_expiration, YouthProfile
+from ..utils import user_is_admin
 
 with override("en"):
     LanguageAtHome = graphene.Enum.from_enum(
@@ -22,14 +30,30 @@ class MembershipStatus(graphene.Enum):
     RENEWING = "renewing"
 
 
-# @extend(fields="id")
-# TODO Add separete ProfileNode with id for extending the open-city-profile profile (like in berth-reservations)
+class AdditionalContactPersonNode(DjangoObjectType):
+    class Meta:
+        model = AdditionalContactPerson
+        interfaces = (relay.Node,)
 
 
-class YouthProfileNode(DjangoObjectType):
-    membership_number = graphene.String(
-        source="membership_number", description="Youth's membership number"
-    )
+class ProfileFilter(django_filters.FilterSet):
+    class Meta:
+        model = YouthProfile
+        fields = ("membership_number",)
+
+    membership_number = django_filters.CharFilter(lookup_expr="icontains")
+
+
+@extend(fields="id")
+class ProfileNode(DjangoObjectType):
+    class Meta:
+        model = YouthProfile
+        exclude = ("approval_token",)
+        interfaces = (relay.Node,)
+        filterset_class = ProfileFilter
+        connection_class = CountConnection
+
+    id = external(relay.GlobalID())
 
     language_at_home = LanguageAtHome(
         source="language_at_home",
@@ -41,11 +65,6 @@ class YouthProfileNode(DjangoObjectType):
     renewable = graphene.Boolean(
         description="Tells if the membership is currently renewable or not"
     )
-
-    class Meta:
-        model = YouthProfile
-        exclude = ("approval_token", "language_at_home")
-        interfaces = (relay.Node,)
 
     def resolve_renewable(self: YouthProfile, info, **kwargs):
         return bool(self.approved_time) and self.expiration != calculate_expiration(
@@ -73,8 +92,27 @@ class YouthProfileNode(DjangoObjectType):
             return MembershipStatus.ACTIVE
         return MembershipStatus.PENDING
 
+    @login_required
+    def __resolve_reference(self, info, **kwargs):
+        profile = graphene.Node.get_node_from_global_id(
+            info, self.id, only_type=ProfileNode
+        )
+        if not profile:
+            return None
 
-class AdditionalContactPersonNode(DjangoObjectType):
-    class Meta:
-        model = AdditionalContactPerson
-        interfaces = (relay.Node,)
+        user = info.context.user
+        if user == profile.user or user_is_admin(user):
+            return profile
+        else:
+            raise PermissionDenied(
+                _("You do not have permission to perform this action.")
+            )
+
+    @classmethod
+    @login_required
+    def get_node(cls, info, id):
+        node = super().get_node(info, id)
+        user = info.context.user
+        if user_is_admin(user) or node.user == user:
+            return node
+        return None
