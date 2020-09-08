@@ -12,7 +12,7 @@ from sequences import Sequence
 
 from common_utils.models import SerializableMixin, UUIDModel
 
-from .enums import NotificationType
+from .enums import MembershipStatus, NotificationType
 from .enums import YouthLanguage as LanguageAtHome
 
 
@@ -79,6 +79,28 @@ class YouthProfile(UUIDModel, SerializableMixin):
             language=self.language_at_home.value,
         )
         self.approval_notification_timestamp = timezone.now()
+
+    @property
+    def membership_status(self):
+        if self.expiration <= date.today():
+            return MembershipStatus.EXPIRED
+        elif self.approved_time and self.approved_time <= timezone.now():
+            # Status RENEWING implemented naively. Calculates the expiration for the existing approval time and checks
+            # if expiration is set explicitly => status == EXPIRED. If expiration is greater than calculated expiration
+            # for the current period, do one of the following:
+            #
+            # 1. If calculated expiration for approval time is in the past, membership is considered expired
+            # 2. Otherwise status of the youth profile is RENEWING
+            approved_period_expiration = calculate_expiration(self.approved_time.date())
+            if self.expiration < approved_period_expiration:
+                return MembershipStatus.EXPIRED
+            elif self.expiration > approved_period_expiration:
+                if date.today() <= approved_period_expiration:
+                    return MembershipStatus.RENEWING
+                else:
+                    return MembershipStatus.EXPIRED
+            return MembershipStatus.ACTIVE
+        return MembershipStatus.PENDING
 
     def __str__(self):
         if self.user:

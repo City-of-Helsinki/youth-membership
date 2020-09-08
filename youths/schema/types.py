@@ -3,7 +3,6 @@ from datetime import date
 import django_filters
 import graphene
 from django.core.exceptions import PermissionDenied
-from django.utils import timezone
 from django.utils.translation import override
 from django.utils.translation import ugettext_lazy as _
 from graphene import relay
@@ -13,7 +12,7 @@ from graphql_jwt.decorators import login_required
 
 from common_utils.graphql import CountConnection
 
-from ..enums import YouthLanguage
+from ..enums import MembershipStatus, YouthLanguage
 from ..models import AdditionalContactPerson, calculate_expiration, YouthProfile
 from ..utils import user_is_admin
 
@@ -23,11 +22,9 @@ with override("en"):
     )
 
 
-class MembershipStatus(graphene.Enum):
-    ACTIVE = "active"
-    PENDING = "pending"
-    EXPIRED = "expired"
-    RENEWING = "renewing"
+MembershipStatusEnum = graphene.Enum.from_enum(
+    MembershipStatus, description=lambda e: e.label if e else ""
+)
 
 
 class AdditionalContactPersonNode(DjangoObjectType):
@@ -58,39 +55,21 @@ class ProfileNode(DjangoObjectType):
     language_at_home = LanguageAtHome(
         source="language_at_home",
         description="The language which is spoken in the youth's home.",
+        required=True,
     )
-    membership_status = MembershipStatus(
-        description="Membership status based on expiration and approved_time fields"
+    membership_status = MembershipStatusEnum(
+        description="Membership status based on expiration and approved_time fields",
+        required=True,
     )
     renewable = graphene.Boolean(
-        description="Tells if the membership is currently renewable or not"
+        description="Tells if the membership is currently renewable or not",
+        required=True,
     )
 
     def resolve_renewable(self: YouthProfile, info, **kwargs):
         return bool(self.approved_time) and self.expiration != calculate_expiration(
             date.today()
         )
-
-    def resolve_membership_status(self: YouthProfile, info, **kwargs):
-        if self.expiration <= date.today():
-            return MembershipStatus.EXPIRED
-        elif self.approved_time and self.approved_time <= timezone.now():
-            # Status RENEWING implemented naively. Calculates the expiration for the existing approval time and checks
-            # if expiration is set explicitly => status == EXPIRED. If expiration is greater than calculated expiration
-            # for the current period, do one of the following:
-            #
-            # 1. If calculated expiration for approval time is in the past, membership is considered expired
-            # 2. Otherwise status of the youth profile is RENEWING
-            approved_period_expiration = calculate_expiration(self.approved_time.date())
-            if self.expiration < approved_period_expiration:
-                return MembershipStatus.EXPIRED
-            elif self.expiration > approved_period_expiration:
-                if date.today() <= approved_period_expiration:
-                    return MembershipStatus.RENEWING
-                else:
-                    return MembershipStatus.EXPIRED
-            return MembershipStatus.ACTIVE
-        return MembershipStatus.PENDING
 
     @login_required
     def __resolve_reference(self, info, **kwargs):

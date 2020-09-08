@@ -29,3 +29,10 @@ class YouthLanguage(Enum):
     # def to_graphene_enum(cls):
     #     items = [(item.name, item.label) for item in cls]
     #     return items
+
+
+class MembershipStatus(Enum):
+    ACTIVE = "active"
+    PENDING = "pending"
+    EXPIRED = "expired"
+    RENEWING = "renewing"
