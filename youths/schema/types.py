@@ -45,7 +45,24 @@ class ProfileFilter(django_filters.FilterSet):
 class ProfileNode(DjangoObjectType):
     class Meta:
         model = YouthProfile
-        exclude = ("approval_token",)
+        fields = (
+            "id",
+            "membership_number",
+            "birth_date",
+            "school_name",
+            "school_class",
+            "expiration",
+            "language_at_home",
+            "approver_first_name",
+            "approver_last_name",
+            "approver_phone",
+            "approver_email",
+            "approval_notification_timestamp",
+            "approved_time",
+            "photo_usage_approved",
+            "additional_contact_persons",
+        )
+
         interfaces = (relay.Node,)
         filterset_class = ProfileFilter
         connection_class = CountConnection
@@ -53,9 +70,7 @@ class ProfileNode(DjangoObjectType):
     id = external(relay.GlobalID())
 
     language_at_home = LanguageAtHome(
-        source="language_at_home",
-        description="The language which is spoken in the youth's home.",
-        required=True,
+        description="The language which is spoken in the youth's home.", required=True,
     )
     membership_status = MembershipStatusEnum(
         description="Membership status based on expiration and approved_time fields",
