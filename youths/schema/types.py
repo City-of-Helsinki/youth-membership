@@ -30,6 +30,13 @@ MembershipStatusEnum = graphene.Enum.from_enum(
 class AdditionalContactPersonNode(DjangoObjectType):
     class Meta:
         model = AdditionalContactPerson
+        fields = (
+            "id",
+            "first_name",
+            "last_name",
+            "phone",
+            "email",
+        )
         interfaces = (relay.Node,)
 
 
