@@ -30,9 +30,11 @@ def test_anon_user_query_should_fail(
         """
     )
     if use_proper_profile_id:
-        query = t.substitute(id=to_global_id(type="ProfileNode", id=youth_profile.pk))
+        query = t.substitute(
+            id=to_global_id(type="YouthProfileNode", id=youth_profile.pk)
+        )
     else:
-        query = t.substitute(id=to_global_id(type="ProfileNode", id=uuid.uuid4()))
+        query = t.substitute(id=to_global_id(type="YouthProfileNode", id=uuid.uuid4()))
     expected_data = {"youthProfile": None}
     executed = anon_user_gql_client.execute(query, context=request)
     assert dict(executed["data"]) == expected_data
@@ -62,7 +64,7 @@ def test_querying_non_existant_profile_returns_none(rf, gql_client):
         }
         """
     )
-    query = t.substitute(id=to_global_id(type="ProfileNode", id=uuid.uuid4()))
+    query = t.substitute(id=to_global_id(type="YouthProfileNode", id=uuid.uuid4()))
     expected_data = {"youthProfile": None}
     executed = gql_client.execute(query, context=request)
     assert dict(executed["data"]) == expected_data
@@ -72,7 +74,7 @@ def test_normal_user_can_query_own_youth_profile_by_id(rf, user_gql_client):
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     youth_profile = YouthProfileFactory(user=user_gql_client.user)
-    profile_id = to_global_id(type="ProfileNode", id=youth_profile.pk)
+    profile_id = to_global_id(type="YouthProfileNode", id=youth_profile.pk)
     t = Template(
         """
         {
@@ -102,7 +104,7 @@ def test_normal_user_cannot_query_someone_elses_youth_profile_by_id(
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     youth_profile = YouthProfileFactory()
-    profile_id = to_global_id(type="ProfileNode", id=youth_profile.pk)
+    profile_id = to_global_id(type="YouthProfileNode", id=youth_profile.pk)
 
     t = Template(
         """
@@ -137,7 +139,7 @@ def test_normal_user_can_query_my_youth_profile(rf, user_gql_client):
     """
     expected_data = {
         "myYouthProfile": {
-            "id": to_global_id(type="ProfileNode", id=youth_profile.pk),
+            "id": to_global_id(type="YouthProfileNode", id=youth_profile.pk),
             "schoolClass": youth_profile.school_class,
             "membershipNumber": youth_profile.membership_number,
         }
@@ -156,7 +158,7 @@ def test_normal_user_can_query_my_youth_profile(rf, user_gql_client):
 def test_staff_user_can_query_own_youth_profile_by_id(rf, youth_profile, gql_client):
     request = rf.post("/graphql")
     request.user = gql_client.user
-    profile_id = to_global_id(type="ProfileNode", id=youth_profile.pk)
+    profile_id = to_global_id(type="YouthProfileNode", id=youth_profile.pk)
 
     t = Template(
         """
