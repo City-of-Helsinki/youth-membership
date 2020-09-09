@@ -25,7 +25,7 @@ def test_normal_user_can_create_youth_profile_mutation(rf, user_gql_client):
         mutation{
             createMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         schoolClass: "${schoolClass}"
                         schoolName: "${schoolName}"
                         languageAtHome: ${language}
@@ -36,7 +36,7 @@ def test_normal_user_can_create_youth_profile_mutation(rf, user_gql_client):
                 }
             )
             {
-                youthProfile {
+                profile {
                     schoolClass
                     schoolName
                     approverEmail
@@ -55,7 +55,7 @@ def test_normal_user_can_create_youth_profile_mutation(rf, user_gql_client):
     }
     query = t.substitute(**creation_data)
     expected_data = {
-        "youthProfile": {
+        "profile": {
             "schoolClass": creation_data["schoolClass"],
             "schoolName": creation_data["schoolName"],
             "approverEmail": creation_data["approverEmail"],
@@ -78,7 +78,7 @@ def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutatio
         mutation{
             createMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         schoolClass: "${schoolClass}"
                         schoolName: "${schoolName}"
                         birthDate: "${birthDate}"
@@ -87,7 +87,7 @@ def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutatio
                 }
             )
             {
-                youthProfile {
+                profile {
                     schoolClass
                     schoolName
                     birthDate
@@ -105,7 +105,7 @@ def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutatio
     }
     query = t.substitute(**creation_data)
     expected_data = {
-        "youthProfile": {
+        "profile": {
             "schoolClass": creation_data["schoolClass"],
             "schoolName": creation_data["schoolName"],
             "birthDate": creation_data["birthDate"],
@@ -128,14 +128,14 @@ def test_user_cannot_create_youth_profile_without_approver_email_field_if_under_
         mutation{
             createMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         birthDate: "${birthDate}"
                     }
 
                 }
             )
             {
-                youthProfile {
+                profile {
                     birthDate
                 }
             }
@@ -165,7 +165,7 @@ def test_user_cannot_create_youth_profile_if_under_13_years_old(rf, user_gql_cli
         mutation{
             createMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         schoolClass: "${schoolClass}"
                         schoolName: "${schoolName}"
                         languageAtHome: ${language}
@@ -176,7 +176,7 @@ def test_user_cannot_create_youth_profile_if_under_13_years_old(rf, user_gql_cli
                 }
             )
             {
-                youthProfile {
+                profile {
                     schoolClass
                     schoolName
                     approverEmail
@@ -215,7 +215,7 @@ def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_o
         mutation{
             createMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         photoUsageApproved: ${photoUsageApproved}
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
@@ -224,7 +224,7 @@ def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_o
                 }
             )
             {
-                youthProfile {
+                profile {
                     photoUsageApproved
                     approverEmail
                     birthDate
@@ -241,7 +241,7 @@ def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_o
     }
     query = t.substitute(**creation_data)
     expected_data = {
-        "youthProfile": {
+        "profile": {
             "photoUsageApproved": True,
             "approverEmail": creation_data["approverEmail"],
             "birthDate": creation_data["birthDate"],
@@ -263,7 +263,7 @@ def test_user_cannot_create_youth_profile_with_photo_usage_field_if_under_15_yea
         mutation{
             createMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         photoUsageApproved: ${photoUsageApproved}
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
@@ -272,7 +272,7 @@ def test_user_cannot_create_youth_profile_with_photo_usage_field_if_under_15_yea
                 }
             )
             {
-                youthProfile {
+                profile {
                     photoUsageApproved
                     approverEmail
                     birthDate
@@ -306,14 +306,14 @@ def test_normal_user_can_update_youth_profile_mutation(rf, user_gql_client):
         mutation{
             updateMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         schoolClass: "${schoolClass}"
                         birthDate: "${birthDate}"
                     }
                 }
             )
             {
-                youthProfile {
+                profile {
                     schoolClass
                     schoolName
                     birthDate
@@ -325,7 +325,7 @@ def test_normal_user_can_update_youth_profile_mutation(rf, user_gql_client):
     creation_data = {"schoolClass": "2A", "birthDate": "2002-02-02"}
     query = t.substitute(**creation_data)
     expected_data = {
-        "youthProfile": {
+        "profile": {
             "schoolClass": creation_data["schoolClass"],
             "schoolName": youth_profile.school_name,
             "birthDate": creation_data["birthDate"],
@@ -348,14 +348,14 @@ def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_o
         mutation{
             updateMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         photoUsageApproved: ${photoUsageApproved}
                         birthDate: "${birthDate}"
                     }
                 }
             )
             {
-                youthProfile {
+                profile {
                     photoUsageApproved
                     birthDate
                 }
@@ -370,7 +370,7 @@ def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_o
     }
     query = t.substitute(**creation_data)
     expected_data = {
-        "youthProfile": {
+        "profile": {
             "photoUsageApproved": True,
             "birthDate": creation_data["birthDate"],
         }
@@ -392,14 +392,14 @@ def test_user_cannot_update_youth_profile_with_photo_usage_field_if_under_15_yea
         mutation{
             updateMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         photoUsageApproved: ${photoUsageApproved}
                         birthDate: "${birthDate}"
                     }
                 }
             )
             {
-                youthProfile {
+                profile {
                     photoUsageApproved
                     birthDate
                 }
@@ -436,13 +436,13 @@ def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_o
         mutation{
             updateMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         photoUsageApproved: ${photoUsageApproved}
                     }
                 }
             )
             {
-                youthProfile {
+                profile {
                     photoUsageApproved
                 }
             }
@@ -451,7 +451,7 @@ def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_o
     )
     creation_data = {"photoUsageApproved": "true"}
     query = t.substitute(**creation_data)
-    expected_data = {"youthProfile": {"photoUsageApproved": True}}
+    expected_data = {"profile": {"photoUsageApproved": True}}
     executed = user_gql_client.execute(query, context=request)
     assert dict(executed["data"]["updateMyYouthProfile"]) == expected_data
 
@@ -471,13 +471,13 @@ def test_user_cannot_update_youth_profile_with_photo_usage_field_if_under_15_yea
         mutation{
             updateMyYouthProfile(
                 input: {
-                    youthProfile: {
+                    profile: {
                         photoUsageApproved: ${photoUsageApproved}
                     }
                 }
             )
             {
-                youthProfile {
+                profile {
                     photoUsageApproved
                 }
             }
@@ -510,8 +510,8 @@ def test_staff_user_can_update_youth_profile_with_photo_usage_field_if_under_15_
         """
         mutation {
             updateYouthProfile(input:{
-                profileId: \"${profile_id}\",
-                youthProfile: {
+                id: \"${id}\",
+                profile: {
                     photoUsageApproved: ${photo_usage_approved}
                 }
             }) {
@@ -521,7 +521,7 @@ def test_staff_user_can_update_youth_profile_with_photo_usage_field_if_under_15_
     """
     )
     mutation = t.substitute(
-        profile_id=to_global_id(type="YouthProfileType", id=youth_profile.pk),
+        id=to_global_id(type="ProfileNode", id=youth_profile.pk),
         photo_usage_approved="true",
     )
     executed = staff_user_gql_client.execute(mutation, context=request)
@@ -552,7 +552,7 @@ def test_anon_user_can_approve_with_token(rf, anon_user_gql_client, youth_profil
                 }
             )
             {
-                youthProfile {
+                profile {
                     photoUsageApproved
                     approverFirstName
                     approverLastName
@@ -574,7 +574,7 @@ def test_anon_user_can_approve_with_token(rf, anon_user_gql_client, youth_profil
     }
     query = t.substitute(**approval_data)
     expected_data = {
-        "youthProfile": {
+        "profile": {
             "photoUsageApproved": True,
             "approverFirstName": approval_data["approver_first_name"],
             "approverLastName": approval_data["approver_last_name"],
@@ -609,7 +609,7 @@ def test_missing_primary_email_error(rf, youth_profile, anon_user_gql_client):
                 }
             )
             {
-                youthProfile {
+                profile {
                     photoUsageApproved
                     approverFirstName
                     approverLastName
@@ -658,7 +658,7 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
         mutation = """
             mutation {
                 renewMyYouthProfile(input:{}) {
-                    youthProfile {
+                    profile {
                         membershipStatus
                     }
                 }
@@ -666,7 +666,7 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
         """
         executed = user_gql_client.execute(mutation, context=request)
         expected_data = {
-            "renewMyYouthProfile": {"youthProfile": {"membershipStatus": "RENEWING"}}
+            "renewMyYouthProfile": {"profile": {"membershipStatus": "RENEWING"}}
         }
         assert dict(executed["data"]) == expected_data
 
@@ -674,12 +674,12 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
     with freeze_time("2021-09-01"):
         query = """
             {
-                youthProfile {
+                myYouthProfile {
                     membershipStatus
                 }
             }
         """
-        expected_data = {"youthProfile": {"membershipStatus": "EXPIRED"}}
+        expected_data = {"myYouthProfile": {"membershipStatus": "EXPIRED"}}
         executed = user_gql_client.execute(query, context=request)
         assert dict(executed["data"]) == expected_data
 
@@ -697,7 +697,7 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
                     }
                 )
                 {
-                    youthProfile {
+                    profile {
                         membershipStatus
                     }
                 }
@@ -708,7 +708,7 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
         approval_data = {"token": youth_profile.approval_token}
         query = t.substitute(**approval_data)
         expected_data = {
-            "approveYouthProfile": {"youthProfile": {"membershipStatus": "ACTIVE"}}
+            "approveYouthProfile": {"profile": {"membershipStatus": "ACTIVE"}}
         }
         executed = anon_user_gql_client.execute(query, context=request)
         assert dict(executed["data"]) == expected_data
@@ -736,9 +736,9 @@ def test_youth_profile_expiration_should_be_renewable_by_staff_user(
             """
             mutation {
                 renewYouthProfile(input:{
-                    profileId: \"${profile_id}\"
+                    id: \"${id}\"
                 }) {
-                    youthProfile {
+                    profile {
                         membershipStatus
                     }
                 }
@@ -746,12 +746,12 @@ def test_youth_profile_expiration_should_be_renewable_by_staff_user(
         """
         )
         mutation = t.substitute(
-            profile_id=to_global_id(type="YouthProfileType", id=youth_profile.pk),
+            id=to_global_id(type="ProfileNode", id=youth_profile.pk),
         )
 
         executed = staff_user_gql_client.execute(mutation, context=request)
         expected_data = {
-            "renewYouthProfile": {"youthProfile": {"membershipStatus": "RENEWING"}}
+            "renewYouthProfile": {"profile": {"membershipStatus": "RENEWING"}}
         }
         assert dict(executed["data"]) == expected_data
 
@@ -769,7 +769,7 @@ def test_youth_profile_expiration_should_be_renewable_by_staff_user(
                     }
                 )
                 {
-                    youthProfile {
+                    profile {
                         membershipStatus
                     }
                 }
@@ -780,7 +780,7 @@ def test_youth_profile_expiration_should_be_renewable_by_staff_user(
         approval_data = {"token": youth_profile.approval_token}
         query = t.substitute(**approval_data)
         expected_data = {
-            "approveYouthProfile": {"youthProfile": {"membershipStatus": "ACTIVE"}}
+            "approveYouthProfile": {"profile": {"membershipStatus": "ACTIVE"}}
         }
         executed = anon_user_gql_client.execute(query, context=request)
         assert dict(executed["data"]) == expected_data
@@ -806,7 +806,7 @@ def test_youth_profile_expiration_for_over_18_years_old_should_renew_and_change_
         mutation = """
             mutation {
                 renewMyYouthProfile(input:{}) {
-                    youthProfile {
+                    profile {
                         membershipStatus
                     }
                 }
@@ -814,7 +814,7 @@ def test_youth_profile_expiration_for_over_18_years_old_should_renew_and_change_
         """
         executed = user_gql_client.execute(mutation, context=request)
         expected_data = {
-            "renewMyYouthProfile": {"youthProfile": {"membershipStatus": "ACTIVE"}}
+            "renewMyYouthProfile": {"profile": {"membershipStatus": "ACTIVE"}}
         }
         assert dict(executed["data"]) == expected_data
 
@@ -836,14 +836,14 @@ def test_should_not_be_able_to_renew_pending_youth_profile(rf, user_gql_client):
 
         query = """
             {
-                youthProfile {
+                myYouthProfile {
                     membershipStatus
                     renewable
                 }
             }
         """
         expected_data = {
-            "youthProfile": {"membershipStatus": "PENDING", "renewable": False}
+            "myYouthProfile": {"membershipStatus": "PENDING", "renewable": False}
         }
         executed = user_gql_client.execute(query, context=request)
         assert dict(executed["data"]) == expected_data
@@ -853,7 +853,7 @@ def test_should_not_be_able_to_renew_pending_youth_profile(rf, user_gql_client):
         mutation = """
             mutation {
                 renewMyYouthProfile(input:{}) {
-                    youthProfile {
+                    profile {
                         membershipStatus
                     }
                 }
@@ -870,7 +870,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
     user = staff_user_gql_client.user
 
     # TODO mock profile_id query from open-city-profile, YM-287
-    profile_id = str(uuid.uuid4())
+    profile_id = to_global_id(type="ProfileNode", id=str(uuid.uuid4()))
     request = rf.post("/graphql")
     request.user = user
     today = date.today()
@@ -891,8 +891,8 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
         mutation {
             createYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
-                    youthProfile: {
+                    id: \"${id}\",
+                    profile: {
                         birthDate: \"${birth_date}\",
                         schoolName: \"${school_name}\",
                         schoolClass: \"${school_class}\",
@@ -904,7 +904,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
                     }
                 }
             ) {
-                youthProfile {
+                profile {
                     id
                     birthDate
                     schoolName
@@ -920,7 +920,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
     """
     )
     query = t.substitute(
-        profile_id=to_global_id(type="YouthProfileType", id=profile_id),
+        id=profile_id,
         birth_date=youth_profile_data["birth_date"],
         school_name=youth_profile_data["school_name"],
         school_class=youth_profile_data["school_class"],
@@ -932,7 +932,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
     )
     expected_data = {
         "createYouthProfile": {
-            "youthProfile": {
+            "profile": {
                 "id": profile_id,
                 "birthDate": youth_profile_data["birth_date"],
                 "schoolName": youth_profile_data["school_name"],
@@ -953,7 +953,7 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     rf, staff_user_gql_client
 ):
     # TODO mock profile_id query from open-city-profile, YM-287
-    profile_id = str(uuid.uuid4())
+    profile_id = to_global_id(type="ProfileNode", id=str(uuid.uuid4()))
 
     user = staff_user_gql_client.user
     request = rf.post("/graphql")
@@ -971,14 +971,14 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
         mutation {
             createYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
-                    youthProfile: {
+                    id: \"${id}\",
+                    profile: {
                         birthDate: \"${birth_date}\",
                         approverEmail: \"${approver_email}\",
                     }
                 }
             ) {
-                youthProfile {
+                profile {
                     id
                     birthDate
                     approverEmail
@@ -988,13 +988,13 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     """
     )
     query = t.substitute(
-        profile_id=to_global_id(type="YouthProfileType", id=profile_id),
+        id=profile_id,
         birth_date=youth_profile_data["birth_date"],
         approver_email=youth_profile_data["approver_email"],
     )
     expected_data = {
         "createYouthProfile": {
-            "youthProfile": {
+            "profile": {
                 "id": profile_id,
                 "birthDate": youth_profile_data["birth_date"],
                 "approverEmail": youth_profile_data["approver_email"],
@@ -1025,14 +1025,14 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(rf, user_gql_clien
         mutation {
             createYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
-                    youthProfile: {
+                    id: \"${id}\",
+                    profile: {
                         birthDate: \"${birth_date}\",
                         approverEmail: \"${approver_email}\",
                     }
                 }
             ) {
-                youthProfile {
+                profile {
                     id
                     birthDate
                     approverEmail
@@ -1042,7 +1042,7 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(rf, user_gql_clien
     """
     )
     query = t.substitute(
-        profile_id=to_global_id(type="YouthProfileType", id=profile_id),
+        id=to_global_id(type="ProfileNode", id=profile_id),
         birth_date=youth_profile_data["birth_date"],
         approver_email=youth_profile_data["approver_email"],
     )
@@ -1062,7 +1062,7 @@ def test_staff_user_can_cancel_youth_membership_on_selected_date(
     today = date.today()
     expiration_date = today + timedelta(days=1)
     youth_profile_data = {
-        "profile_id": to_global_id(type="YouthProfileType", id=youth_profile.pk),
+        "id": to_global_id(type="ProfileNode", id=youth_profile.pk),
         "expiration": expiration_date.strftime("%Y-%m-%d"),
     }
 
@@ -1071,11 +1071,11 @@ def test_staff_user_can_cancel_youth_membership_on_selected_date(
         mutation {
             cancelYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
+                    id: \"${id}\",
                     expiration: \"${expiration}\"
                 }
             ) {
-                youthProfile {
+                profile {
                     expiration
                 }
             }
@@ -1083,12 +1083,11 @@ def test_staff_user_can_cancel_youth_membership_on_selected_date(
     """
     )
     query = t.substitute(
-        profile_id=youth_profile_data["profile_id"],
-        expiration=youth_profile_data["expiration"],
+        id=youth_profile_data["id"], expiration=youth_profile_data["expiration"],
     )
     expected_data = {
         "cancelYouthProfile": {
-            "youthProfile": {"expiration": youth_profile_data["expiration"]}
+            "profile": {"expiration": youth_profile_data["expiration"]}
         }
     }
     executed = staff_user_gql_client.execute(query, context=request)
@@ -1102,29 +1101,25 @@ def test_staff_user_can_cancel_youth_membership_now(
     request = rf.post("/graphql")
     request.user = user
 
-    youth_profile_data = {
-        "profile_id": to_global_id(type="YouthProfileType", id=youth_profile.pk)
-    }
-
     t = Template(
         """
         mutation {
             cancelYouthProfile(
                 input: {
-                    profileId: \"${profile_id}\",
+                    id: \"${id}\",
                 }
             ) {
-                youthProfile {
+                profile {
                     expiration
                 }
             }
         }
     """
     )
-    query = t.substitute(profile_id=youth_profile_data["profile_id"],)
+    query = t.substitute(id=to_global_id(type="ProfileNode", id=youth_profile.pk))
     expected_data = {
         "cancelYouthProfile": {
-            "youthProfile": {"expiration": date.today().strftime("%Y-%m-%d")}
+            "profile": {"expiration": date.today().strftime("%Y-%m-%d")}
         }
     }
     executed = staff_user_gql_client.execute(query, context=request)
@@ -1149,7 +1144,7 @@ def test_normal_user_can_cancel_youth_membership(rf, user_gql_client):
                 }
             )
             {
-                youthProfile {
+                profile {
                     expiration
                     membershipStatus
                 }
@@ -1160,7 +1155,7 @@ def test_normal_user_can_cancel_youth_membership(rf, user_gql_client):
     query = t.substitute(expiration=expiration_string)
 
     expected_data = {
-        "youthProfile": {"expiration": expiration_string, "membershipStatus": "EXPIRED"}
+        "profile": {"expiration": expiration_string, "membershipStatus": "EXPIRED"}
     }
     executed = user_gql_client.execute(query, context=request)
     assert dict(executed["data"]["cancelMyYouthProfile"]) == expected_data
@@ -1177,7 +1172,7 @@ def test_normal_user_can_cancel_youth_membership_now(rf, user_gql_client):
                 input: {}
             )
             {
-                youthProfile {
+                profile {
                     expiration
                     membershipStatus
                 }
@@ -1185,7 +1180,7 @@ def test_normal_user_can_cancel_youth_membership_now(rf, user_gql_client):
         }
     """
     expected_data = {
-        "youthProfile": {
+        "profile": {
             "expiration": date.today().strftime("%Y-%m-%d"),
             "membershipStatus": "EXPIRED",
         }
