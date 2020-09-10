@@ -17,6 +17,7 @@ graphene-federation
 pillow
 pyyaml
 requests
+requests-oauthlib
 psycopg2
 --no-binary psycopg2
 sentry-sdk

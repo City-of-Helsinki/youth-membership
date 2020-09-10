@@ -30,3 +30,7 @@ class ProfileMustHaveOnePrimaryEmail(CommonGraphQLError):
 
 class TokenExpiredError(CommonGraphQLError):
     """Token has expired"""
+
+
+class TokenExchangeError(Exception):
+    """OAuth/OIDC token exchange related exception."""
