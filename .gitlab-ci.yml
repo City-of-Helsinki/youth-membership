@@ -19,10 +19,10 @@ review:
         K8S_SECRET_SENTRY_ENVIRONMENT: "test"
         K8S_SECRET_VERSION: "$CI_COMMIT_SHORT_SHA"
         K8S_SECRET_ENABLE_GRAPHIQL: 1
-#        K8S_SECRET_TOKEN_AUTH_ACCEPTED_AUDIENCE: "https://api.hel.fi/auth/helsinkiprofile"
-#        K8S_SECRET_TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX: "helsinkiprofile"
-#        K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso-test/openid"
-#        K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
+        K8S_SECRET_TOKEN_AUTH_ACCEPTED_AUDIENCE: "https://api.hel.fi/auth/jassariapi"
+        K8S_SECRET_TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX: "jassariapi"
+        K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso-test"
+        K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
 #        K8S_SECRET_MAIL_MAILGUN_KEY: "$GL_MAILGUN_API_KEY"
 #        K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
 #        K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
@@ -44,10 +44,10 @@ staging:
         K8S_SECRET_SKIP_DATABASE_CHECK: 1
         K8S_SECRET_VERSION: "$CI_COMMIT_SHORT_SHA"
         K8S_SECRET_ENABLE_GRAPHIQL: 1
-#        K8S_SECRET_TOKEN_AUTH_ACCEPTED_AUDIENCE: "https://api.hel.fi/auth/helsinkiprofile"
-#        K8S_SECRET_TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX: "helsinkiprofile"
-#        K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso-test/openid"
-#        K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
+        K8S_SECRET_TOKEN_AUTH_ACCEPTED_AUDIENCE: "https://api.hel.fi/auth/jassariapi"
+        K8S_SECRET_TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX: "jassariapi"
+        K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso-test"
+        K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
 #        K8S_SECRET_MAIL_MAILGUN_KEY: "$GL_MAILGUN_API_KEY"
 #        K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
 #        K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
@@ -65,10 +65,10 @@ production:
         K8S_SECRET_SENTRY_ENVIRONMENT: "production"
         K8S_SECRET_SKIP_DATABASE_CHECK: 1
         K8S_SECRET_VERSION: "$CI_COMMIT_SHORT_SHA"
-#        K8S_SECRET_TOKEN_AUTH_ACCEPTED_AUDIENCE: "https://api.hel.fi/auth/helsinkiprofile"
-#        K8S_SECRET_TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX: "helsinkiprofile"
-#        K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso/openid"
-#        K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
+        K8S_SECRET_TOKEN_AUTH_ACCEPTED_AUDIENCE: "https://api.hel.fi/auth/jassariapi"
+        K8S_SECRET_TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX: "jassariapi"
+        K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso"
+        K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
 #        K8S_SECRET_MAIL_MAILGUN_KEY: "$GL_MAILGUN_API_KEY"
 #        K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
 #        K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
