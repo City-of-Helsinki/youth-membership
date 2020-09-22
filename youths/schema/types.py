@@ -30,6 +30,13 @@ MembershipStatusEnum = graphene.Enum.from_enum(
 class AdditionalContactPersonNode(DjangoObjectType):
     class Meta:
         model = AdditionalContactPerson
+        fields = (
+            "id",
+            "first_name",
+            "last_name",
+            "phone",
+            "email",
+        )
         interfaces = (relay.Node,)
 
 
@@ -41,8 +48,7 @@ class ProfileFilter(django_filters.FilterSet):
     membership_number = django_filters.CharFilter(lookup_expr="icontains")
 
 
-@extend(fields="id")
-class ProfileNode(DjangoObjectType):
+class YouthProfileNode(DjangoObjectType):
     class Meta:
         model = YouthProfile
         fields = (
@@ -67,7 +73,10 @@ class ProfileNode(DjangoObjectType):
         filterset_class = ProfileFilter
         connection_class = CountConnection
 
-    id = external(relay.GlobalID())
+    profile = graphene.Field(
+        "youths.schema.types.ProfileNode",
+        description="Profile related to the youth profile",
+    )
 
     language_at_home = LanguageAtHome(
         description="The language which is spoken in the youth's home.", required=True,
@@ -85,6 +94,36 @@ class ProfileNode(DjangoObjectType):
         return bool(self.approved_time) and self.expiration != calculate_expiration(
             date.today()
         )
+
+    def resolve_profile(self: YouthProfile, info, **kwargs):
+        return self
+
+    @classmethod
+    @login_required
+    def get_node(cls, info, id):
+        node = super().get_node(info, id)
+        user = info.context.user
+        if user_is_admin(user) or node.user == user:
+            return node
+        return None
+
+
+@extend(fields="id")
+class ProfileNode(DjangoObjectType):
+    class Meta:
+        model = YouthProfile
+        fields = ("id",)
+        interfaces = (relay.Node,)
+        filterset_class = ProfileFilter
+        connection_class = CountConnection
+
+    id = external(relay.GlobalID())
+    youth_profile = graphene.Field(
+        YouthProfileNode, description="Youth Profile related to the Profile"
+    )
+
+    def resolve_youth_profile(self: YouthProfile, info, **kwargs):
+        return self
 
     @login_required
     def __resolve_reference(self, info, **kwargs):
