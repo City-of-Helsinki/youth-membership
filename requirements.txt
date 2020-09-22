@@ -41,6 +41,7 @@ graphql-relay==2.0.1      # via graphene
 idna==2.10                # via requests
 jdcal==1.4.1              # via openpyxl
 jinja2==2.11.2            # via django-ilmoitin
+jmespath==0.10.0          # via -r requirements.in
 lockfile==0.12.2          # via django-mailer
 markuppy==1.14            # via tablib
 markupsafe==1.1.1         # via jinja2
