@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from requests_oauthlib import OAuth2Session
 
+from common_utils.exceptions import TokenExchangeError
 from common_utils.oidc import TunnistamoTokenExchange
 
 
@@ -31,7 +32,7 @@ def test_authorization_code_wrong_scope_in_response(mocker):
     token_response = {tte.scope + "nope": "code"}
     mock_token_exchange(mocker, token_response)
 
-    with pytest.raises(Exception) as e:
+    with pytest.raises(TokenExchangeError) as e:
         tte.fetch_api_token("auth_code")
 
     assert "Token for scope" in str(e.value)

@@ -1,7 +1,10 @@
 import requests
 from django.conf import settings
 from helusers.oidc import ApiTokenAuthentication
+from oauthlib.oauth2 import OAuth2Error
 from requests_oauthlib import OAuth2Session
+
+from common_utils.exceptions import TokenExchangeError
 
 
 class GraphQLApiTokenAuthentication(ApiTokenAuthentication):
@@ -37,32 +40,40 @@ class TunnistamoTokenExchange:
     def fetch_api_token(self, authorization_code: str) -> str:
         """Exchanges the authorization code into a API token that can access open-city-profile API."""
         oidc_conf = self.get_oidc_config()
-        session = OAuth2Session(
-            client_id=self.client_id,
-            redirect_uri=self.callback_url,
-            scope=f"openid {self.scope}",
-        )
-        authorization_url, state = session.authorization_url(
-            oidc_conf["authorization_endpoint"]
-        )
-        redirect_response = (
-            f"{self.callback_url}?code={authorization_code}&state={state}"
-        )
-        session.fetch_token(
-            token_url=oidc_conf["token_endpoint"],
-            authorization_response=redirect_response,
-            client_secret=self.client_secret,
-            include_client_id=True,
-            timeout=self.timeout,
-        )
+
+        try:
+            session = OAuth2Session(
+                client_id=self.client_id,
+                redirect_uri=self.callback_url,
+                scope=f"openid {self.scope}",
+            )
+            authorization_url, state = session.authorization_url(
+                oidc_conf["authorization_endpoint"]
+            )
+            redirect_response = (
+                f"{self.callback_url}?code={authorization_code}&state={state}"
+            )
+            session.fetch_token(
+                token_url=oidc_conf["token_endpoint"],
+                authorization_response=redirect_response,
+                client_secret=self.client_secret,
+                include_client_id=True,
+                timeout=self.timeout,
+            )
+        except OAuth2Error:
+            raise TokenExchangeError("Failed to obtain an access token.")
+
         response = session.get(self.oidc_endpoint + "/api-tokens", timeout=self.timeout)
         response.raise_for_status()
+
         api_tokens = response.json()
 
         if self.scope in api_tokens:
             return api_tokens[self.scope]
 
-        raise Exception(f"Token for scope {self.scope} not available in response.")
+        raise TokenExchangeError(
+            f"Token for scope {self.scope} not available in response."
+        )
 
     def get_authorization_token_url(self):
         """Return the url, which will generate a authorization code when visited."""
