@@ -20,37 +20,39 @@ class BearerAuth(AuthBase):
 class ProfileAPI:
     """Client for fetching open-city-profile related data."""
 
-    MY_PROFILE_QUERY = """
-        query myProfile {
-            myProfile {
-                id
-            }
-        }
-    """
-
-    MY_PROFILE_PATH = jmespath.compile(
-        """
-        data.myProfile.{
-            id: id
-        }
-    """
-    )
-
     def __init__(self):
         self.api_url = settings.HELSINKI_PROFILE_API_URL
         self.timeout = 5
 
     def fetch_my_profile(self, authorization_code: str) -> dict:
         """Fetch profile data for the user of the given authorization code."""
+        query = """
+            query myProfile {
+                myProfile {
+                    id
+                }
+            }
+        """
+        path = jmespath.compile(
+            """
+            data.myProfile.{
+                id: id
+            }
+        """
+        )
+
+        data = self.do_query(authorization_code, query)
+        return path.search(data)
+
+    def do_query(self, authorization_code: str, query: str) -> dict:
         token_exchange = TunnistamoTokenExchange()
         api_token = token_exchange.fetch_api_token(authorization_code)
         response = requests.post(
             self.api_url,
-            json={"query": self.MY_PROFILE_QUERY},
+            json={"query": query},
             timeout=self.timeout,
             auth=BearerAuth(api_token),
         )
         response.raise_for_status()
 
-        data = response.json()
-        return self.MY_PROFILE_PATH.search(data)
+        return response.json()

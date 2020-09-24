@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from youth_membership.tests.conftest import *  # noqa
-from youths.tests.factories import YouthProfileFactory
+from youths.tests.factories import ProfileAPIResponse, YouthProfileFactory
 
 # from pytest_factoryboy import register
 
@@ -26,6 +26,11 @@ def setup_youth_membership_dates(settings):
 @pytest.fixture(autouse=True)
 def setup_gdpr_api(settings):
     settings.GDPR_API_ENABLED = True
+
+
+@pytest.fixture
+def profile_api_response():
+    return ProfileAPIResponse()
 
 
 # Register factory fixtures
