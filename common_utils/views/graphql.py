@@ -67,7 +67,7 @@ sentry_ignored_errors = (
 )
 
 
-error_codes = {**error_codes_shared, **error_codes_youth_profile}
+error_codes = {**error_codes_shared, **error_codes_profile, **error_codes_youth_profile}
 
 
 class SentryGraphQLView(BaseGraphQLView):

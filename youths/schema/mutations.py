@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 from graphene import relay
 from graphql_jwt.decorators import login_required
-from graphql_relay.node.node import from_global_id
+from graphql_relay.node.node import from_global_id, to_global_id
 
 from common_utils.exceptions import ProfileDoesNotExistError
 from common_utils.profile import ProfileAPI
@@ -195,6 +195,14 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.Argument(graphene.ID, required=True)
         youth_profile = CreateYouthProfileInput(required=True)
+        authorization_code = graphene.String(
+            required=True,
+            description=(
+                "OAuth/OIDC authorization code for Helsinki profile. When "
+                "obtaining the code, it is required to use Helsinki profile "
+                "specific scope."
+            ),
+        )
 
     youth_profile = graphene.Field(YouthProfileNode)
 
@@ -203,11 +211,17 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
+        authorization_code = input.get("authorization_code")
+        profile_id = from_global_id(input.get("id"))[1]
+        profile_node_id = to_global_id("ProfileNode", profile_id)
 
-        # TODO Create youth profile with the given ID
-        youth_profile = create_youth_profile(
-            input_data, None, from_global_id(input.get("id"))[1]
-        )
+        profile_api = ProfileAPI()
+        profile_data = profile_api.fetch_profile(authorization_code, profile_node_id)
+
+        if not profile_data:
+            raise ProfileDoesNotExistError("Profile does not exist")
+
+        youth_profile = create_youth_profile(input_data, None, profile_id)
 
         return CreateYouthProfileMutation(youth_profile=youth_profile)
 
