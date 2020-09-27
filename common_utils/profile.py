@@ -1,3 +1,5 @@
+from string import Template
+
 import jmespath
 import requests
 from django.conf import settings
@@ -23,6 +25,29 @@ class ProfileAPI:
     def __init__(self):
         self.api_url = settings.HELSINKI_PROFILE_API_URL
         self.timeout = 5
+        self.service_type = settings.HELSINKI_PROFILE_SERVICE_TYPE
+
+    def fetch_profile(self, authorization_code: str, id: str) -> dict:
+        """Fetch profile data for the given profile ID. Requires staff level permission"""
+        query = Template(
+            """
+            query Profile {
+                profile(id: "${id}", serviceType: ${service_type}) {
+                    id
+                }
+            }
+        """
+        ).substitute(id=id, service_type=self.service_type)
+        path = jmespath.compile(
+            """
+            data.profile.{
+                id: id
+            }
+        """
+        )
+
+        data = self.do_query(authorization_code, query)
+        return path.search(data)
 
     def fetch_my_profile(self, authorization_code: str) -> dict:
         """Fetch profile data for the user of the given authorization code."""
