@@ -1,4 +1,3 @@
-import uuid
 from datetime import date, datetime, timedelta
 from string import Template
 
@@ -6,7 +5,7 @@ import pytest
 from freezegun import freeze_time
 from graphql_relay.node.node import from_global_id, to_global_id
 
-from common_utils.consts import PERMISSION_DENIED_ERROR
+from common_utils.consts import PERMISSION_DENIED_ERROR, PROFILE_DOES_NOT_EXIST_ERROR
 from common_utils.profile import ProfileAPI
 from youths.consts import (
     APPROVER_EMAIL_CANNOT_BE_EMPTY_FOR_MINORS_ERROR,
@@ -908,11 +907,14 @@ def test_should_not_be_able_to_renew_pending_youth_profile(rf, user_gql_client):
         )
 
 
-def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
-    user = staff_user_gql_client.user
+def test_staff_user_can_create_youth_profile(
+    rf, staff_user_gql_client, mocker, profile_api_response
+):
+    mocker.patch.object(ProfileAPI, "fetch_profile", return_value=profile_api_response)
+    profile_id = from_global_id(profile_api_response["id"])[1]
+    profile_global_id = to_global_id(type="YouthProfileNode", id=profile_id)
 
-    # TODO mock profile_id query from open-city-profile, YM-287
-    profile_id = to_global_id(type="YouthProfileNode", id=str(uuid.uuid4()))
+    user = staff_user_gql_client.user
     request = rf.post("/graphql")
     request.user = user
     today = date.today()
@@ -944,6 +946,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
                         approverFirstName: \"${approver_first_name}\",
                         approverLastName: \"${approver_last_name}\",
                     }
+                    authorizationCode: "auth_code"
                 }
             ) {
                 youthProfile {
@@ -962,7 +965,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
     """
     )
     query = t.substitute(
-        id=profile_id,
+        id=profile_global_id,
         birth_date=youth_profile_data["birth_date"],
         school_name=youth_profile_data["school_name"],
         school_class=youth_profile_data["school_class"],
@@ -975,7 +978,7 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
     expected_data = {
         "createYouthProfile": {
             "youthProfile": {
-                "id": profile_id,
+                "id": profile_global_id,
                 "birthDate": youth_profile_data["birth_date"],
                 "schoolName": youth_profile_data["school_name"],
                 "schoolClass": youth_profile_data["school_class"],
@@ -991,11 +994,63 @@ def test_staff_user_can_create_youth_profile(rf, staff_user_gql_client):
     assert executed["data"] == expected_data
 
 
-def test_staff_user_can_create_youth_profile_for_under_13_years_old(
-    rf, staff_user_gql_client
+def test_staff_user_cannot_create_youth_profile_if_profile_does_not_exist(
+    rf, staff_user_gql_client, mocker, profile_api_response
 ):
-    # TODO mock profile_id query from open-city-profile, YM-287
-    profile_id = to_global_id(type="YouthProfileNode", id=str(uuid.uuid4()))
+    mocker.patch.object(
+        ProfileAPI, "fetch_profile", return_value=None
+    )  # Jmespath should return null if profile = null
+    profile_id = from_global_id(profile_api_response["id"])[1]
+    profile_global_id = to_global_id(type="YouthProfileNode", id=profile_id)
+
+    user = staff_user_gql_client.user
+    request = rf.post("/graphql")
+    request.user = user
+    today = date.today()
+    birth_date = today.replace(year=today.year - 13) - timedelta(days=1)
+    youth_profile_data = {
+        "birth_date": birth_date.strftime("%Y-%m-%d"),
+        "approver_email": "jane.doe@example.com",
+    }
+
+    t = Template(
+        """
+        mutation {
+            createYouthProfile(
+                input: {
+                    id: \"${id}\",
+                    youthProfile: {
+                        birthDate: \"${birth_date}\",
+                        approverEmail: \"${approver_email}\",
+                    }
+                    authorizationCode: "auth_code"
+                }
+            ) {
+                youthProfile {
+                    id
+                }
+            }
+        }
+    """
+    )
+    query = t.substitute(
+        id=profile_global_id,
+        birth_date=youth_profile_data["birth_date"],
+        approver_email=youth_profile_data["approver_email"],
+    )
+    executed = staff_user_gql_client.execute(query, context=request)
+    assert (
+        executed["errors"][0].get("extensions").get("code")
+        == PROFILE_DOES_NOT_EXIST_ERROR
+    )
+
+
+def test_staff_user_can_create_youth_profile_for_under_13_years_old(
+    rf, staff_user_gql_client, mocker, profile_api_response
+):
+    mocker.patch.object(ProfileAPI, "fetch_profile", return_value=profile_api_response)
+    profile_id = from_global_id(profile_api_response["id"])[1]
+    profile_global_id = to_global_id(type="YouthProfileNode", id=profile_id)
 
     user = staff_user_gql_client.user
     request = rf.post("/graphql")
@@ -1018,6 +1073,7 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
                         birthDate: \"${birth_date}\",
                         approverEmail: \"${approver_email}\",
                     }
+                    authorizationCode: "auth_code"
                 }
             ) {
                 youthProfile {
@@ -1030,14 +1086,14 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     """
     )
     query = t.substitute(
-        id=profile_id,
+        id=profile_global_id,
         birth_date=youth_profile_data["birth_date"],
         approver_email=youth_profile_data["approver_email"],
     )
     expected_data = {
         "createYouthProfile": {
             "youthProfile": {
-                "id": profile_id,
+                "id": profile_global_id,
                 "birthDate": youth_profile_data["birth_date"],
                 "approverEmail": youth_profile_data["approver_email"],
             }
@@ -1047,9 +1103,11 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     assert executed["data"] == expected_data
 
 
-def test_normal_user_cannot_use_create_youth_profile_mutation(rf, user_gql_client):
-    # TODO mock profile_id query from open-city-profile, YM-287
-    profile_id = str(uuid.uuid4())
+def test_normal_user_cannot_use_create_youth_profile_mutation(
+    rf, user_gql_client, mocker, profile_api_response
+):
+    mocker.patch.object(ProfileAPI, "fetch_profile", return_value=profile_api_response)
+    profile_id = from_global_id(profile_api_response["id"])[1]
 
     user = user_gql_client.user
     request = rf.post("/graphql")
@@ -1072,6 +1130,7 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(rf, user_gql_clien
                         birthDate: \"${birth_date}\",
                         approverEmail: \"${approver_email}\",
                     }
+                    authorizationCode: "auth_code"
                 }
             ) {
                 youthProfile {
