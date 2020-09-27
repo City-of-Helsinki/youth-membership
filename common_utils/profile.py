@@ -33,6 +33,31 @@ class ProfileAPI:
                 "Required Helsinki profile configuration not set."
             )
 
+    def fetch_profile(self, authorization_code: str, id: str) -> dict:
+        """Fetch profile data for the given profile ID. Requires staff level permission"""
+        query = """
+            query Profile($id: ID!, $service_type: ServiceType!) {
+                profile(id: $id, serviceType: $service_type) {
+                    id
+                }
+            }
+        """
+
+        path = jmespath.compile(
+            """
+            data.profile.{
+                id: id
+            }
+        """
+        )
+
+        data = self.do_query(
+            authorization_code,
+            query,
+            {"id": id, "service_type": settings.HELSINKI_PROFILE_SERVICE_TYPE},
+        )
+        return path.search(data)
+
     def fetch_my_profile(self, authorization_code: str) -> dict:
         """Fetch profile data for the user of the given authorization code."""
         query = """
@@ -53,12 +78,17 @@ class ProfileAPI:
         data = self.do_query(authorization_code, query)
         return path.search(data)
 
-    def do_query(self, authorization_code: str, query: str) -> dict:
+    def do_query(
+        self, authorization_code: str, query: str, variables: dict = None
+    ) -> dict:
         token_exchange = TunnistamoTokenExchange()
         api_token = token_exchange.fetch_api_token(authorization_code)
+        payload = {"query": query}
+        if variables:
+            payload["variables"] = variables
         response = requests.post(
             settings.HELSINKI_PROFILE_API_URL,
-            json={"query": query},
+            json=payload,
             timeout=self.timeout,
             auth=BearerAuth(api_token),
         )

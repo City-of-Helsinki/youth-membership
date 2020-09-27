@@ -23,6 +23,21 @@ def test_call_profile_api_and_fetch_my_profile(
     assert profile == expected_data
 
 
+def test_call_profile_api_and_fetch_profile_with_id(
+    mocker, requests_mock, profile_response, settings
+):
+    mocker.patch.object(
+        TunnistamoTokenExchange, "fetch_api_token", return_value="api_token"
+    )
+    requests_mock.post(settings.HELSINKI_PROFILE_API_URL, json=profile_response)
+    api = ProfileAPI()
+
+    profile = api.fetch_profile("auth_code", PROFILE_ID)
+
+    expected_data = {"id": PROFILE_ID}
+    assert profile == expected_data
+
+
 def test_call_profile_api_fails(mocker, requests_mock, settings):
     mocker.patch.object(
         TunnistamoTokenExchange, "fetch_api_token", return_value="api_token"
