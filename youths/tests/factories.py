@@ -1,7 +1,14 @@
+from functools import partial
+
 import factory
+from graphql_relay import to_global_id
 
 from users.factories import UserFactory
 from youths.models import AdditionalContactPerson, YouthProfile
+
+
+class ProfileAPIResponse(factory.DictFactory):
+    id = factory.Faker("uuid4", cast_to=partial(to_global_id, "ProfileNode"))
 
 
 class YouthProfileFactory(factory.django.DjangoModelFactory):

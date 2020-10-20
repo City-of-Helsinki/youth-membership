@@ -4,9 +4,10 @@ from string import Template
 
 import pytest
 from freezegun import freeze_time
-from graphql_relay.node.node import to_global_id
+from graphql_relay.node.node import from_global_id, to_global_id
 
 from common_utils.consts import PERMISSION_DENIED_ERROR
+from common_utils.profile import ProfileAPI
 from youths.consts import (
     APPROVER_EMAIL_CANNOT_BE_EMPTY_FOR_MINORS_ERROR,
     CANNOT_CREATE_YOUTH_PROFILE_IF_UNDER_13_YEARS_OLD_ERROR,
@@ -17,7 +18,14 @@ from youths.enums import YouthLanguage
 from youths.tests.factories import YouthProfileFactory
 
 
-def test_normal_user_can_create_youth_profile_mutation(rf, user_gql_client):
+def test_normal_user_can_create_youth_profile_mutation(
+    rf, user_gql_client, mocker, profile_api_response
+):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    profile_id = from_global_id(profile_api_response["id"])[1]
+
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     t = Template(
@@ -32,11 +40,12 @@ def test_normal_user_can_create_youth_profile_mutation(rf, user_gql_client):
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
                     }
-
+                    authorizationCode: "auth_code"
                 }
             )
             {
                 youthProfile {
+                    id
                     schoolClass
                     schoolName
                     approverEmail
@@ -56,6 +65,8 @@ def test_normal_user_can_create_youth_profile_mutation(rf, user_gql_client):
     query = t.substitute(**creation_data)
     expected_data = {
         "youthProfile": {
+            # id is fetched from Profile API
+            "id": to_global_id(type="YouthProfileNode", id=profile_id),
             "schoolClass": creation_data["schoolClass"],
             "schoolName": creation_data["schoolName"],
             "approverEmail": creation_data["approverEmail"],
@@ -67,8 +78,13 @@ def test_normal_user_can_create_youth_profile_mutation(rf, user_gql_client):
 
 
 def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutation(
-    rf, user_gql_client
+    rf, user_gql_client, mocker, profile_api_response
 ):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    profile_id = from_global_id(profile_api_response["id"])[1]
+
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     today = date.today()
@@ -83,11 +99,12 @@ def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutatio
                         schoolName: "${schoolName}"
                         birthDate: "${birthDate}"
                     }
-
+                    authorizationCode: "auth_code"
                 }
             )
             {
                 youthProfile {
+                    id
                     schoolClass
                     schoolName
                     birthDate
@@ -106,6 +123,7 @@ def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutatio
     query = t.substitute(**creation_data)
     expected_data = {
         "youthProfile": {
+            "id": to_global_id(type="YouthProfileNode", id=profile_id),
             "schoolClass": creation_data["schoolClass"],
             "schoolName": creation_data["schoolName"],
             "birthDate": creation_data["birthDate"],
@@ -117,8 +135,11 @@ def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutatio
 
 
 def test_user_cannot_create_youth_profile_without_approver_email_field_if_under_18_years_old(
-    rf, user_gql_client
+    rf, user_gql_client, mocker, profile_api_response
 ):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     today = date.today()
@@ -131,7 +152,7 @@ def test_user_cannot_create_youth_profile_without_approver_email_field_if_under_
                     youthProfile: {
                         birthDate: "${birthDate}"
                     }
-
+                    authorizationCode: "auth_code"
                 }
             )
             {
@@ -155,7 +176,13 @@ def test_user_cannot_create_youth_profile_without_approver_email_field_if_under_
     )
 
 
-def test_user_cannot_create_youth_profile_if_under_13_years_old(rf, user_gql_client):
+def test_user_cannot_create_youth_profile_if_under_13_years_old(
+    rf, user_gql_client, mocker, profile_api_response
+):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     today = date.today()
@@ -172,7 +199,7 @@ def test_user_cannot_create_youth_profile_if_under_13_years_old(rf, user_gql_cli
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
                     }
-
+                    authorizationCode: "auth_code"
                 }
             )
             {
@@ -204,8 +231,13 @@ def test_user_cannot_create_youth_profile_if_under_13_years_old(rf, user_gql_cli
 
 
 def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_old(
-    rf, user_gql_client
+    rf, user_gql_client, mocker, profile_api_response
 ):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    profile_id = from_global_id(profile_api_response["id"])[1]
+
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     today = date.today()
@@ -220,11 +252,12 @@ def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_o
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
                     }
-
+                    authorizationCode: "auth_code"
                 }
             )
             {
                 youthProfile {
+                    id
                     photoUsageApproved
                     approverEmail
                     birthDate
@@ -242,6 +275,7 @@ def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_o
     query = t.substitute(**creation_data)
     expected_data = {
         "youthProfile": {
+            "id": to_global_id(type="YouthProfileNode", id=profile_id),
             "photoUsageApproved": True,
             "approverEmail": creation_data["approverEmail"],
             "birthDate": creation_data["birthDate"],
@@ -252,8 +286,12 @@ def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_o
 
 
 def test_user_cannot_create_youth_profile_with_photo_usage_field_if_under_15_years_old(
-    rf, user_gql_client
+    rf, user_gql_client, mocker, profile_api_response
 ):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     today = date.today()
@@ -268,7 +306,7 @@ def test_user_cannot_create_youth_profile_with_photo_usage_field_if_under_15_yea
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
                     }
-
+                    authorizationCode: "auth_code"
                 }
             )
             {
