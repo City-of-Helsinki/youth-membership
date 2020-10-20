@@ -14,6 +14,7 @@ django-sequences
 djangorestframework
 graphene-django
 graphene-federation
+jmespath
 pillow
 pyyaml
 requests
