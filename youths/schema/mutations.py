@@ -195,13 +195,8 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.Argument(graphene.ID, required=True)
         youth_profile = CreateYouthProfileInput(required=True)
-        authorization_code = graphene.String(
-            required=True,
-            description=(
-                "OAuth/OIDC authorization code for Helsinki profile. When "
-                "obtaining the code, it is required to use Helsinki profile "
-                "specific scope."
-            ),
+        profile_api_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API."
         )
 
     youth_profile = graphene.Field(YouthProfileNode)
@@ -211,12 +206,12 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
-        authorization_code = input.get("authorization_code")
+        profile_api_token = input.get("profile_api_token")
         profile_id = from_global_id(input.get("id"))[1]
         profile_node_id = to_global_id("ProfileNode", profile_id)
 
         profile_api = ProfileAPI()
-        profile_data = profile_api.fetch_profile(authorization_code, profile_node_id)
+        profile_data = profile_api.fetch_profile(profile_api_token, profile_node_id)
 
         if not profile_data:
             raise ProfileDoesNotExistError("Profile does not exist")
@@ -229,13 +224,8 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
 class CreateMyYouthProfileMutation(relay.ClientIDMutation):
     class Input:
         youth_profile = CreateYouthProfileInput(required=True)
-        authorization_code = graphene.String(
-            required=True,
-            description=(
-                "OAuth/OIDC authorization code for Helsinki profile. When "
-                "obtaining the code, it is required to use Helsinki profile "
-                "specific scope."
-            ),
+        profile_api_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API."
         )
 
     youth_profile = graphene.Field(YouthProfileNode)
@@ -245,7 +235,7 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
-        authorization_code = input.get("authorization_code")
+        profile_api_token = input.get("profile_api_token")
 
         if calculate_age(input_data["birth_date"]) < 13:
             raise CannotCreateYouthProfileIfUnder13YearsOldError(
@@ -253,14 +243,14 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
             )
 
         if "photo_usage_approved" in input_data:
-            # Disable setting photo usage by themselfs for youths under 15 years old
+            # Disable setting photo usage by themselves for youths under 15 years old
             if calculate_age(input_data["birth_date"]) < 15:
                 raise CannotSetPhotoUsagePermissionIfUnder15YearsError(
                     "Cannot set photo usage permission if under 15 years old"
                 )
 
         profile_api = ProfileAPI()
-        profile_data = profile_api.fetch_my_profile(authorization_code)
+        profile_data = profile_api.fetch_my_profile(profile_api_token)
 
         if not profile_data:
             raise ProfileDoesNotExistError("Profile does not exist")

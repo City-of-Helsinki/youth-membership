@@ -4,8 +4,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from requests.auth import AuthBase
 
-from common_utils.oidc import TunnistamoTokenExchange
-
 
 class BearerAuth(AuthBase):
     """Bearer token authentication module for requests."""
@@ -33,7 +31,7 @@ class ProfileAPI:
                 "Required Helsinki profile configuration not set."
             )
 
-    def fetch_profile(self, authorization_code: str, id: str) -> dict:
+    def fetch_profile(self, api_token: str, id: str) -> dict:
         """Fetch profile data for the given profile ID. Requires staff level permission"""
         query = """
             query Profile($id: ID!, $service_type: ServiceType!) {
@@ -52,13 +50,13 @@ class ProfileAPI:
         )
 
         data = self.do_query(
-            authorization_code,
+            api_token,
             query,
             {"id": id, "service_type": settings.HELSINKI_PROFILE_SERVICE_TYPE},
         )
         return path.search(data)
 
-    def fetch_my_profile(self, authorization_code: str) -> dict:
+    def fetch_my_profile(self, api_token: str) -> dict:
         """Fetch profile data for the user of the given authorization code."""
         query = """
             query myProfile {
@@ -75,14 +73,10 @@ class ProfileAPI:
         """
         )
 
-        data = self.do_query(authorization_code, query)
+        data = self.do_query(api_token, query)
         return path.search(data)
 
-    def do_query(
-        self, authorization_code: str, query: str, variables: dict = None
-    ) -> dict:
-        token_exchange = TunnistamoTokenExchange()
-        api_token = token_exchange.fetch_api_token(authorization_code)
+    def do_query(self, api_token: str, query: str, variables: dict = None) -> dict:
         payload = {"query": query}
         if variables:
             payload["variables"] = variables

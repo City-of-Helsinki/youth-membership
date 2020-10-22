@@ -39,7 +39,7 @@ def test_normal_user_can_create_youth_profile_mutation(
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             )
             {
@@ -98,7 +98,7 @@ def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutatio
                         schoolName: "${schoolName}"
                         birthDate: "${birthDate}"
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             )
             {
@@ -151,7 +151,7 @@ def test_user_cannot_create_youth_profile_without_approver_email_field_if_under_
                     youthProfile: {
                         birthDate: "${birthDate}"
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             )
             {
@@ -198,7 +198,7 @@ def test_user_cannot_create_youth_profile_if_under_13_years_old(
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             )
             {
@@ -251,7 +251,7 @@ def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_o
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             )
             {
@@ -305,7 +305,7 @@ def test_user_cannot_create_youth_profile_with_photo_usage_field_if_under_15_yea
                         approverEmail: "${approverEmail}"
                         birthDate: "${birthDate}"
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             )
             {
@@ -946,7 +946,7 @@ def test_staff_user_can_create_youth_profile(
                         approverFirstName: \"${approver_first_name}\",
                         approverLastName: \"${approver_last_name}\",
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             ) {
                 youthProfile {
@@ -1023,7 +1023,7 @@ def test_staff_user_cannot_create_youth_profile_if_profile_does_not_exist(
                         birthDate: \"${birth_date}\",
                         approverEmail: \"${approver_email}\",
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             ) {
                 youthProfile {
@@ -1073,7 +1073,7 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
                         birthDate: \"${birth_date}\",
                         approverEmail: \"${approver_email}\",
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             ) {
                 youthProfile {
@@ -1130,7 +1130,7 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(
                         birthDate: \"${birth_date}\",
                         approverEmail: \"${approver_email}\",
                     }
-                    authorizationCode: "auth_code"
+                    profileApiToken: "token"
                 }
             ) {
                 youthProfile {
