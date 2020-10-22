@@ -2,6 +2,7 @@ import jmespath
 import requests
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.dateparse import parse_datetime
 from requests.auth import AuthBase
 
 
@@ -57,7 +58,7 @@ class ProfileAPI:
         return path.search(data)
 
     def fetch_my_profile(self, api_token: str) -> dict:
-        """Fetch profile data for the user of the given authorization code."""
+        """Fetch profile data for the user of the given API token."""
         query = """
             query myProfile {
                 myProfile {
@@ -75,6 +76,32 @@ class ProfileAPI:
 
         data = self.do_query(api_token, query)
         return path.search(data)
+
+    def create_temporary_access_token(self, api_token: str) -> dict:
+        """Create a temporary profile access token for the user of the given API token."""
+        query = """
+            mutation CreateToken {
+                createMyProfileTemporaryReadAccessToken(input: {}) {
+                    temporaryReadAccessToken {
+                        token
+                        expiresAt
+                    }
+                }
+            }
+        """
+
+        path = jmespath.compile(
+            """
+            data.createMyProfileTemporaryReadAccessToken.temporaryReadAccessToken.{
+                token: token
+                expires_at: expiresAt
+            }
+        """
+        )
+        data = self.do_query(api_token, query)
+        parsed_data = path.search(data)
+        parsed_data["expires_at"] = parse_datetime(parsed_data["expires_at"])
+        return parsed_data
 
     def do_query(self, api_token: str, query: str, variables: dict = None) -> dict:
         payload = {"query": query}
