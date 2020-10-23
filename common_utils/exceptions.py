@@ -16,6 +16,10 @@ class InvalidEmailFormatError(CommonGraphQLError):
     """Email must be in valid email format"""
 
 
+class ProfileAPIError(CommonGraphQLError):
+    """Failure using the Profile GraphQL API."""
+
+
 class ProfileDoesNotExistError(CommonGraphQLError):
     """Profile does not exist"""
 

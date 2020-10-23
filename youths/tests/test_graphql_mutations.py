@@ -997,9 +997,7 @@ def test_staff_user_can_create_youth_profile(
 def test_staff_user_cannot_create_youth_profile_if_profile_does_not_exist(
     rf, staff_user_gql_client, mocker, profile_api_response
 ):
-    mocker.patch.object(
-        ProfileAPI, "fetch_profile", return_value=None
-    )  # Jmespath should return null if profile = null
+    mocker.patch.object(ProfileAPI, "fetch_profile", return_value={"id": ""})
     profile_id = from_global_id(profile_api_response["id"])[1]
     profile_global_id = to_global_id(type="YouthProfileNode", id=profile_id)
 

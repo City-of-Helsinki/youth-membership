@@ -213,7 +213,7 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
         profile_api = ProfileAPI()
         profile_data = profile_api.fetch_profile(profile_api_token, profile_node_id)
 
-        if not profile_data:
+        if not profile_data["id"]:
             raise ProfileDoesNotExistError("Profile does not exist")
 
         youth_profile = create_youth_profile(input_data, None, profile_id)
@@ -252,7 +252,7 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
         profile_api = ProfileAPI()
         profile_data = profile_api.fetch_my_profile(profile_api_token)
 
-        if not profile_data:
+        if not profile_data["id"]:
             raise ProfileDoesNotExistError("Profile does not exist")
 
         youth_profile = create_youth_profile(
