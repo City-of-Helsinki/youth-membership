@@ -41,6 +41,7 @@ graphql-relay==2.0.1      # via graphene
 idna==2.10                # via requests
 jdcal==1.4.1              # via openpyxl
 jinja2==2.11.2            # via django-ilmoitin
+jmespath==0.10.0          # via -r requirements.in
 lockfile==0.12.2          # via django-mailer
 markuppy==1.14            # via tablib
 markupsafe==1.1.1         # via jinja2
@@ -59,7 +60,7 @@ python-jose==3.1.0        # via django-helusers
 python3-openid==3.2.0     # via social-auth-core
 pytz==2020.1              # via django
 pyyaml==5.3.1             # via -r requirements.in, tablib
-requests-oauthlib==1.3.0  # via social-auth-core
+requests-oauthlib==1.3.0  # via -r requirements.in, social-auth-core
 requests==2.24.0          # via -r requirements.in, django-anymail, django-helusers, pyjwkest, requests-oauthlib, social-auth-core
 rsa==4.6                  # via python-jose
 rx==1.6.1                 # via graphql-core

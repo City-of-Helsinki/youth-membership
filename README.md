@@ -29,6 +29,10 @@ Prerequisites:
      (kuva-admin@hel.ninja)
      * `ADMIN_USER_PASSWORD`, the admin user's password. If this is not given, a random password is generated
      and written into stdout when an admin user is created automatically.
+     * `HELSINKI_PROFILE_API_URL` URL for the Helsinki profile GraphQL API
+     * `HELSINKI_PROFILE_AUTH_SCOPE` OAuth/OIDC scope for open-city-profile
+     * `HELSINKI_PROFILE_AUTH_CALLBACK_URL` Callback URL used by the UI for fetching OAuth/OIDC authorization token
+     for open-city-profile
 
 2. Run `docker-compose up`
     * The project is now running at [localhost:8081](http://localhost:8081)

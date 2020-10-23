@@ -5,7 +5,10 @@ from django.db import transaction
 from django.utils import timezone
 from graphene import relay
 from graphql_jwt.decorators import login_required
-from graphql_relay.node.node import from_global_id
+from graphql_relay.node.node import from_global_id, to_global_id
+
+from common_utils.exceptions import ProfileDoesNotExistError
+from common_utils.profile import ProfileAPI
 
 from ..decorators import staff_required
 from ..exceptions import (
@@ -31,14 +34,10 @@ from .types import LanguageAtHome, YouthProfileNode
 # from common_utils.exceptions import ProfileHasNoPrimaryEmailError
 
 
-def create_youth_profile(input, user, profile_id=None):
-    # TODO Admin creates a profile for which has a user linked
-    #  to the profile on open-city-profile
+def create_youth_profile(input, user, profile_id):
     contact_persons_to_create = input.pop("add_additional_contact_persons", [])
 
-    if profile_id:
-        input["id"] = profile_id
-    youth_profile = YouthProfile.objects.create(user=user, **input)
+    youth_profile = YouthProfile.objects.create(user=user, id=profile_id, **input)
 
     if calculate_age(youth_profile.birth_date) >= 18:
         youth_profile.approved_time = timezone.now()
@@ -196,6 +195,9 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.Argument(graphene.ID, required=True)
         youth_profile = CreateYouthProfileInput(required=True)
+        profile_api_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API."
+        )
 
     youth_profile = graphene.Field(YouthProfileNode)
 
@@ -204,11 +206,17 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
+        profile_api_token = input.get("profile_api_token")
+        profile_id = from_global_id(input.get("id"))[1]
+        profile_node_id = to_global_id("ProfileNode", profile_id)
 
-        # TODO Create youth profile with the given ID
-        youth_profile = create_youth_profile(
-            input_data, None, from_global_id(input.get("id"))[1]
-        )
+        profile_api = ProfileAPI()
+        profile_data = profile_api.fetch_profile(profile_api_token, profile_node_id)
+
+        if not profile_data:
+            raise ProfileDoesNotExistError("Profile does not exist")
+
+        youth_profile = create_youth_profile(input_data, None, profile_id)
 
         return CreateYouthProfileMutation(youth_profile=youth_profile)
 
@@ -216,6 +224,9 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
 class CreateMyYouthProfileMutation(relay.ClientIDMutation):
     class Input:
         youth_profile = CreateYouthProfileInput(required=True)
+        profile_api_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API."
+        )
 
     youth_profile = graphene.Field(YouthProfileNode)
 
@@ -224,6 +235,7 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
+        profile_api_token = input.get("profile_api_token")
 
         if calculate_age(input_data["birth_date"]) < 13:
             raise CannotCreateYouthProfileIfUnder13YearsOldError(
@@ -231,14 +243,21 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
             )
 
         if "photo_usage_approved" in input_data:
-            # Disable setting photo usage by themselfs for youths under 15 years old
+            # Disable setting photo usage by themselves for youths under 15 years old
             if calculate_age(input_data["birth_date"]) < 15:
                 raise CannotSetPhotoUsagePermissionIfUnder15YearsError(
                     "Cannot set photo usage permission if under 15 years old"
                 )
 
-        # TODO YM-287 Fetch profile ID from open-city-profile
-        youth_profile = create_youth_profile(input_data, info.context.user)
+        profile_api = ProfileAPI()
+        profile_data = profile_api.fetch_my_profile(profile_api_token)
+
+        if not profile_data:
+            raise ProfileDoesNotExistError("Profile does not exist")
+
+        youth_profile = create_youth_profile(
+            input_data, info.context.user, from_global_id(profile_data["id"])[1]
+        )
 
         return CreateMyYouthProfileMutation(youth_profile=youth_profile)
 
