@@ -10,7 +10,7 @@ aniso8601==7.0.0          # via graphene
 certifi==2020.6.20        # via requests, sentry-sdk
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
-cryptography==2.9.2       # via social-auth-core
+cryptography==3.2         # via social-auth-core
 defusedxml==0.6.0         # via odfpy, python3-openid, social-auth-core
 diff-match-patch==20181111  # via django-import-export
 django-admin-sortable==2.2.3  # via -r requirements.in
