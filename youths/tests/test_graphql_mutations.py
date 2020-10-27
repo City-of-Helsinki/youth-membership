@@ -14,14 +14,18 @@ from youths.consts import (
     CANNOT_SET_PHOTO_USAGE_PERMISSION_IF_UNDER_15_YEARS_ERROR,
 )
 from youths.enums import YouthLanguage
+from youths.models import YouthProfile
 from youths.tests.factories import YouthProfileFactory
 
 
 def test_normal_user_can_create_youth_profile_mutation(
-    rf, user_gql_client, mocker, profile_api_response
+    rf, user_gql_client, mocker, profile_api_response, token_response
 ):
     mocker.patch.object(
         ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
     profile_id = from_global_id(profile_api_response["id"])[1]
 
@@ -57,7 +61,7 @@ def test_normal_user_can_create_youth_profile_mutation(
     creation_data = {
         "schoolClass": "2A",
         "schoolName": "Alakoulu",
-        "approverEmail": "hyvaksyja@ex.com",
+        "approverEmail": "hyvaksyja@example.com",
         "language": YouthLanguage.FINNISH.name,
         "birthDate": "2004-04-11",
     }
@@ -76,11 +80,68 @@ def test_normal_user_can_create_youth_profile_mutation(
     assert dict(executed["data"]["createMyYouthProfile"]) == expected_data
 
 
+def test_profile_access_token_is_saved_when_using_create_my_youth_profile(
+    rf, user_gql_client, mocker, profile_api_response, token_response
+):
+    """Temporary profile access token can be used later when access to profile information
+    is needed e.g. when unauthenticated parent approves the youth membership."""
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
+    )
+    profile_id = from_global_id(profile_api_response["id"])[1]
+
+    request = rf.post("/graphql")
+    request.user = user_gql_client.user
+    t = Template(
+        """
+        mutation {
+            createMyYouthProfile (
+                input: {
+                    youthProfile: {
+                        schoolClass: "${schoolClass}"
+                        schoolName: "${schoolName}"
+                        languageAtHome: ${language}
+                        approverEmail: "${approverEmail}"
+                        birthDate: "${birthDate}"
+                    }
+                    profileApiToken: "token"
+                }
+            )
+            {
+                youthProfile {
+                    id
+                }
+            }
+        }
+        """
+    )
+    creation_data = {
+        "schoolClass": "2A",
+        "schoolName": "Alakoulu",
+        "approverEmail": "hyvaksyja@example.com",
+        "language": YouthLanguage.FINNISH.name,
+        "birthDate": "2004-04-11",
+    }
+    query = t.substitute(**creation_data)
+
+    user_gql_client.execute(query, context=request)
+
+    youth_profile = YouthProfile.objects.get(pk=profile_id)
+    assert youth_profile.profile_access_token == token_response["token"]
+    assert youth_profile.profile_access_token_expiration == token_response["expires_at"]
+
+
 def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutation(
-    rf, user_gql_client, mocker, profile_api_response
+    rf, user_gql_client, mocker, profile_api_response, token_response
 ):
     mocker.patch.object(
         ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
     profile_id = from_global_id(profile_api_response["id"])[1]
 
@@ -175,13 +236,7 @@ def test_user_cannot_create_youth_profile_without_approver_email_field_if_under_
     )
 
 
-def test_user_cannot_create_youth_profile_if_under_13_years_old(
-    rf, user_gql_client, mocker, profile_api_response
-):
-    mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
-    )
-
+def test_user_cannot_create_youth_profile_if_under_13_years_old(rf, user_gql_client):
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     today = date.today()
@@ -230,10 +285,13 @@ def test_user_cannot_create_youth_profile_if_under_13_years_old(
 
 
 def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_old(
-    rf, user_gql_client, mocker, profile_api_response
+    rf, user_gql_client, mocker, profile_api_response, token_response
 ):
     mocker.patch.object(
         ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
     profile_id = from_global_id(profile_api_response["id"])[1]
 
@@ -285,12 +343,8 @@ def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_o
 
 
 def test_user_cannot_create_youth_profile_with_photo_usage_field_if_under_15_years_old(
-    rf, user_gql_client, mocker, profile_api_response
+    rf, user_gql_client
 ):
-    mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
-    )
-
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     today = date.today()

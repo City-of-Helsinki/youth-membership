@@ -236,6 +236,7 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
         profile_api_token = input.get("profile_api_token")
+        profile_api = ProfileAPI()
 
         if calculate_age(input_data["birth_date"]) < 13:
             raise CannotCreateYouthProfileIfUnder13YearsOldError(
@@ -249,7 +250,6 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
                     "Cannot set photo usage permission if under 15 years old"
                 )
 
-        profile_api = ProfileAPI()
         profile_data = profile_api.fetch_my_profile(profile_api_token)
 
         if not profile_data["id"]:
@@ -257,6 +257,14 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
 
         youth_profile = create_youth_profile(
             input_data, info.context.user, from_global_id(profile_data["id"])[1]
+        )
+
+        # Create and save a temporary Helsinki profile access token for later use.
+        temp_token = profile_api.create_temporary_access_token(profile_api_token)
+        youth_profile.profile_access_token = temp_token["token"]
+        youth_profile.profile_access_token_expiration = temp_token["expires_at"]
+        youth_profile.save(
+            update_fields=["profile_access_token", "profile_access_token_expiration"]
         )
 
         return CreateMyYouthProfileMutation(youth_profile=youth_profile)

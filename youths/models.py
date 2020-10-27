@@ -35,8 +35,6 @@ def calculate_expiration(from_date=None):
 
 @reversion.register()
 class YouthProfile(UUIDModel, SerializableMixin):
-    # TODO YouthProfile PK should be the same as is the Profile PK
-    # TODO How to access Profile (backend) related information in new YouthProfile (backend)?
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE
     )
@@ -66,6 +64,15 @@ class YouthProfile(UUIDModel, SerializableMixin):
     )
     approved_time = models.DateTimeField(null=True, blank=True, editable=False)
     photo_usage_approved = models.NullBooleanField()
+
+    profile_access_token = models.CharField(
+        max_length=36,
+        blank=True,
+        help_text=_(
+            "Temporary read access token for the profile linked to this youth profile."
+        ),
+    )
+    profile_access_token_expiration = models.DateTimeField(null=True, blank=True)
 
     # Source sequence of integer values for a membership number.
     membership_number_sequence = Sequence("membership_number")
