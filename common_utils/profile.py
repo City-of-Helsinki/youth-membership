@@ -85,6 +85,7 @@ class ProfileAPI:
             json=payload,
             timeout=self.timeout,
             auth=BearerAuth(api_token),
+            verify=settings.PROFILE_API_VERIFY,
         )
         response.raise_for_status()
 
