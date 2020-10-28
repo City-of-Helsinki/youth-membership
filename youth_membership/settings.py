@@ -40,6 +40,7 @@ env = environ.Env(
     HELSINKI_PROFILE_API_URL=(str, ""),
     HELSINKI_PROFILE_AUTH_SCOPE=(str, ""),
     HELSINKI_PROFILE_AUTH_CALLBACK_URL=(str, ""),
+    PROFILE_API_VERIFY=(bool, True),
     MAILER_EMAIL_BACKEND=(str, "django.core.mail.backends.console.EmailBackend"),
     DEFAULT_FROM_EMAIL=(str, "no-reply@hel.fi"),
     MAIL_MAILGUN_KEY=(str, ""),
@@ -222,6 +223,9 @@ HELSINKI_PROFILE_AUTH_SCOPE = env("HELSINKI_PROFILE_AUTH_SCOPE")
 HELSINKI_PROFILE_AUTH_CALLBACK_URL = env("HELSINKI_PROFILE_AUTH_CALLBACK_URL")
 # Service type for this service in open-city-profile API
 HELSINKI_PROFILE_SERVICE_TYPE = "YOUTH_MEMBERSHIP"
+
+# Controls whether ProfileAPI verifies the server’s TLS certificate. Defaults to True.
+PROFILE_API_VERIFY = env("PROFILE_API_VERIFY")
 
 OIDC_API_TOKEN_AUTH = {
     "AUDIENCE": env("TOKEN_AUTH_ACCEPTED_AUDIENCE"),
