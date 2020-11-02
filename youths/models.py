@@ -87,6 +87,13 @@ class YouthProfile(UUIDModel, SerializableMixin):
         )
         self.approval_notification_timestamp = timezone.now()
 
+    def set_approved(self, save=False):
+        self.approved_time = timezone.now()
+        self.approval_token = ""  # invalidate
+
+        if save:
+            self.save(update_fields=("approved_time", "approval_token"))
+
     @property
     def membership_status(self):
         if self.expiration <= date.today():

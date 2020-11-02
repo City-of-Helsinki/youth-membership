@@ -80,8 +80,9 @@ def test_normal_user_can_create_youth_profile_mutation(
     assert dict(executed["data"]["createMyYouthProfile"]) == expected_data
 
 
-def test_profile_access_token_is_saved_when_using_create_my_youth_profile(
-    rf, user_gql_client, mocker, profile_api_response, token_response
+@pytest.mark.parametrize("minor", [True, False])
+def test_profile_access_token_is_saved_for_minors_when_using_create_my_youth_profile(
+    rf, user_gql_client, mocker, profile_api_response, token_response, minor
 ):
     """Temporary profile access token can be used later when access to profile information
     is needed e.g. when unauthenticated parent approves the youth membership."""
@@ -92,6 +93,7 @@ def test_profile_access_token_is_saved_when_using_create_my_youth_profile(
         ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
     profile_id = from_global_id(profile_api_response["id"])[1]
+    today = date.today()
 
     request = rf.post("/graphql")
     request.user = user_gql_client.user
@@ -118,20 +120,34 @@ def test_profile_access_token_is_saved_when_using_create_my_youth_profile(
         }
         """
     )
+
+    if minor:
+        birth_date = today.replace(year=today.year - 13)
+    else:
+        birth_date = today.replace(year=today.year - 19)
+
     creation_data = {
         "schoolClass": "2A",
         "schoolName": "Alakoulu",
         "approverEmail": "hyvaksyja@example.com",
         "language": YouthLanguage.FINNISH.name,
-        "birthDate": "2004-04-11",
+        "birthDate": birth_date.isoformat(),
     }
     query = t.substitute(**creation_data)
 
     user_gql_client.execute(query, context=request)
 
     youth_profile = YouthProfile.objects.get(pk=profile_id)
-    assert youth_profile.profile_access_token == token_response["token"]
-    assert youth_profile.profile_access_token_expiration == token_response["expires_at"]
+
+    if minor:
+        assert youth_profile.profile_access_token == token_response["token"]
+        assert (
+            youth_profile.profile_access_token_expiration
+            == token_response["expires_at"]
+        )
+    else:
+        assert youth_profile.profile_access_token == ""
+        assert youth_profile.profile_access_token_expiration is None
 
 
 def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutation(

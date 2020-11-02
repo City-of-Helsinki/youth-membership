@@ -38,17 +38,6 @@ def create_youth_profile(input, user, profile_id):
     contact_persons_to_create = input.pop("add_additional_contact_persons", [])
 
     youth_profile = YouthProfile.objects.create(user=user, id=profile_id, **input)
-
-    if calculate_age(youth_profile.birth_date) >= 18:
-        youth_profile.approved_time = timezone.now()
-    else:
-        if not input.get("approver_email"):
-            raise ApproverEmailCannotBeEmptyForMinorsError(
-                "Approver email is required for youth under 18 years old"
-            )
-        youth_profile.make_approvable()
-    youth_profile.save()
-
     create_or_update_contact_persons(youth_profile, contact_persons_to_create)
 
     return youth_profile
@@ -259,13 +248,27 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
             input_data, info.context.user, from_global_id(profile_data["id"])[1]
         )
 
-        # Create and save a temporary Helsinki profile access token for later use.
-        temp_token = profile_api.create_temporary_access_token(profile_api_token)
-        youth_profile.profile_access_token = temp_token["token"]
-        youth_profile.profile_access_token_expiration = temp_token["expires_at"]
-        youth_profile.save(
-            update_fields=["profile_access_token", "profile_access_token_expiration"]
-        )
+        if calculate_age(youth_profile.birth_date) >= 18:
+            youth_profile.set_approved()
+        else:
+            if not youth_profile.approver_email:
+                raise ApproverEmailCannotBeEmptyForMinorsError(
+                    "Approver email is required for youth under 18 years old"
+                )
+
+            # Create and save a temporary Helsinki profile access token for later use.
+            temp_token = profile_api.create_temporary_access_token(profile_api_token)
+            youth_profile.profile_access_token = temp_token["token"]
+            youth_profile.profile_access_token_expiration = temp_token["expires_at"]
+            youth_profile.save(
+                update_fields=[
+                    "profile_access_token",
+                    "profile_access_token_expiration",
+                ]
+            )
+
+            youth_profile.make_approvable()
+        youth_profile.save()
 
         return CreateMyYouthProfileMutation(youth_profile=youth_profile)
 
