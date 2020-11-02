@@ -4,15 +4,11 @@ from graphene_federation import build_schema
 import youths.schema
 
 
-class Query(
-    youths.schema.Query, graphene.ObjectType,
-):
+class Query(youths.schema.Query, graphene.ObjectType):
     pass
 
 
-class Mutation(
-    youths.schema.Mutation, graphene.ObjectType,
-):
+class Mutation(youths.schema.Mutation, graphene.ObjectType):
     pass
 
 
