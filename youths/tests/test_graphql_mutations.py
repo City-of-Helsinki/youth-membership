@@ -990,6 +990,7 @@ def test_staff_user_can_create_youth_profile(
     today = date.today()
     birth_date = today.replace(year=today.year - 13) - timedelta(days=1)
     youth_profile_data = {
+        "id": profile_global_id,
         "birth_date": birth_date.strftime("%Y-%m-%d"),
         "school_name": "Koulu",
         "school_class": "2B",
@@ -1034,21 +1035,11 @@ def test_staff_user_can_create_youth_profile(
         }
     """
     )
-    query = t.substitute(
-        id=profile_global_id,
-        birth_date=youth_profile_data["birth_date"],
-        school_name=youth_profile_data["school_name"],
-        school_class=youth_profile_data["school_class"],
-        language_at_home=youth_profile_data["language_at_home"],
-        approver_email=youth_profile_data["approver_email"],
-        approver_phone=youth_profile_data["approver_phone"],
-        approver_first_name=youth_profile_data["approver_first_name"],
-        approver_last_name=youth_profile_data["approver_last_name"],
-    )
+    query = t.substitute(**youth_profile_data)
     expected_data = {
         "createYouthProfile": {
             "youthProfile": {
-                "id": profile_global_id,
+                "id": youth_profile_data["id"],
                 "birthDate": youth_profile_data["birth_date"],
                 "schoolName": youth_profile_data["school_name"],
                 "schoolClass": youth_profile_data["school_class"],
@@ -1067,6 +1058,7 @@ def test_staff_user_can_create_youth_profile(
 def test_staff_user_cannot_create_youth_profile_if_profile_does_not_exist(
     rf, staff_user_gql_client, mocker, profile_api_response
 ):
+    """Creating a youth profile will query Helsinki profile for the given profile id."""
     mocker.patch.object(ProfileAPI, "fetch_profile", return_value={"id": ""})
     profile_id = from_global_id(profile_api_response["id"])[1]
     profile_global_id = to_global_id(type="YouthProfileNode", id=profile_id)
@@ -1127,6 +1119,7 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     today = date.today()
     birth_date = today.replace(year=today.year - 13) + timedelta(days=1)
     youth_profile_data = {
+        "id": profile_global_id,
         "birth_date": birth_date.strftime("%Y-%m-%d"),
         "approver_email": "jane.doe@example.com",
     }
@@ -1153,15 +1146,11 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
         }
     """
     )
-    query = t.substitute(
-        id=profile_global_id,
-        birth_date=youth_profile_data["birth_date"],
-        approver_email=youth_profile_data["approver_email"],
-    )
+    query = t.substitute(**youth_profile_data)
     expected_data = {
         "createYouthProfile": {
             "youthProfile": {
-                "id": profile_global_id,
+                "id": youth_profile_data["id"],
                 "birthDate": youth_profile_data["birth_date"],
                 "approverEmail": youth_profile_data["approver_email"],
             }
@@ -1242,6 +1231,7 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(
     today = date.today()
     birth_date = today.replace(year=today.year - 13) - timedelta(days=1)
     youth_profile_data = {
+        "id": to_global_id(type="YouthProfileNode", id=profile_id),
         "birth_date": birth_date.strftime("%Y-%m-%d"),
         "approver_email": "jane.doe@example.com",
     }
@@ -1268,11 +1258,7 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(
         }
     """
     )
-    query = t.substitute(
-        id=to_global_id(type="YouthProfileNode", id=profile_id),
-        birth_date=youth_profile_data["birth_date"],
-        approver_email=youth_profile_data["approver_email"],
-    )
+    query = t.substitute(**youth_profile_data)
     executed = user_gql_client.execute(query, context=request)
     assert (
         executed["errors"][0].get("extensions").get("code") == PERMISSION_DENIED_ERROR
@@ -1309,9 +1295,7 @@ def test_staff_user_can_cancel_youth_membership_on_selected_date(
         }
     """
     )
-    query = t.substitute(
-        id=youth_profile_data["id"], expiration=youth_profile_data["expiration"],
-    )
+    query = t.substitute(**youth_profile_data)
     expected_data = {
         "cancelYouthProfile": {
             "youthProfile": {"expiration": youth_profile_data["expiration"]}
