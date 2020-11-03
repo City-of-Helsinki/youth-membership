@@ -2,7 +2,6 @@ from datetime import date
 
 import graphene
 from django.db import transaction
-from django.utils import timezone
 from graphene import relay
 from graphql_jwt.decorators import login_required
 from graphql_relay.node.node import from_global_id, to_global_id
@@ -97,7 +96,7 @@ def renew_youth_profile(youth_profile):
     youth_profile.expiration = next_expiration
 
     if calculate_age(youth_profile.birth_date) >= 18:
-        youth_profile.approved_time = timezone.now()
+        youth_profile.set_approved()
     else:
         youth_profile.make_approvable()
 
@@ -384,8 +383,7 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
         #         "Cannot send email confirmation, youth profile has no primary email address."
         #     )
 
-        youth_profile.approved_time = timezone.now()
-        youth_profile.approval_token = ""  # invalidate
+        youth_profile.set_approved()
         youth_profile.save()
         # send_notification(
         #     email=email.email,
