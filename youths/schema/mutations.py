@@ -206,6 +206,7 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
             raise ProfileDoesNotExistError("Profile does not exist")
 
         youth_profile = create_youth_profile(input_data, None, profile_id)
+        youth_profile.set_approved(save=True)
 
         return CreateYouthProfileMutation(youth_profile=youth_profile)
 

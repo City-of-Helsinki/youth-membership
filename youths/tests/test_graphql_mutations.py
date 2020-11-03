@@ -13,7 +13,7 @@ from youths.consts import (
     CANNOT_RENEW_YOUTH_PROFILE_ERROR,
     CANNOT_SET_PHOTO_USAGE_PERMISSION_IF_UNDER_15_YEARS_ERROR,
 )
-from youths.enums import YouthLanguage
+from youths.enums import MembershipStatus, YouthLanguage
 from youths.models import YouthProfile
 from youths.tests.factories import YouthProfileFactory
 
@@ -1169,6 +1169,64 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     }
     executed = staff_user_gql_client.execute(query, context=request)
     assert executed["data"] == expected_data
+
+
+def test_staff_user_creates_approved_profiles(
+    rf, staff_user_gql_client, mocker, profile_api_response
+):
+    mocker.patch.object(ProfileAPI, "fetch_profile", return_value=profile_api_response)
+    profile_id = from_global_id(profile_api_response["id"])[1]
+    profile_global_id = to_global_id(type="YouthProfileNode", id=profile_id)
+
+    user = staff_user_gql_client.user
+    request = rf.post("/graphql")
+    request.user = user
+    today = date.today()
+    birth_date = today.replace(year=today.year - 13) - timedelta(days=1)
+    youth_profile_data = {
+        "id": profile_global_id,
+        "birth_date": birth_date.strftime("%Y-%m-%d"),
+        "school_name": "Koulu",
+        "school_class": "2B",
+        "language_at_home": YouthLanguage.ENGLISH.name,
+        "approver_first_name": "Jane",
+        "approver_last_name": "Doe",
+        "approver_phone": "040-1234567",
+        "approver_email": "jane.doe@example.com",
+    }
+
+    t = Template(
+        """
+        mutation {
+            createYouthProfile(
+                input: {
+                    id: \"${id}\",
+                    youthProfile: {
+                        birthDate: \"${birth_date}\",
+                        schoolName: \"${school_name}\",
+                        schoolClass: \"${school_class}\",
+                        languageAtHome: ${language_at_home},
+                        approverEmail: \"${approver_email}\",
+                        approverPhone: \"${approver_phone}\",
+                        approverFirstName: \"${approver_first_name}\",
+                        approverLastName: \"${approver_last_name}\",
+                    }
+                    profileApiToken: "token"
+                }
+            ) {
+                youthProfile {
+                    id
+                }
+            }
+        }
+    """
+    )
+    query = t.substitute(**youth_profile_data)
+    staff_user_gql_client.execute(query, context=request)
+
+    youth_profile = YouthProfile.objects.get(pk=profile_id)
+    assert youth_profile.approved_time is not None
+    assert youth_profile.membership_status == MembershipStatus.ACTIVE
 
 
 def test_normal_user_cannot_use_create_youth_profile_mutation(
