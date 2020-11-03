@@ -27,6 +27,7 @@ class YouthProfileFactory(factory.django.DjangoModelFactory):
     school_class = "1A"
     approver_email = factory.Faker("email")
     birth_date = "2002-02-02"
+    approval_token = factory.Faker("uuid4")
 
     class Meta:
         model = YouthProfile

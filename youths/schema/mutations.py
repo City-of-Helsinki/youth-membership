@@ -3,6 +3,7 @@ from datetime import date
 import graphene
 from django.db import transaction
 from graphene import relay
+from graphql import GraphQLError
 from graphql_jwt.decorators import login_required
 from graphql_relay.node.node import from_global_id, to_global_id
 
@@ -356,6 +357,9 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         youth_data = input.get("approval_data")
         token = input.get("approval_token")
+
+        if not token:
+            raise GraphQLError("Approval token cannot be empty.")
 
         contact_persons_to_create = youth_data.pop("add_additional_contact_persons", [])
         contact_persons_to_update = youth_data.pop(

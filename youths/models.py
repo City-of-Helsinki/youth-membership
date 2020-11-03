@@ -56,9 +56,7 @@ class YouthProfile(UUIDModel, SerializableMixin):
     approver_last_name = models.CharField(max_length=255, blank=True)
     approver_phone = models.CharField(max_length=50, blank=True)
     approver_email = models.EmailField(max_length=254, blank=True)
-    approval_token = models.CharField(
-        max_length=36, blank=True, default=uuid.uuid4, editable=False
-    )
+    approval_token = models.CharField(max_length=36, blank=True, editable=False)
     approval_notification_timestamp = models.DateTimeField(
         null=True, blank=True, editable=False
     )
