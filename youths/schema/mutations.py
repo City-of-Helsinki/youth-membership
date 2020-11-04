@@ -324,6 +324,7 @@ class RenewYouthProfileMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         youth_profile = YouthProfile.objects.get(pk=from_global_id(input.get("id"))[1])
         youth_profile = renew_youth_profile(youth_profile)
+        youth_profile.set_approved(save=True)
 
         return RenewYouthProfileMutation(youth_profile=youth_profile)
 
@@ -340,8 +341,18 @@ class RenewMyYouthProfileMutation(relay.ClientIDMutation):
     @login_required
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
+        profile_api_token = input.get("profile_api_token")
         youth_profile = YouthProfile.objects.get(user=info.context.user)
+
         youth_profile = renew_youth_profile(youth_profile)
+
+        if calculate_age(youth_profile.birth_date) >= 18:
+            youth_profile.set_approved()
+        else:
+            generate_profile_access_token(profile_api_token, youth_profile)
+            youth_profile.make_approvable()
+        youth_profile.save()
+
         return RenewMyYouthProfileMutation(youth_profile=youth_profile)
 
 

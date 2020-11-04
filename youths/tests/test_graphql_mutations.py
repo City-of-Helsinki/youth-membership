@@ -804,8 +804,20 @@ def test_missing_primary_email_error(rf, youth_profile, anon_user_gql_client):
 
 
 def test_youth_profile_expiration_should_renew_and_be_approvable(
-    rf, user_gql_client, anon_user_gql_client
+    rf,
+    user_gql_client,
+    anon_user_gql_client,
+    mocker,
+    profile_api_response,
+    token_response,
 ):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
+    )
+
     request = rf.post("/graphql")
     request.user = user_gql_client.user
 
@@ -884,6 +896,7 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
 def test_youth_profile_expiration_should_be_renewable_by_staff_user(
     rf, user, staff_user_gql_client, anon_user_gql_client
 ):
+    """Profiles renew by staff are set as approved."""
     staff_user = staff_user_gql_client.user
     request = rf.post("/graphql")
     request.user = staff_user
@@ -918,38 +931,8 @@ def test_youth_profile_expiration_should_be_renewable_by_staff_user(
 
         executed = staff_user_gql_client.execute(mutation, context=request)
         expected_data = {
-            "renewYouthProfile": {"youthProfile": {"membershipStatus": "RENEWING"}}
+            "renewYouthProfile": {"youthProfile": {"membershipStatus": "ACTIVE"}}
         }
-        assert dict(executed["data"]) == expected_data
-
-    # Let's go back in time a few months and re-approve the membership
-    with freeze_time("2021-05-02"):
-        request.user = anon_user_gql_client.user
-
-        t = Template(
-            """
-            mutation{
-                approveYouthProfile(
-                    input: {
-                        approvalToken: "${token}",
-                        approvalData: {}
-                    }
-                )
-                {
-                    youthProfile {
-                        membershipStatus
-                    }
-                }
-            }
-            """
-        )
-        youth_profile.refresh_from_db()
-        approval_data = {"token": youth_profile.approval_token}
-        query = t.substitute(**approval_data)
-        expected_data = {
-            "approveYouthProfile": {"youthProfile": {"membershipStatus": "ACTIVE"}}
-        }
-        executed = anon_user_gql_client.execute(query, context=request)
         assert dict(executed["data"]) == expected_data
 
 
