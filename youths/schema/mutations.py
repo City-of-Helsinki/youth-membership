@@ -297,6 +297,9 @@ class UpdateYouthProfileMutation(relay.ClientIDMutation):
 class UpdateMyYouthProfileMutation(relay.ClientIDMutation):
     class Input:
         youth_profile = UpdateYouthProfileInput(required=True)
+        profile_api_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API."
+        )
 
     youth_profile = graphene.Field(YouthProfileNode)
 
@@ -328,6 +331,11 @@ class RenewYouthProfileMutation(relay.ClientIDMutation):
 
 
 class RenewMyYouthProfileMutation(relay.ClientIDMutation):
+    class Input:
+        profile_api_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API."
+        )
+
     youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod

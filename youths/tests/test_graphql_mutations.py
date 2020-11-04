@@ -417,6 +417,7 @@ def test_normal_user_can_update_youth_profile_mutation(rf, user_gql_client):
                         schoolClass: "${schoolClass}"
                         birthDate: "${birthDate}"
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -459,6 +460,7 @@ def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_o
                         photoUsageApproved: ${photoUsageApproved}
                         birthDate: "${birthDate}"
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -503,6 +505,7 @@ def test_user_cannot_update_youth_profile_with_photo_usage_field_if_under_15_yea
                         photoUsageApproved: ${photoUsageApproved}
                         birthDate: "${birthDate}"
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -546,6 +549,7 @@ def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_o
                     youthProfile: {
                         photoUsageApproved: ${photoUsageApproved}
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -581,6 +585,7 @@ def test_user_cannot_update_youth_profile_with_photo_usage_field_if_under_15_yea
                     youthProfile: {
                         photoUsageApproved: ${photoUsageApproved}
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -768,7 +773,9 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
     with freeze_time("2021-05-01"):
         mutation = """
             mutation {
-                renewMyYouthProfile(input:{}) {
+                renewMyYouthProfile(input: {
+                    profileApiToken: "token"
+                }) {
                     youthProfile {
                         membershipStatus
                     }
@@ -916,7 +923,9 @@ def test_youth_profile_expiration_for_over_18_years_old_should_renew_and_change_
     with freeze_time("2021-05-01"):
         mutation = """
             mutation {
-                renewMyYouthProfile(input:{}) {
+                renewMyYouthProfile(input:{
+                    profileApiToken: "token"
+                }) {
                     youthProfile {
                         membershipStatus
                     }
@@ -963,7 +972,9 @@ def test_should_not_be_able_to_renew_pending_youth_profile(rf, user_gql_client):
 
         mutation = """
             mutation {
-                renewMyYouthProfile(input:{}) {
+                renewMyYouthProfile(input:{
+                    profileApiToken: "token"
+                }) {
                     youthProfile {
                         membershipStatus
                     }
