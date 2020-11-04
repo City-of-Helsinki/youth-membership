@@ -86,11 +86,21 @@ class YouthProfile(UUIDModel, SerializableMixin):
         self.approval_notification_timestamp = timezone.now()
 
     def set_approved(self, save=False):
+        """Set profile as approved and remove access tokens."""
         self.approved_time = timezone.now()
-        self.approval_token = ""  # invalidate
+        self.approval_token = ""
+        self.profile_access_token = ""
+        self.profile_access_token_expiration = None
 
         if save:
-            self.save(update_fields=("approved_time", "approval_token"))
+            self.save(
+                update_fields=(
+                    "approved_time",
+                    "approval_token",
+                    "profile_access_token",
+                    "profile_access_token_expiration",
+                )
+            )
 
     @property
     def membership_status(self):

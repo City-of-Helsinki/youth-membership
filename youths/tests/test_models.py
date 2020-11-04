@@ -2,6 +2,7 @@ import pytest
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from youths.models import YouthProfile
 from youths.tests.factories import AdditionalContactPersonFactory
@@ -97,6 +98,20 @@ def test_membership_number_is_not_changed_when_saving(youth_profile):
     youth_profile.save()
 
     assert youth_profile.membership_number == expected_number
+
+
+def test_approving_profile_removes_access_tokens(youth_profile):
+    youth_profile.profile_access_token = "token"
+    youth_profile.profile_access_token_expiration = timezone.now()
+    youth_profile.approval_token = "token"
+    youth_profile.save()
+
+    youth_profile.set_approved(save=True)
+
+    youth_profile.refresh_from_db()
+    assert youth_profile.profile_access_token == ""
+    assert youth_profile.profile_access_token_expiration is None
+    assert youth_profile.approval_token == ""
 
 
 def test_additional_contact_person_runs_full_clean_when_saving(youth_profile):
