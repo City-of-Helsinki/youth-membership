@@ -1,3 +1,4 @@
+import json
 from datetime import date, datetime, timedelta
 from string import Template
 
@@ -441,6 +442,54 @@ def test_normal_user_can_update_youth_profile_mutation(rf, user_gql_client):
     }
     executed = user_gql_client.execute(query, context=request)
     assert dict(executed["data"]["updateMyYouthProfile"]) == expected_data
+
+
+@pytest.mark.parametrize("resend", [True, False])
+def test_normal_user_can_resend_request_notification_on_update(
+    rf, user_gql_client, mocker, profile_api_response, token_response, resend
+):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
+    )
+    request = rf.post("/graphql")
+    request.user = user_gql_client.user
+    youth_profile = YouthProfileFactory(user=user_gql_client.user)
+    original_approval_token = youth_profile.approval_token
+    original_profile_access_token = youth_profile.profile_access_token
+
+    t = Template(
+        """
+        mutation{
+            updateMyYouthProfile(
+                input: {
+                    youthProfile: {
+                        resendRequestNotification: ${resend}
+                    }
+                    profileApiToken: "token"
+                }
+            )
+            {
+                youthProfile {
+                    id
+                }
+            }
+        }
+        """
+    )
+    query = t.substitute(resend=json.dumps(resend))
+    user_gql_client.execute(query, context=request)
+
+    youth_profile.refresh_from_db()
+    if resend:
+        assert youth_profile.approval_token
+        assert youth_profile.approval_token != original_approval_token
+        assert youth_profile.profile_access_token == token_response["token"]
+    else:
+        assert youth_profile.approval_token == original_approval_token
+        assert youth_profile.profile_access_token == original_profile_access_token
 
 
 def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_old(
