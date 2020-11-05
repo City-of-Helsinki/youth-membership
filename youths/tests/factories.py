@@ -10,10 +10,21 @@ from youths.models import AdditionalContactPerson, YouthProfile
 
 
 class ProfileAPIResponse(factory.DictFactory):
+    """Data returned from ProfileAPI.fetch_profile."""
+
     id = factory.Faker("uuid4", cast_to=partial(to_global_id, "ProfileNode"))
 
 
+class MyProfileAPIResponse(ProfileAPIResponse):
+    """Data returned from ProfileAPI.fetch_my_profile."""
+
+    first_name = factory.Faker("first_name")
+    last_name = factory.Faker("last_name")
+
+
 class ProfileAPITokenResponse(factory.DictFactory):
+    """Data returned from ProfileAPI.create_temporary_access_token."""
+
     token = factory.Faker("uuid4", cast_to=str)
     expires_at = factory.LazyFunction(
         lambda: timezone.now() + datetime.timedelta(days=2)

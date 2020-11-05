@@ -78,6 +78,8 @@ class ProfileAPI:
             query myProfile {
                 myProfile {
                     id
+                    firstName
+                    lastName
                 }
             }
         """
@@ -85,6 +87,8 @@ class ProfileAPI:
             """
             data.myProfile.{
                 id: id
+                first_name: firstName
+                last_name: lastName
             }
         """
         )
@@ -92,7 +96,7 @@ class ProfileAPI:
         data = self.do_query(api_token, query)
 
         parsed_data = path.search(data)
-        self.contains_keys(parsed_data, ["id"])
+        self.contains_keys(parsed_data, ["id", "first_name", "last_name"])
         return parsed_data
 
     def create_temporary_access_token(self, api_token: str) -> dict:

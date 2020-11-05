@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 
 from youth_membership.tests.conftest import *  # noqa
 from youths.tests.factories import (
+    MyProfileAPIResponse,
     ProfileAPIResponse,
     ProfileAPITokenResponse,
     YouthProfileFactory,
@@ -33,6 +34,11 @@ def setup_gdpr_api(settings):
 @pytest.fixture
 def profile_api_response():
     return ProfileAPIResponse()
+
+
+@pytest.fixture
+def my_profile_api_response():
+    return MyProfileAPIResponse()
 
 
 @pytest.fixture

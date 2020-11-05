@@ -20,15 +20,16 @@ from youths.tests.factories import YouthProfileFactory
 
 
 def test_normal_user_can_create_youth_profile_mutation(
-    rf, user_gql_client, mocker, profile_api_response, token_response
+    rf, user_gql_client, mocker, my_profile_api_response, token_response
 ):
     mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+        ProfileAPI, "fetch_my_profile", return_value=my_profile_api_response
     )
     mocker.patch.object(
         ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
-    profile_id = from_global_id(profile_api_response["id"])[1]
+    mocked_notification = mocker.patch("youths.models.send_notification")
+    profile_id = from_global_id(my_profile_api_response["id"])[1]
 
     request = rf.post("/graphql")
     request.user = user_gql_client.user
@@ -80,20 +81,26 @@ def test_normal_user_can_create_youth_profile_mutation(
     executed = user_gql_client.execute(query, context=request)
     assert dict(executed["data"]["createMyYouthProfile"]) == expected_data
 
+    mocked_notification.assert_called_once()
+    assert mocked_notification.call_args.kwargs["context"] == {
+        "youth_profile": YouthProfile.objects.get(pk=profile_id),
+        "youth_name": my_profile_api_response["first_name"],
+    }
+
 
 @pytest.mark.parametrize("minor", [True, False])
 def test_profile_access_token_is_saved_for_minors_when_using_create_my_youth_profile(
-    rf, user_gql_client, mocker, profile_api_response, token_response, minor
+    rf, user_gql_client, mocker, my_profile_api_response, token_response, minor
 ):
     """Temporary profile access token can be used later when access to profile information
     is needed e.g. when unauthenticated parent approves the youth membership."""
     mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+        ProfileAPI, "fetch_my_profile", return_value=my_profile_api_response
     )
     mocker.patch.object(
         ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
-    profile_id = from_global_id(profile_api_response["id"])[1]
+    profile_id = from_global_id(my_profile_api_response["id"])[1]
     today = date.today()
 
     request = rf.post("/graphql")
@@ -152,15 +159,15 @@ def test_profile_access_token_is_saved_for_minors_when_using_create_my_youth_pro
 
 
 def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutation(
-    rf, user_gql_client, mocker, profile_api_response, token_response
+    rf, user_gql_client, mocker, my_profile_api_response, token_response
 ):
     mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+        ProfileAPI, "fetch_my_profile", return_value=my_profile_api_response
     )
     mocker.patch.object(
         ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
-    profile_id = from_global_id(profile_api_response["id"])[1]
+    profile_id = from_global_id(my_profile_api_response["id"])[1]
 
     request = rf.post("/graphql")
     request.user = user_gql_client.user
@@ -212,10 +219,10 @@ def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutatio
 
 
 def test_user_cannot_create_youth_profile_without_approver_email_field_if_under_18_years_old(
-    rf, user_gql_client, mocker, profile_api_response
+    rf, user_gql_client, mocker, my_profile_api_response
 ):
     mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+        ProfileAPI, "fetch_my_profile", return_value=my_profile_api_response
     )
     request = rf.post("/graphql")
     request.user = user_gql_client.user
@@ -302,15 +309,15 @@ def test_user_cannot_create_youth_profile_if_under_13_years_old(rf, user_gql_cli
 
 
 def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_old(
-    rf, user_gql_client, mocker, profile_api_response, token_response
+    rf, user_gql_client, mocker, my_profile_api_response, token_response
 ):
     mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+        ProfileAPI, "fetch_my_profile", return_value=my_profile_api_response
     )
     mocker.patch.object(
         ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
-    profile_id = from_global_id(profile_api_response["id"])[1]
+    profile_id = from_global_id(my_profile_api_response["id"])[1]
 
     request = rf.post("/graphql")
     request.user = user_gql_client.user
@@ -446,14 +453,15 @@ def test_normal_user_can_update_youth_profile_mutation(rf, user_gql_client):
 
 @pytest.mark.parametrize("resend", [True, False])
 def test_normal_user_can_resend_request_notification_on_update(
-    rf, user_gql_client, mocker, profile_api_response, token_response, resend
+    rf, user_gql_client, mocker, my_profile_api_response, token_response, resend
 ):
     mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+        ProfileAPI, "fetch_my_profile", return_value=my_profile_api_response
     )
     mocker.patch.object(
         ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
+    mocked_notification = mocker.patch("youths.models.send_notification")
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     youth_profile = YouthProfileFactory(user=user_gql_client.user)
@@ -487,6 +495,12 @@ def test_normal_user_can_resend_request_notification_on_update(
         assert youth_profile.approval_token
         assert youth_profile.approval_token != original_approval_token
         assert youth_profile.profile_access_token == token_response["token"]
+
+        mocked_notification.assert_called_once()
+        assert mocked_notification.call_args.kwargs["context"] == {
+            "youth_profile": YouthProfile.objects.get(pk=youth_profile.pk),
+            "youth_name": my_profile_api_response["first_name"],
+        }
     else:
         assert youth_profile.approval_token == original_approval_token
         assert youth_profile.profile_access_token == original_profile_access_token
@@ -811,11 +825,11 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
     user_gql_client,
     anon_user_gql_client,
     mocker,
-    profile_api_response,
+    my_profile_api_response,
     token_response,
 ):
     mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+        ProfileAPI, "fetch_my_profile", return_value=my_profile_api_response
     )
     mocker.patch.object(
         ProfileAPI, "create_temporary_access_token", return_value=token_response
@@ -894,6 +908,61 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
         }
         executed = anon_user_gql_client.execute(query, context=request)
         assert dict(executed["data"]) == expected_data
+
+
+def test_youth_profile_renewal_sends_approval_message_for_a_minor(
+    rf,
+    user_gql_client,
+    anon_user_gql_client,
+    mocker,
+    my_profile_api_response,
+    token_response,
+):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=my_profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
+    )
+    mocked_notification = mocker.patch("youths.models.send_notification")
+    request = rf.post("/graphql")
+    request.user = user_gql_client.user
+
+    # Create a youth profile in the 2020
+    with freeze_time("2020-05-02"):
+        today = date.today()
+        youth_profile = YouthProfileFactory(
+            user=user_gql_client.user,
+            approved_time=datetime.today(),
+            birth_date=today.replace(year=today.year - 15),
+        )
+
+    # Renew the profile in 2021
+    with freeze_time("2021-05-01"):
+        mutation = """
+            mutation {
+                renewMyYouthProfile(input: {
+                    profileApiToken: "token"
+                }) {
+                    youthProfile {
+                        membershipStatus
+                    }
+                }
+            }
+        """
+        user_gql_client.execute(mutation, context=request)
+
+        youth_profile.refresh_from_db()
+        assert youth_profile.profile_access_token == token_response["token"]
+        assert (
+            youth_profile.profile_access_token_expiration
+            == token_response["expires_at"]
+        )
+        mocked_notification.assert_called_once()
+        assert mocked_notification.call_args.kwargs["context"] == {
+            "youth_profile": YouthProfile.objects.get(pk=youth_profile.pk),
+            "youth_name": my_profile_api_response["first_name"],
+        }
 
 
 def test_youth_profile_expiration_should_be_renewable_by_staff_user(

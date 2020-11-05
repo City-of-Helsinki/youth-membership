@@ -8,6 +8,8 @@ from common_utils.profile import ProfileAPI
 
 # ID in the mocked responses ProfileNode:5b36406d-da95-4cb0-88d8-2ec6f80e9fc9
 PROFILE_ID = "UHJvZmlsZU5vZGU6NWIzNjQwNmQtZGE5NS00Y2IwLTg4ZDgtMmVjNmY4MGU5ZmM5"
+FIRST_NAME = "Test"
+LAST_NAME = "Person"
 
 
 def test_call_profile_api_and_fetch_my_profile(
@@ -18,7 +20,11 @@ def test_call_profile_api_and_fetch_my_profile(
 
     profile = api.fetch_my_profile("api_token")
 
-    expected_data = {"id": PROFILE_ID}
+    expected_data = {
+        "id": PROFILE_ID,
+        "first_name": FIRST_NAME,
+        "last_name": LAST_NAME,
+    }
     assert profile == expected_data
 
 

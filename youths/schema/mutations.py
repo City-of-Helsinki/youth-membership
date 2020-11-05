@@ -18,6 +18,7 @@ from ..exceptions import (
     CannotSetPhotoUsagePermissionIfUnder15YearsError,
 )
 from ..models import calculate_expiration, YouthProfile
+from ..notifications import ConfirmationMessageExtraContext
 from ..utils import (
     calculate_age,
     create_or_update_contact_persons,
@@ -93,13 +94,8 @@ def renew_youth_profile(youth_profile, staff_renewal=False) -> YouthProfile:
             "renew window."
         )
     youth_profile.expiration = next_expiration
+    youth_profile.save(update_fields=["expiration"])
 
-    if calculate_age(youth_profile.birth_date) >= 18:
-        youth_profile.set_approved()
-    else:
-        youth_profile.make_approvable()
-
-    youth_profile.save()
     return youth_profile
 
 
@@ -255,7 +251,10 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
                     "Approver email is required for youth under 18 years old"
                 )
             generate_profile_access_token(profile_api_token, youth_profile)
-            youth_profile.make_approvable()
+            extra_context = ConfirmationMessageExtraContext(
+                youth_name=profile_data["first_name"]
+            )
+            youth_profile.make_approvable(extra_context=extra_context)
         youth_profile.save()
 
         return CreateMyYouthProfileMutation(youth_profile=youth_profile)
@@ -305,8 +304,13 @@ class UpdateMyYouthProfileMutation(relay.ClientIDMutation):
         youth_profile = update_youth_profile(input_data, youth_profile)
 
         if resend_request_notification:
+            profile_api = ProfileAPI()
+            profile_data = profile_api.fetch_my_profile(profile_api_token)
             generate_profile_access_token(profile_api_token, youth_profile)
-            youth_profile.make_approvable()
+            extra_context = ConfirmationMessageExtraContext(
+                youth_name=profile_data["first_name"]
+            )
+            youth_profile.make_approvable(extra_context=extra_context)
             youth_profile.save()
 
         return UpdateMyYouthProfileMutation(youth_profile=youth_profile)
@@ -349,8 +353,13 @@ class RenewMyYouthProfileMutation(relay.ClientIDMutation):
         if calculate_age(youth_profile.birth_date) >= 18:
             youth_profile.set_approved()
         else:
+            profile_api = ProfileAPI()
+            profile_data = profile_api.fetch_my_profile(profile_api_token)
             generate_profile_access_token(profile_api_token, youth_profile)
-            youth_profile.make_approvable()
+            extra_context = ConfirmationMessageExtraContext(
+                youth_name=profile_data["first_name"]
+            )
+            youth_profile.make_approvable(extra_context=extra_context)
         youth_profile.save()
 
         return RenewMyYouthProfileMutation(youth_profile=youth_profile)
