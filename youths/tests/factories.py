@@ -22,6 +22,12 @@ class MyProfileAPIResponse(ProfileAPIResponse):
     last_name = factory.Faker("last_name")
 
 
+class RestrictedProfileAPIResponse(MyProfileAPIResponse):
+    """Data returned from ProfileAPI.fetch_profile_with_temporary_access_token."""
+
+    email = factory.Faker("email")
+
+
 class ProfileAPITokenResponse(factory.DictFactory):
     """Data returned from ProfileAPI.create_temporary_access_token."""
 
@@ -39,6 +45,10 @@ class YouthProfileFactory(factory.django.DjangoModelFactory):
     approver_email = factory.Faker("email")
     birth_date = "2002-02-02"
     approval_token = factory.Faker("uuid4")
+    profile_access_token = factory.Faker("uuid4")
+    profile_access_token_expiration = factory.LazyFunction(
+        lambda: timezone.now() + datetime.timedelta(days=2)
+    )
 
     class Meta:
         model = YouthProfile

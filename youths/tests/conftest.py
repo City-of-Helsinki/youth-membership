@@ -6,6 +6,7 @@ from youths.tests.factories import (
     MyProfileAPIResponse,
     ProfileAPIResponse,
     ProfileAPITokenResponse,
+    RestrictedProfileAPIResponse,
     YouthProfileFactory,
 )
 
@@ -44,3 +45,8 @@ def my_profile_api_response():
 @pytest.fixture
 def token_response():
     return ProfileAPITokenResponse()
+
+
+@pytest.fixture
+def restricted_profile_response():
+    return RestrictedProfileAPIResponse()

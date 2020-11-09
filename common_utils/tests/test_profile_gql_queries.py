@@ -11,6 +11,12 @@ PROFILE_ID = "UHJvZmlsZU5vZGU6NWIzNjQwNmQtZGE5NS00Y2IwLTg4ZDgtMmVjNmY4MGU5ZmM5"
 FIRST_NAME = "Test"
 LAST_NAME = "Person"
 
+# RestrictedProfileNode:5b36406d-da95-4cb0-88d8-2ec6f80e9fc9
+RESTRICTED_PROFILE_ID = (
+    "UmVzdHJpY3RlZFByb2ZpbGVOb2RlOjViMzY0MDZkLWRhOTUtNGNiMC04OGQ4LTJlYzZmODBlOWZjOQ=="
+)
+EMAIL = "testi@example.com"
+
 
 def test_call_profile_api_and_fetch_my_profile(
     requests_mock, my_profile_response, settings
@@ -61,4 +67,23 @@ def test_create_my_profile_temporary_read_access_token(
     profile = api.create_temporary_access_token("api_token")
 
     expected_data = {"token": token, "expires_at": expires_at}
+    assert profile == expected_data
+
+
+def test_fetch_profile_with_temporary_access_token(
+    requests_mock, profile_access_token_response, settings
+):
+    requests_mock.post(
+        settings.HELSINKI_PROFILE_API_URL, json=profile_access_token_response
+    )
+    api = ProfileAPI()
+
+    profile = api.fetch_profile_with_temporary_access_token("token")
+
+    expected_data = {
+        "id": RESTRICTED_PROFILE_ID,
+        "first_name": FIRST_NAME,
+        "last_name": LAST_NAME,
+        "email": EMAIL,
+    }
     assert profile == expected_data

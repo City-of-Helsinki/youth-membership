@@ -1,15 +1,7 @@
-from dataclasses import dataclass
-
 from django_ilmoitin.dummy_context import COMMON_CONTEXT, dummy_context
 from django_ilmoitin.registry import notifications
 
 from .enums import NotificationType
-
-
-@dataclass
-class ConfirmationMessageExtraContext:
-    youth_name: str
-
 
 notifications.register(
     NotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED.value,

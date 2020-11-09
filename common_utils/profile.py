@@ -63,9 +63,12 @@ class ProfileAPI:
         )
 
         data = self.do_query(
-            api_token,
             query,
-            {"id": id, "service_type": settings.HELSINKI_PROFILE_SERVICE_TYPE},
+            api_token=api_token,
+            variables={
+                "id": id,
+                "service_type": settings.HELSINKI_PROFILE_SERVICE_TYPE,
+            },
         )
 
         parsed_data = path.search(data)
@@ -93,10 +96,40 @@ class ProfileAPI:
         """
         )
 
-        data = self.do_query(api_token, query)
+        data = self.do_query(query, api_token=api_token)
 
         parsed_data = path.search(data)
         self.contains_keys(parsed_data, ["id", "first_name", "last_name"])
+        return parsed_data
+
+    def fetch_profile_with_temporary_access_token(self, temporary_token: str):
+        """Fetch profile data for the user using the given temporary Helsinki profile token."""
+        query = """
+            query profileWithAccessToken($token: UUID!) {
+                profileWithAccessToken(token: $token) {
+                    id
+                    firstName
+                    lastName
+                    primaryEmail {
+                        email
+                    }
+                }
+            }
+        """
+        path = jmespath.compile(
+            """
+            data.profileWithAccessToken.{
+                id: id
+                first_name: firstName
+                last_name: lastName
+                email: primaryEmail.email
+            }
+        """
+        )
+        data = self.do_query(query, variables={"token": temporary_token})
+
+        parsed_data = path.search(data)
+        self.contains_keys(parsed_data, ["id", "first_name", "last_name", "email"])
         return parsed_data
 
     def create_temporary_access_token(self, api_token: str) -> dict:
@@ -120,13 +153,15 @@ class ProfileAPI:
             }
         """
         )
-        data = self.do_query(api_token, query)
+        data = self.do_query(query, api_token=api_token)
         parsed_data = path.search(data)
         self.contains_keys(parsed_data, ["token", "expires_at"])
         parsed_data["expires_at"] = parse_datetime(parsed_data["expires_at"])
         return parsed_data
 
-    def do_query(self, api_token: str, query: str, variables: dict = None) -> dict:
+    def do_query(
+        self, query: str, *, variables: dict = None, api_token: str = None
+    ) -> dict:
         payload = {"query": query}
         if variables:
             payload["variables"] = variables
@@ -134,7 +169,7 @@ class ProfileAPI:
             settings.HELSINKI_PROFILE_API_URL,
             json=payload,
             timeout=self.timeout,
-            auth=BearerAuth(api_token),
+            auth=BearerAuth(api_token) if api_token else None,
             verify=settings.PROFILE_API_VERIFY,
         )
         response.raise_for_status()

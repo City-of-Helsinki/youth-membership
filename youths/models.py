@@ -1,5 +1,4 @@
 import uuid
-from dataclasses import asdict
 from datetime import date
 
 import reversion
@@ -15,7 +14,6 @@ from common_utils.models import SerializableMixin, UUIDModel
 
 from .enums import MembershipStatus, NotificationType
 from .enums import YouthLanguage as LanguageAtHome
-from .notifications import ConfirmationMessageExtraContext
 
 
 def calculate_expiration(from_date=None):
@@ -77,12 +75,12 @@ class YouthProfile(UUIDModel, SerializableMixin):
     # Source sequence of integer values for a membership number.
     membership_number_sequence = Sequence("membership_number")
 
-    def make_approvable(self, extra_context: ConfirmationMessageExtraContext):
+    def make_approvable(self, youth_name: str):
         self.approval_token = uuid.uuid4()
         send_notification(
             email=self.approver_email,
             notification_type=NotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED.value,
-            context={"youth_profile": self, **asdict(extra_context)},
+            context={"youth_profile": self, "youth_name": youth_name},
             language=self.language_at_home.value,
         )
         self.approval_notification_timestamp = timezone.now()
