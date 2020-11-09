@@ -1,3 +1,4 @@
+import json
 from datetime import date, datetime, timedelta
 from string import Template
 
@@ -13,15 +14,19 @@ from youths.consts import (
     CANNOT_RENEW_YOUTH_PROFILE_ERROR,
     CANNOT_SET_PHOTO_USAGE_PERMISSION_IF_UNDER_15_YEARS_ERROR,
 )
-from youths.enums import YouthLanguage
+from youths.enums import MembershipStatus, YouthLanguage
+from youths.models import YouthProfile
 from youths.tests.factories import YouthProfileFactory
 
 
 def test_normal_user_can_create_youth_profile_mutation(
-    rf, user_gql_client, mocker, profile_api_response
+    rf, user_gql_client, mocker, profile_api_response, token_response
 ):
     mocker.patch.object(
         ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
     profile_id = from_global_id(profile_api_response["id"])[1]
 
@@ -57,7 +62,7 @@ def test_normal_user_can_create_youth_profile_mutation(
     creation_data = {
         "schoolClass": "2A",
         "schoolName": "Alakoulu",
-        "approverEmail": "hyvaksyja@ex.com",
+        "approverEmail": "hyvaksyja@example.com",
         "language": YouthLanguage.FINNISH.name,
         "birthDate": "2004-04-11",
     }
@@ -76,11 +81,84 @@ def test_normal_user_can_create_youth_profile_mutation(
     assert dict(executed["data"]["createMyYouthProfile"]) == expected_data
 
 
+@pytest.mark.parametrize("minor", [True, False])
+def test_profile_access_token_is_saved_for_minors_when_using_create_my_youth_profile(
+    rf, user_gql_client, mocker, profile_api_response, token_response, minor
+):
+    """Temporary profile access token can be used later when access to profile information
+    is needed e.g. when unauthenticated parent approves the youth membership."""
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
+    )
+    profile_id = from_global_id(profile_api_response["id"])[1]
+    today = date.today()
+
+    request = rf.post("/graphql")
+    request.user = user_gql_client.user
+    t = Template(
+        """
+        mutation {
+            createMyYouthProfile (
+                input: {
+                    youthProfile: {
+                        schoolClass: "${schoolClass}"
+                        schoolName: "${schoolName}"
+                        languageAtHome: ${language}
+                        approverEmail: "${approverEmail}"
+                        birthDate: "${birthDate}"
+                    }
+                    profileApiToken: "token"
+                }
+            )
+            {
+                youthProfile {
+                    id
+                }
+            }
+        }
+        """
+    )
+
+    if minor:
+        birth_date = today.replace(year=today.year - 13)
+    else:
+        birth_date = today.replace(year=today.year - 19)
+
+    creation_data = {
+        "schoolClass": "2A",
+        "schoolName": "Alakoulu",
+        "approverEmail": "hyvaksyja@example.com",
+        "language": YouthLanguage.FINNISH.name,
+        "birthDate": birth_date.isoformat(),
+    }
+    query = t.substitute(**creation_data)
+
+    user_gql_client.execute(query, context=request)
+
+    youth_profile = YouthProfile.objects.get(pk=profile_id)
+
+    if minor:
+        assert youth_profile.profile_access_token == token_response["token"]
+        assert (
+            youth_profile.profile_access_token_expiration
+            == token_response["expires_at"]
+        )
+    else:
+        assert youth_profile.profile_access_token == ""
+        assert youth_profile.profile_access_token_expiration is None
+
+
 def test_normal_user_over_18_years_old_can_create_approved_youth_profile_mutation(
-    rf, user_gql_client, mocker, profile_api_response
+    rf, user_gql_client, mocker, profile_api_response, token_response
 ):
     mocker.patch.object(
         ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
     profile_id = from_global_id(profile_api_response["id"])[1]
 
@@ -175,13 +253,7 @@ def test_user_cannot_create_youth_profile_without_approver_email_field_if_under_
     )
 
 
-def test_user_cannot_create_youth_profile_if_under_13_years_old(
-    rf, user_gql_client, mocker, profile_api_response
-):
-    mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
-    )
-
+def test_user_cannot_create_youth_profile_if_under_13_years_old(rf, user_gql_client):
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     today = date.today()
@@ -230,10 +302,13 @@ def test_user_cannot_create_youth_profile_if_under_13_years_old(
 
 
 def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_old(
-    rf, user_gql_client, mocker, profile_api_response
+    rf, user_gql_client, mocker, profile_api_response, token_response
 ):
     mocker.patch.object(
         ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
     )
     profile_id = from_global_id(profile_api_response["id"])[1]
 
@@ -285,12 +360,8 @@ def test_user_can_create_youth_profile_with_photo_usage_field_if_over_15_years_o
 
 
 def test_user_cannot_create_youth_profile_with_photo_usage_field_if_under_15_years_old(
-    rf, user_gql_client, mocker, profile_api_response
+    rf, user_gql_client
 ):
-    mocker.patch.object(
-        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
-    )
-
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     today = date.today()
@@ -347,6 +418,7 @@ def test_normal_user_can_update_youth_profile_mutation(rf, user_gql_client):
                         schoolClass: "${schoolClass}"
                         birthDate: "${birthDate}"
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -372,6 +444,54 @@ def test_normal_user_can_update_youth_profile_mutation(rf, user_gql_client):
     assert dict(executed["data"]["updateMyYouthProfile"]) == expected_data
 
 
+@pytest.mark.parametrize("resend", [True, False])
+def test_normal_user_can_resend_request_notification_on_update(
+    rf, user_gql_client, mocker, profile_api_response, token_response, resend
+):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
+    )
+    request = rf.post("/graphql")
+    request.user = user_gql_client.user
+    youth_profile = YouthProfileFactory(user=user_gql_client.user)
+    original_approval_token = youth_profile.approval_token
+    original_profile_access_token = youth_profile.profile_access_token
+
+    t = Template(
+        """
+        mutation{
+            updateMyYouthProfile(
+                input: {
+                    youthProfile: {
+                        resendRequestNotification: ${resend}
+                    }
+                    profileApiToken: "token"
+                }
+            )
+            {
+                youthProfile {
+                    id
+                }
+            }
+        }
+        """
+    )
+    query = t.substitute(resend=json.dumps(resend))
+    user_gql_client.execute(query, context=request)
+
+    youth_profile.refresh_from_db()
+    if resend:
+        assert youth_profile.approval_token
+        assert youth_profile.approval_token != original_approval_token
+        assert youth_profile.profile_access_token == token_response["token"]
+    else:
+        assert youth_profile.approval_token == original_approval_token
+        assert youth_profile.profile_access_token == original_profile_access_token
+
+
 def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_old(
     rf, user_gql_client
 ):
@@ -389,6 +509,7 @@ def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_o
                         photoUsageApproved: ${photoUsageApproved}
                         birthDate: "${birthDate}"
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -433,6 +554,7 @@ def test_user_cannot_update_youth_profile_with_photo_usage_field_if_under_15_yea
                         photoUsageApproved: ${photoUsageApproved}
                         birthDate: "${birthDate}"
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -476,6 +598,7 @@ def test_user_can_update_youth_profile_with_photo_usage_field_if_over_15_years_o
                     youthProfile: {
                         photoUsageApproved: ${photoUsageApproved}
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -511,6 +634,7 @@ def test_user_cannot_update_youth_profile_with_photo_usage_field_if_under_15_yea
                     youthProfile: {
                         photoUsageApproved: ${photoUsageApproved}
                     }
+                    profileApiToken: "token"
                 }
             )
             {
@@ -627,6 +751,9 @@ def test_anon_user_can_approve_with_token(rf, anon_user_gql_client, youth_profil
     executed = anon_user_gql_client.execute(query, context=request)
     assert dict(executed["data"]["approveYouthProfile"]) == expected_data
 
+    youth_profile.refresh_from_db()
+    assert youth_profile.membership_status == MembershipStatus.ACTIVE
+
 
 @pytest.mark.skip(reason="Need to implement a way to get email from profile")
 def test_missing_primary_email_error(rf, youth_profile, anon_user_gql_client):
@@ -680,8 +807,20 @@ def test_missing_primary_email_error(rf, youth_profile, anon_user_gql_client):
 
 
 def test_youth_profile_expiration_should_renew_and_be_approvable(
-    rf, user_gql_client, anon_user_gql_client
+    rf,
+    user_gql_client,
+    anon_user_gql_client,
+    mocker,
+    profile_api_response,
+    token_response,
 ):
+    mocker.patch.object(
+        ProfileAPI, "fetch_my_profile", return_value=profile_api_response
+    )
+    mocker.patch.object(
+        ProfileAPI, "create_temporary_access_token", return_value=token_response
+    )
+
     request = rf.post("/graphql")
     request.user = user_gql_client.user
 
@@ -698,7 +837,9 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
     with freeze_time("2021-05-01"):
         mutation = """
             mutation {
-                renewMyYouthProfile(input:{}) {
+                renewMyYouthProfile(input: {
+                    profileApiToken: "token"
+                }) {
                     youthProfile {
                         membershipStatus
                     }
@@ -758,6 +899,7 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
 def test_youth_profile_expiration_should_be_renewable_by_staff_user(
     rf, user, staff_user_gql_client, anon_user_gql_client
 ):
+    """Profiles renew by staff are set as approved."""
     staff_user = staff_user_gql_client.user
     request = rf.post("/graphql")
     request.user = staff_user
@@ -792,38 +934,8 @@ def test_youth_profile_expiration_should_be_renewable_by_staff_user(
 
         executed = staff_user_gql_client.execute(mutation, context=request)
         expected_data = {
-            "renewYouthProfile": {"youthProfile": {"membershipStatus": "RENEWING"}}
+            "renewYouthProfile": {"youthProfile": {"membershipStatus": "ACTIVE"}}
         }
-        assert dict(executed["data"]) == expected_data
-
-    # Let's go back in time a few months and re-approve the membership
-    with freeze_time("2021-05-02"):
-        request.user = anon_user_gql_client.user
-
-        t = Template(
-            """
-            mutation{
-                approveYouthProfile(
-                    input: {
-                        approvalToken: "${token}",
-                        approvalData: {}
-                    }
-                )
-                {
-                    youthProfile {
-                        membershipStatus
-                    }
-                }
-            }
-            """
-        )
-        youth_profile.refresh_from_db()
-        approval_data = {"token": youth_profile.approval_token}
-        query = t.substitute(**approval_data)
-        expected_data = {
-            "approveYouthProfile": {"youthProfile": {"membershipStatus": "ACTIVE"}}
-        }
-        executed = anon_user_gql_client.execute(query, context=request)
         assert dict(executed["data"]) == expected_data
 
 
@@ -846,7 +958,9 @@ def test_youth_profile_expiration_for_over_18_years_old_should_renew_and_change_
     with freeze_time("2021-05-01"):
         mutation = """
             mutation {
-                renewMyYouthProfile(input:{}) {
+                renewMyYouthProfile(input:{
+                    profileApiToken: "token"
+                }) {
                     youthProfile {
                         membershipStatus
                     }
@@ -893,7 +1007,9 @@ def test_should_not_be_able_to_renew_pending_youth_profile(rf, user_gql_client):
 
         mutation = """
             mutation {
-                renewMyYouthProfile(input:{}) {
+                renewMyYouthProfile(input:{
+                    profileApiToken: "token"
+                }) {
                     youthProfile {
                         membershipStatus
                     }
@@ -920,6 +1036,7 @@ def test_staff_user_can_create_youth_profile(
     today = date.today()
     birth_date = today.replace(year=today.year - 13) - timedelta(days=1)
     youth_profile_data = {
+        "id": profile_global_id,
         "birth_date": birth_date.strftime("%Y-%m-%d"),
         "school_name": "Koulu",
         "school_class": "2B",
@@ -964,21 +1081,11 @@ def test_staff_user_can_create_youth_profile(
         }
     """
     )
-    query = t.substitute(
-        id=profile_global_id,
-        birth_date=youth_profile_data["birth_date"],
-        school_name=youth_profile_data["school_name"],
-        school_class=youth_profile_data["school_class"],
-        language_at_home=youth_profile_data["language_at_home"],
-        approver_email=youth_profile_data["approver_email"],
-        approver_phone=youth_profile_data["approver_phone"],
-        approver_first_name=youth_profile_data["approver_first_name"],
-        approver_last_name=youth_profile_data["approver_last_name"],
-    )
+    query = t.substitute(**youth_profile_data)
     expected_data = {
         "createYouthProfile": {
             "youthProfile": {
-                "id": profile_global_id,
+                "id": youth_profile_data["id"],
                 "birthDate": youth_profile_data["birth_date"],
                 "schoolName": youth_profile_data["school_name"],
                 "schoolClass": youth_profile_data["school_class"],
@@ -997,9 +1104,8 @@ def test_staff_user_can_create_youth_profile(
 def test_staff_user_cannot_create_youth_profile_if_profile_does_not_exist(
     rf, staff_user_gql_client, mocker, profile_api_response
 ):
-    mocker.patch.object(
-        ProfileAPI, "fetch_profile", return_value=None
-    )  # Jmespath should return null if profile = null
+    """Creating a youth profile will query Helsinki profile for the given profile id."""
+    mocker.patch.object(ProfileAPI, "fetch_profile", return_value={"id": ""})
     profile_id = from_global_id(profile_api_response["id"])[1]
     profile_global_id = to_global_id(type="YouthProfileNode", id=profile_id)
 
@@ -1059,6 +1165,7 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     today = date.today()
     birth_date = today.replace(year=today.year - 13) + timedelta(days=1)
     youth_profile_data = {
+        "id": profile_global_id,
         "birth_date": birth_date.strftime("%Y-%m-%d"),
         "approver_email": "jane.doe@example.com",
     }
@@ -1085,15 +1192,11 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
         }
     """
     )
-    query = t.substitute(
-        id=profile_global_id,
-        birth_date=youth_profile_data["birth_date"],
-        approver_email=youth_profile_data["approver_email"],
-    )
+    query = t.substitute(**youth_profile_data)
     expected_data = {
         "createYouthProfile": {
             "youthProfile": {
-                "id": profile_global_id,
+                "id": youth_profile_data["id"],
                 "birthDate": youth_profile_data["birth_date"],
                 "approverEmail": youth_profile_data["approver_email"],
             }
@@ -1101,6 +1204,64 @@ def test_staff_user_can_create_youth_profile_for_under_13_years_old(
     }
     executed = staff_user_gql_client.execute(query, context=request)
     assert executed["data"] == expected_data
+
+
+def test_staff_user_creates_approved_profiles(
+    rf, staff_user_gql_client, mocker, profile_api_response
+):
+    mocker.patch.object(ProfileAPI, "fetch_profile", return_value=profile_api_response)
+    profile_id = from_global_id(profile_api_response["id"])[1]
+    profile_global_id = to_global_id(type="YouthProfileNode", id=profile_id)
+
+    user = staff_user_gql_client.user
+    request = rf.post("/graphql")
+    request.user = user
+    today = date.today()
+    birth_date = today.replace(year=today.year - 13) - timedelta(days=1)
+    youth_profile_data = {
+        "id": profile_global_id,
+        "birth_date": birth_date.strftime("%Y-%m-%d"),
+        "school_name": "Koulu",
+        "school_class": "2B",
+        "language_at_home": YouthLanguage.ENGLISH.name,
+        "approver_first_name": "Jane",
+        "approver_last_name": "Doe",
+        "approver_phone": "040-1234567",
+        "approver_email": "jane.doe@example.com",
+    }
+
+    t = Template(
+        """
+        mutation {
+            createYouthProfile(
+                input: {
+                    id: \"${id}\",
+                    youthProfile: {
+                        birthDate: \"${birth_date}\",
+                        schoolName: \"${school_name}\",
+                        schoolClass: \"${school_class}\",
+                        languageAtHome: ${language_at_home},
+                        approverEmail: \"${approver_email}\",
+                        approverPhone: \"${approver_phone}\",
+                        approverFirstName: \"${approver_first_name}\",
+                        approverLastName: \"${approver_last_name}\",
+                    }
+                    profileApiToken: "token"
+                }
+            ) {
+                youthProfile {
+                    id
+                }
+            }
+        }
+    """
+    )
+    query = t.substitute(**youth_profile_data)
+    staff_user_gql_client.execute(query, context=request)
+
+    youth_profile = YouthProfile.objects.get(pk=profile_id)
+    assert youth_profile.approved_time is not None
+    assert youth_profile.membership_status == MembershipStatus.ACTIVE
 
 
 def test_normal_user_cannot_use_create_youth_profile_mutation(
@@ -1116,6 +1277,7 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(
     today = date.today()
     birth_date = today.replace(year=today.year - 13) - timedelta(days=1)
     youth_profile_data = {
+        "id": to_global_id(type="YouthProfileNode", id=profile_id),
         "birth_date": birth_date.strftime("%Y-%m-%d"),
         "approver_email": "jane.doe@example.com",
     }
@@ -1142,11 +1304,7 @@ def test_normal_user_cannot_use_create_youth_profile_mutation(
         }
     """
     )
-    query = t.substitute(
-        id=to_global_id(type="YouthProfileNode", id=profile_id),
-        birth_date=youth_profile_data["birth_date"],
-        approver_email=youth_profile_data["approver_email"],
-    )
+    query = t.substitute(**youth_profile_data)
     executed = user_gql_client.execute(query, context=request)
     assert (
         executed["errors"][0].get("extensions").get("code") == PERMISSION_DENIED_ERROR
@@ -1183,9 +1341,7 @@ def test_staff_user_can_cancel_youth_membership_on_selected_date(
         }
     """
     )
-    query = t.substitute(
-        id=youth_profile_data["id"], expiration=youth_profile_data["expiration"],
-    )
+    query = t.substitute(**youth_profile_data)
     expected_data = {
         "cancelYouthProfile": {
             "youthProfile": {"expiration": youth_profile_data["expiration"]}

@@ -62,7 +62,12 @@ def test_normal_user_can_add_additional_contact_persons(rf, user_gql_client):
     request = rf.post("/graphql")
     request.user = user_gql_client.user
 
-    variables = {"input": {"youthProfile": {"addAdditionalContactPersons": [acpd]}}}
+    variables = {
+        "input": {
+            "youthProfile": {"addAdditionalContactPersons": [acpd]},
+            "profileApiToken": "token",
+        }
+    }
     executed = user_gql_client.execute(
         UPDATE_MUTATION, context=request, variables=variables
     )
@@ -101,7 +106,8 @@ def test_normal_user_can_remove_additional_contact_persons(rf, user_gql_client):
                 "removeAdditionalContactPersons": [
                     to_global_id(type="AdditionalContactPersonNode", id=acp.pk)
                 ]
-            }
+            },
+            "profileApiToken": "token",
         }
     }
     executed = user_gql_client.execute(
@@ -134,7 +140,8 @@ def test_normal_user_can_update_additional_contact_persons(rf, user_gql_client):
                         **new_values,
                     }
                 ],
-            }
+            },
+            "profileApiToken": "token",
         }
     }
     executed = user_gql_client.execute(

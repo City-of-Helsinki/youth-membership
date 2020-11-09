@@ -2,8 +2,8 @@ from datetime import date
 
 import graphene
 from django.db import transaction
-from django.utils import timezone
 from graphene import relay
+from graphql import GraphQLError
 from graphql_jwt.decorators import login_required
 from graphql_relay.node.node import from_global_id, to_global_id
 
@@ -25,47 +25,37 @@ from ..utils import (
 )
 from .types import LanguageAtHome, YouthProfileNode
 
-# from django_ilmoitin.utils import send_notification
-# from ..enums import NotificationType
 
-# from profiles.decorators import staff_required
-# from profiles.models import Email, Profile
+def generate_profile_access_token(profile_api_token: str, youth_profile: YouthProfile):
+    """Create and save a temporary Helsinki profile access token for later use."""
+    profile_api = ProfileAPI()
+    temp_token = profile_api.create_temporary_access_token(profile_api_token)
+    youth_profile.profile_access_token = temp_token["token"]
+    youth_profile.profile_access_token_expiration = temp_token["expires_at"]
+    youth_profile.save(
+        update_fields=["profile_access_token", "profile_access_token_expiration"]
+    )
 
-# from common_utils.exceptions import ProfileHasNoPrimaryEmailError
 
-
-def create_youth_profile(input, user, profile_id):
+def create_youth_profile(input, user, profile_id) -> YouthProfile:
     contact_persons_to_create = input.pop("add_additional_contact_persons", [])
 
     youth_profile = YouthProfile.objects.create(user=user, id=profile_id, **input)
-
-    if calculate_age(youth_profile.birth_date) >= 18:
-        youth_profile.approved_time = timezone.now()
-    else:
-        if not input.get("approver_email"):
-            raise ApproverEmailCannotBeEmptyForMinorsError(
-                "Approver email is required for youth under 18 years old"
-            )
-        youth_profile.make_approvable()
-    youth_profile.save()
-
     create_or_update_contact_persons(youth_profile, contact_persons_to_create)
 
     return youth_profile
 
 
-def update_youth_profile(input, youth_profile, manage_permission=False):
+def update_youth_profile(input, youth_profile, staff_update=False) -> YouthProfile:
     """Update the given youth profile.
 
-    :param manage_permission: Calling user has manage permission on youth membership service.
+    :param staff_update: Calling user has manage permission on youth membership service.
     """
     contact_persons_to_create = input.pop("add_additional_contact_persons", [])
     contact_persons_to_update = input.pop("update_additional_contact_persons", [])
     contact_persons_to_delete = input.pop("remove_additional_contact_persons", [])
 
-    resend_request_notification = input.pop("resend_request_notification", False)
-
-    if "photo_usage_approved" in input and not manage_permission:
+    if "photo_usage_approved" in input and not staff_update:
         # Disable setting photo usage by themselves for youths under 15 years old (allowed for staff).
         # Check for birth date given in input or birth date persisted in the db.
         if (
@@ -77,9 +67,6 @@ def update_youth_profile(input, youth_profile, manage_permission=False):
 
     for field, value in input.items():
         setattr(youth_profile, field, value)
-    if resend_request_notification:
-        youth_profile.make_approvable()
-
     youth_profile.save()
 
     create_or_update_contact_persons(youth_profile, contact_persons_to_create)
@@ -89,7 +76,7 @@ def update_youth_profile(input, youth_profile, manage_permission=False):
     return youth_profile
 
 
-def cancel_youth_profile(youth_profile, input):
+def cancel_youth_profile(youth_profile, input) -> YouthProfile:
     expiration = input.get("expiration")
 
     youth_profile.expiration = expiration or date.today()
@@ -98,7 +85,7 @@ def cancel_youth_profile(youth_profile, input):
     return youth_profile
 
 
-def renew_youth_profile(youth_profile):
+def renew_youth_profile(youth_profile, staff_renewal=False) -> YouthProfile:
     next_expiration = calculate_expiration(date.today())
     if youth_profile.expiration == next_expiration:
         raise CannotRenewYouthProfileError(
@@ -108,7 +95,7 @@ def renew_youth_profile(youth_profile):
     youth_profile.expiration = next_expiration
 
     if calculate_age(youth_profile.birth_date) >= 18:
-        youth_profile.approved_time = timezone.now()
+        youth_profile.set_approved()
     else:
         youth_profile.make_approvable()
 
@@ -132,7 +119,7 @@ class UpdateAdditionalContactPersonInput(graphene.InputObjectType):
 
 
 # Abstract base fields
-class YouthProfileFields(graphene.InputObjectType):
+class YouthProfileInput(graphene.InputObjectType):
     school_name = graphene.String(description="The youth's school name.")
     school_class = graphene.String(description="The youth's school class.")
     language_at_home = LanguageAtHome(
@@ -177,14 +164,14 @@ class YouthProfileFields(graphene.InputObjectType):
 
 
 # Subset of abstract fields are required for creation
-class CreateYouthProfileInput(YouthProfileFields):
+class CreateYouthProfileInput(YouthProfileInput):
     birth_date = graphene.Date(
         required=True,
         description="The youth's birth date. This is used for example to calculate if the youth is a minor or not.",
     )
 
 
-class UpdateYouthProfileInput(YouthProfileFields):
+class UpdateMyYouthProfileInput(YouthProfileInput):
     resend_request_notification = graphene.Boolean(
         description="If set to `true`, a new approval token is generated and a new email notification is sent to the"
         "approver's email address."
@@ -213,10 +200,11 @@ class CreateYouthProfileMutation(relay.ClientIDMutation):
         profile_api = ProfileAPI()
         profile_data = profile_api.fetch_profile(profile_api_token, profile_node_id)
 
-        if not profile_data:
+        if not profile_data["id"]:
             raise ProfileDoesNotExistError("Profile does not exist")
 
         youth_profile = create_youth_profile(input_data, None, profile_id)
+        youth_profile.set_approved(save=True)
 
         return CreateYouthProfileMutation(youth_profile=youth_profile)
 
@@ -236,6 +224,7 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
         profile_api_token = input.get("profile_api_token")
+        profile_api = ProfileAPI()
 
         if calculate_age(input_data["birth_date"]) < 13:
             raise CannotCreateYouthProfileIfUnder13YearsOldError(
@@ -249,15 +238,25 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
                     "Cannot set photo usage permission if under 15 years old"
                 )
 
-        profile_api = ProfileAPI()
         profile_data = profile_api.fetch_my_profile(profile_api_token)
 
-        if not profile_data:
+        if not profile_data["id"]:
             raise ProfileDoesNotExistError("Profile does not exist")
 
         youth_profile = create_youth_profile(
             input_data, info.context.user, from_global_id(profile_data["id"])[1]
         )
+
+        if calculate_age(youth_profile.birth_date) >= 18:
+            youth_profile.set_approved()
+        else:
+            if not youth_profile.approver_email:
+                raise ApproverEmailCannotBeEmptyForMinorsError(
+                    "Approver email is required for youth under 18 years old"
+                )
+            generate_profile_access_token(profile_api_token, youth_profile)
+            youth_profile.make_approvable()
+        youth_profile.save()
 
         return CreateMyYouthProfileMutation(youth_profile=youth_profile)
 
@@ -265,7 +264,7 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
 class UpdateYouthProfileMutation(relay.ClientIDMutation):
     class Input:
         id = graphene.Argument(graphene.ID, required=True)
-        youth_profile = UpdateYouthProfileInput(required=True)
+        youth_profile = YouthProfileInput(required=True)
 
     youth_profile = graphene.Field(YouthProfileNode)
 
@@ -277,14 +276,17 @@ class UpdateYouthProfileMutation(relay.ClientIDMutation):
 
         youth_profile = YouthProfile.objects.get(pk=from_global_id(input.get("id"))[1])
         youth_profile = update_youth_profile(
-            input_data, youth_profile, manage_permission=True
+            input_data, youth_profile, staff_update=True
         )
         return UpdateYouthProfileMutation(youth_profile=youth_profile)
 
 
 class UpdateMyYouthProfileMutation(relay.ClientIDMutation):
     class Input:
-        youth_profile = UpdateYouthProfileInput(required=True)
+        youth_profile = UpdateMyYouthProfileInput(required=True)
+        profile_api_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API."
+        )
 
     youth_profile = graphene.Field(YouthProfileNode)
 
@@ -293,9 +295,20 @@ class UpdateMyYouthProfileMutation(relay.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input_data = input.get("youth_profile")
+        profile_api_token = input.get("profile_api_token")
 
         youth_profile = YouthProfile.objects.get(user=info.context.user)
+        resend_request_notification = input_data.pop(
+            "resend_request_notification", False
+        )
+
         youth_profile = update_youth_profile(input_data, youth_profile)
+
+        if resend_request_notification:
+            generate_profile_access_token(profile_api_token, youth_profile)
+            youth_profile.make_approvable()
+            youth_profile.save()
+
         return UpdateMyYouthProfileMutation(youth_profile=youth_profile)
 
 
@@ -311,19 +324,35 @@ class RenewYouthProfileMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         youth_profile = YouthProfile.objects.get(pk=from_global_id(input.get("id"))[1])
         youth_profile = renew_youth_profile(youth_profile)
+        youth_profile.set_approved(save=True)
 
         return RenewYouthProfileMutation(youth_profile=youth_profile)
 
 
 class RenewMyYouthProfileMutation(relay.ClientIDMutation):
+    class Input:
+        profile_api_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API."
+        )
+
     youth_profile = graphene.Field(YouthProfileNode)
 
     @classmethod
     @login_required
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
+        profile_api_token = input.get("profile_api_token")
         youth_profile = YouthProfile.objects.get(user=info.context.user)
+
         youth_profile = renew_youth_profile(youth_profile)
+
+        if calculate_age(youth_profile.birth_date) >= 18:
+            youth_profile.set_approved()
+        else:
+            generate_profile_access_token(profile_api_token, youth_profile)
+            youth_profile.make_approvable()
+        youth_profile.save()
+
         return RenewMyYouthProfileMutation(youth_profile=youth_profile)
 
 
@@ -333,7 +362,7 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
             required=True,
             description="This is the token with which a youth profile may be fetched for approval purposes.",
         )
-        approval_data = YouthProfileFields(
+        approval_data = YouthProfileInput(
             required=True,
             description="The youth profile data to approve. This may contain modifications done by the approver.",
         )
@@ -345,6 +374,9 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         youth_data = input.get("approval_data")
         token = input.get("approval_token")
+
+        if not token:
+            raise GraphQLError("Approval token cannot be empty.")
 
         contact_persons_to_create = youth_data.pop("add_additional_contact_persons", [])
         contact_persons_to_update = youth_data.pop(
@@ -372,8 +404,7 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
         #         "Cannot send email confirmation, youth profile has no primary email address."
         #     )
 
-        youth_profile.approved_time = timezone.now()
-        youth_profile.approval_token = ""  # invalidate
+        youth_profile.set_approved()
         youth_profile.save()
         # send_notification(
         #     email=email.email,
@@ -419,7 +450,7 @@ class CancelMyYouthProfileMutation(relay.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         youth_profile = cancel_youth_profile(
-            YouthProfile.objects.get(user=info.context.user), input,
+            YouthProfile.objects.get(user=info.context.user), input
         )
 
         return CancelMyYouthProfileMutation(youth_profile=youth_profile)

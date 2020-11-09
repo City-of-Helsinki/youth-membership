@@ -12,3 +12,8 @@ def my_profile_response():
 @pytest.fixture(scope="session")
 def profile_response():
     return read_json_file(__file__, "responses", "profile_response.json")
+
+
+@pytest.fixture(scope="session")
+def temporary_token_response():
+    return read_json_file(__file__, "responses", "temporary_token_response.json")

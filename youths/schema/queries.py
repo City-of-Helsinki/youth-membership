@@ -44,4 +44,7 @@ class Query(graphene.ObjectType):
         return YouthProfile.objects.all()
 
     def resolve_youth_profile_by_approval_token(self, info, **kwargs):
-        return YouthProfile.objects.get(approval_token=kwargs.get("token"))
+        approval_token = kwargs.get("token")
+        if approval_token:
+            return YouthProfile.objects.get(approval_token=kwargs.get("token"))
+        return None

@@ -2,9 +2,11 @@ import pytest
 from rest_framework.test import APIClient
 
 from youth_membership.tests.conftest import *  # noqa
-from youths.tests.factories import ProfileAPIResponse, YouthProfileFactory
-
-# from pytest_factoryboy import register
+from youths.tests.factories import (
+    ProfileAPIResponse,
+    ProfileAPITokenResponse,
+    YouthProfileFactory,
+)
 
 
 @pytest.fixture
@@ -33,5 +35,6 @@ def profile_api_response():
     return ProfileAPIResponse()
 
 
-# Register factory fixtures
-# register(YouthProfileFactory)
+@pytest.fixture
+def token_response():
+    return ProfileAPITokenResponse()

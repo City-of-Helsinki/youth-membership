@@ -1,0 +1,10 @@
+{
+  "data": {
+    "createMyProfileTemporaryReadAccessToken": {
+      "temporaryReadAccessToken": {
+        "token": "a2fe1f2b-c9fe-4329-a270-400fa0dfd9f5",
+        "expiresAt": "2020-10-24T09:46:52.000000+00:00"
+      }
+    }
+  }
+}

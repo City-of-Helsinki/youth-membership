@@ -1,6 +1,8 @@
+import datetime
 from functools import partial
 
 import factory
+from django.utils import timezone
 from graphql_relay import to_global_id
 
 from users.factories import UserFactory
@@ -11,6 +13,13 @@ class ProfileAPIResponse(factory.DictFactory):
     id = factory.Faker("uuid4", cast_to=partial(to_global_id, "ProfileNode"))
 
 
+class ProfileAPITokenResponse(factory.DictFactory):
+    token = factory.Faker("uuid4", cast_to=str)
+    expires_at = factory.LazyFunction(
+        lambda: timezone.now() + datetime.timedelta(days=2)
+    )
+
+
 class YouthProfileFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
 
@@ -18,6 +27,7 @@ class YouthProfileFactory(factory.django.DjangoModelFactory):
     school_class = "1A"
     approver_email = factory.Faker("email")
     birth_date = "2002-02-02"
+    approval_token = factory.Faker("uuid4")
 
     class Meta:
         model = YouthProfile

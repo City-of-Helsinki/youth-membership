@@ -35,8 +35,6 @@ def calculate_expiration(from_date=None):
 
 @reversion.register()
 class YouthProfile(UUIDModel, SerializableMixin):
-    # TODO YouthProfile PK should be the same as is the Profile PK
-    # TODO How to access Profile (backend) related information in new YouthProfile (backend)?
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE
     )
@@ -58,14 +56,21 @@ class YouthProfile(UUIDModel, SerializableMixin):
     approver_last_name = models.CharField(max_length=255, blank=True)
     approver_phone = models.CharField(max_length=50, blank=True)
     approver_email = models.EmailField(max_length=254, blank=True)
-    approval_token = models.CharField(
-        max_length=36, blank=True, default=uuid.uuid4, editable=False
-    )
+    approval_token = models.CharField(max_length=36, blank=True, editable=False)
     approval_notification_timestamp = models.DateTimeField(
         null=True, blank=True, editable=False
     )
     approved_time = models.DateTimeField(null=True, blank=True, editable=False)
     photo_usage_approved = models.NullBooleanField()
+
+    profile_access_token = models.CharField(
+        max_length=36,
+        blank=True,
+        help_text=_(
+            "Temporary read access token for the profile linked to this youth profile."
+        ),
+    )
+    profile_access_token_expiration = models.DateTimeField(null=True, blank=True)
 
     # Source sequence of integer values for a membership number.
     membership_number_sequence = Sequence("membership_number")
@@ -79,6 +84,23 @@ class YouthProfile(UUIDModel, SerializableMixin):
             language=self.language_at_home.value,
         )
         self.approval_notification_timestamp = timezone.now()
+
+    def set_approved(self, save=False):
+        """Set profile as approved and remove access tokens."""
+        self.approved_time = timezone.now()
+        self.approval_token = ""
+        self.profile_access_token = ""
+        self.profile_access_token_expiration = None
+
+        if save:
+            self.save(
+                update_fields=(
+                    "approved_time",
+                    "approval_token",
+                    "profile_access_token",
+                    "profile_access_token_expiration",
+                )
+            )
 
     @property
     def membership_status(self):

@@ -215,7 +215,7 @@ def test_youth_profile_should_show_correct_membership_status(rf, user_gql_client
     executed = user_gql_client.execute(query, context=request)
     assert dict(executed["data"]) == expected_data
 
-    youth_profile.approved_time = timezone.now()
+    youth_profile.set_approved()
     youth_profile.save()
     expected_data = {"myYouthProfile": {"membershipStatus": "ACTIVE"}}
     executed = user_gql_client.execute(query, context=request)

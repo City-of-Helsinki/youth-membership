@@ -9,6 +9,7 @@ from common_utils.consts import (
     INVALID_EMAIL_FORMAT_ERROR,
     OBJECT_DOES_NOT_EXIST_ERROR,
     PERMISSION_DENIED_ERROR,
+    PROFILE_API_ERROR,
     PROFILE_DOES_NOT_EXIST_ERROR,
     PROFILE_HAS_NO_PRIMARY_EMAIL_ERROR,
     PROFILE_MUST_HAVE_ONE_PRIMARY_EMAIL,
@@ -18,6 +19,7 @@ from common_utils.exceptions import (
     APINotImplementedError,
     CommonGraphQLError,
     InvalidEmailFormatError,
+    ProfileAPIError,
     ProfileDoesNotExistError,
     ProfileHasNoPrimaryEmailError,
     ProfileMustHaveOnePrimaryEmail,
@@ -44,6 +46,7 @@ error_codes_shared = {
     JwtPermissionDenied: PERMISSION_DENIED_ERROR,
     APINotImplementedError: API_NOT_IMPLEMENTED_ERROR,
     InvalidEmailFormatError: INVALID_EMAIL_FORMAT_ERROR,
+    ProfileAPIError: PROFILE_API_ERROR,
 }
 
 error_codes_profile = {

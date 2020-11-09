@@ -82,17 +82,18 @@ def generate_notifications():
         fi_html = (
             "Hei {{ youth_profile.approver_first_name }},<br /><br />{{ youth_profile.profile.first_name }} on "
             "pyytänyt sinua vahvistamaan nuorisojäsenyytensä. Käy antamassa vahvistus Jässäri-palvelussa käyttäen "
-            "tätä linkkiä:"
-            '<br /><br /><a href="https://jassari.test.kuva.hel.ninja/approve/{{ youth_profile.approval_token }}">'
-            "https://jassari.test.kuva.hel.ninja/approve/{{ youth_profile.approval_token }}</a><br /><br /><i>Tämä "
-            "viesti on lähetetty järjestelmistä automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia ei "
-            "käsitellä.</i>"
+            'tätä linkkiä:<br /><br /><a href="https://jassari.test.kuva.hel.ninja/approve'
+            '/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}">'
+            "https://jassari.test.kuva.hel.ninja/approve/{{ youth_profile.approval_token }}"
+            "/{{ youth_profile.profile_access_token }}</a><br /><br /><i>Tämä viesti on lähetetty järjestelmästä "
+            "automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia ei käsitellä.</i>"
         )
         fi_text = (
             "Hei {{ youth_profile.approver_first_name }},\r\n\r\n{{ youth_profile.profile.first_name }} on pyytänyt "
             "sinua vahvistamaan nuorisojäsenyytensä. Käy antamassa vahvistus Jässäri-palvelussa käyttäen tätä linkkiä:"
-            "\r\n\r\nhttps://jassari.test.kuva.hel.ninja/approve/{{ youth_profile.approval_token }}\r\n\r\nTämä viesti "
-            "on lähetetty järjestelmistä automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia ei käsitellä."
+            "\r\n\r\nhttps://jassari.test.kuva.hel.ninja/approve/{{ youth_profile.approval_token }}"
+            "/{{ youth_profile.profile_access_token }}\r\n\r\nTämä viesti on lähetetty järjestelmästä automaattisesti. "
+            "Älä vastaa tähän viestiin, sillä vastauksia ei käsitellä."
         )
         template.set_current_language("fi")
         template.subject = fi_subject
