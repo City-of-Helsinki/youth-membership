@@ -1,7 +1,6 @@
 import uuid
 from datetime import date
 
-import reversion
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -33,7 +32,6 @@ def calculate_expiration(from_date=None):
     return date(year=expiration_year, month=expiration_month, day=expiration_day)
 
 
-@reversion.register()
 class YouthProfile(UUIDModel, SerializableMixin):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE
