@@ -2,15 +2,22 @@ from datetime import date
 
 import graphene
 from django.db import transaction
+from django.utils import timezone
+from django_ilmoitin.utils import send_notification
 from graphene import relay
 from graphql import GraphQLError
 from graphql_jwt.decorators import login_required
 from graphql_relay.node.node import from_global_id, to_global_id
 
-from common_utils.exceptions import ProfileDoesNotExistError
+from common_utils.exceptions import (
+    ProfileDoesNotExistError,
+    ProfileHasNoPrimaryEmailError,
+    TokenExpiredError,
+)
 from common_utils.profile import ProfileAPI
 
 from ..decorators import staff_required
+from ..enums import NotificationType
 from ..exceptions import (
     ApproverEmailCannotBeEmptyForMinorsError,
     CannotCreateYouthProfileIfUnder13YearsOldError,
@@ -93,13 +100,8 @@ def renew_youth_profile(youth_profile, staff_renewal=False) -> YouthProfile:
             "renew window."
         )
     youth_profile.expiration = next_expiration
+    youth_profile.save(update_fields=["expiration"])
 
-    if calculate_age(youth_profile.birth_date) >= 18:
-        youth_profile.set_approved()
-    else:
-        youth_profile.make_approvable()
-
-    youth_profile.save()
     return youth_profile
 
 
@@ -255,7 +257,7 @@ class CreateMyYouthProfileMutation(relay.ClientIDMutation):
                     "Approver email is required for youth under 18 years old"
                 )
             generate_profile_access_token(profile_api_token, youth_profile)
-            youth_profile.make_approvable()
+            youth_profile.make_approvable(youth_name=profile_data["first_name"])
         youth_profile.save()
 
         return CreateMyYouthProfileMutation(youth_profile=youth_profile)
@@ -305,8 +307,10 @@ class UpdateMyYouthProfileMutation(relay.ClientIDMutation):
         youth_profile = update_youth_profile(input_data, youth_profile)
 
         if resend_request_notification:
+            profile_api = ProfileAPI()
+            profile_data = profile_api.fetch_my_profile(profile_api_token)
             generate_profile_access_token(profile_api_token, youth_profile)
-            youth_profile.make_approvable()
+            youth_profile.make_approvable(youth_name=profile_data["first_name"])
             youth_profile.save()
 
         return UpdateMyYouthProfileMutation(youth_profile=youth_profile)
@@ -349,8 +353,10 @@ class RenewMyYouthProfileMutation(relay.ClientIDMutation):
         if calculate_age(youth_profile.birth_date) >= 18:
             youth_profile.set_approved()
         else:
+            profile_api = ProfileAPI()
+            profile_data = profile_api.fetch_my_profile(profile_api_token)
             generate_profile_access_token(profile_api_token, youth_profile)
-            youth_profile.make_approvable()
+            youth_profile.make_approvable(youth_name=profile_data["first_name"])
         youth_profile.save()
 
         return RenewMyYouthProfileMutation(youth_profile=youth_profile)
@@ -374,9 +380,23 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         youth_data = input.get("approval_data")
         token = input.get("approval_token")
-
         if not token:
             raise GraphQLError("Approval token cannot be empty.")
+        youth_profile = YouthProfile.objects.get(approval_token=token)
+        if (
+            not youth_profile.profile_access_token
+            or youth_profile.profile_access_token_expiration < timezone.now()
+        ):
+            raise TokenExpiredError("Profile access token is expired or not set.")
+
+        profile_api = ProfileAPI()
+        profile_data = profile_api.fetch_profile_with_temporary_access_token(
+            youth_profile.profile_access_token
+        )
+        if not profile_data["email"]:
+            raise ProfileHasNoPrimaryEmailError(
+                "Cannot send email confirmation, youth profile has no primary email address."
+            )
 
         contact_persons_to_create = youth_data.pop("add_additional_contact_persons", [])
         contact_persons_to_update = youth_data.pop(
@@ -386,8 +406,6 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
             "remove_additional_contact_persons", []
         )
 
-        youth_profile = YouthProfile.objects.get(approval_token=token)
-
         for field, value in youth_data.items():
             setattr(youth_profile, field, value)
 
@@ -396,23 +414,18 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
         create_or_update_contact_persons(youth_profile, contact_persons_to_update)
         delete_contact_persons(youth_profile, contact_persons_to_delete)
 
-        # try:
-        #     # TODO Should get the profile email through other methods
-        #     email = youth_profile.profile.get_primary_email()
-        # except Email.DoesNotExist:
-        #     raise ProfileHasNoPrimaryEmailError(
-        #         "Cannot send email confirmation, youth profile has no primary email address."
-        #     )
-
         youth_profile.set_approved()
         youth_profile.save()
-        # send_notification(
-        #     email=email.email,
-        #     notification_type=NotificationType.YOUTH_PROFILE_CONFIRMED.value,
-        #     context={"youth_profile": youth_profile},
-        #     language=youth_profile.profile.language if youth_profile.profile else "fi",
-        #     # TODO Refactor should get the language of profile through other methods
-        # )
+
+        send_notification(
+            email=profile_data["email"],
+            notification_type=NotificationType.YOUTH_PROFILE_CONFIRMED.value,
+            context={
+                "youth_profile": youth_profile,
+                "youth_name": profile_data["first_name"],
+            },
+            language=youth_profile.language_at_home.value,
+        )
         return ApproveYouthProfileMutation(youth_profile=youth_profile)
 
 

@@ -75,12 +75,12 @@ class YouthProfile(UUIDModel, SerializableMixin):
     # Source sequence of integer values for a membership number.
     membership_number_sequence = Sequence("membership_number")
 
-    def make_approvable(self):
+    def make_approvable(self, youth_name: str):
         self.approval_token = uuid.uuid4()
         send_notification(
             email=self.approver_email,
             notification_type=NotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED.value,
-            context={"youth_profile": self},
+            context={"youth_profile": self, "youth_name": youth_name},
             language=self.language_at_home.value,
         )
         self.approval_notification_timestamp = timezone.now()

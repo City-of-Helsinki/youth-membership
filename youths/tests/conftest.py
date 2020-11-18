@@ -3,8 +3,10 @@ from rest_framework.test import APIClient
 
 from youth_membership.tests.conftest import *  # noqa
 from youths.tests.factories import (
+    MyProfileAPIResponse,
     ProfileAPIResponse,
     ProfileAPITokenResponse,
+    RestrictedProfileAPIResponse,
     YouthProfileFactory,
 )
 
@@ -36,5 +38,15 @@ def profile_api_response():
 
 
 @pytest.fixture
+def my_profile_api_response():
+    return MyProfileAPIResponse()
+
+
+@pytest.fixture
 def token_response():
     return ProfileAPITokenResponse()
+
+
+@pytest.fixture
+def restricted_profile_response():
+    return RestrictedProfileAPIResponse()

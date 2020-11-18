@@ -1,0 +1,12 @@
+{
+    "data": {
+        "profileWithAccessToken": {
+            "id": "UmVzdHJpY3RlZFByb2ZpbGVOb2RlOjViMzY0MDZkLWRhOTUtNGNiMC04OGQ4LTJlYzZmODBlOWZjOQ==",
+            "firstName": "Test",
+            "lastName": "Person",
+            "primaryEmail": {
+                "email": "testi@example.com"
+            }
+        }
+    }
+}

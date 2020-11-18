@@ -2,6 +2,7 @@ from string import Template
 
 from graphql_relay import to_global_id
 
+from common_utils.profile import ProfileAPI
 from youths.models import AdditionalContactPerson
 from youths.tests.factories import (
     AdditionalContactPersonDictFactory,
@@ -204,8 +205,13 @@ def test_normal_user_can_query_additional_contact_persons(
 
 
 def test_profile_approval_allows_changing_contact_persons(
-    rf, anon_user_gql_client, youth_profile
+    rf, anon_user_gql_client, youth_profile, mocker, restricted_profile_response
 ):
+    mocker.patch.object(
+        ProfileAPI,
+        "fetch_profile_with_temporary_access_token",
+        return_value=restricted_profile_response,
+    )
     request = rf.post("/graphql")
     request.user = anon_user_gql_client.user
 

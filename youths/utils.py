@@ -80,7 +80,7 @@ def generate_notifications():
         )
         fi_subject = "Vahvista nuorisojäsenyys"
         fi_html = (
-            "Hei {{ youth_profile.approver_first_name }},<br /><br />{{ youth_profile.profile.first_name }} on "
+            "Hei {{ youth_profile.approver_first_name }},<br /><br />{{ youth_name }} on "
             "pyytänyt sinua vahvistamaan nuorisojäsenyytensä. Käy antamassa vahvistus Jässäri-palvelussa käyttäen "
             'tätä linkkiä:<br /><br /><a href="https://jassari.test.kuva.hel.ninja/approve'
             '/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}">'
@@ -89,7 +89,7 @@ def generate_notifications():
             "automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia ei käsitellä.</i>"
         )
         fi_text = (
-            "Hei {{ youth_profile.approver_first_name }},\r\n\r\n{{ youth_profile.profile.first_name }} on pyytänyt "
+            "Hei {{ youth_profile.approver_first_name }},\r\n\r\n{{ youth_name }} on pyytänyt "
             "sinua vahvistamaan nuorisojäsenyytensä. Käy antamassa vahvistus Jässäri-palvelussa käyttäen tätä linkkiä:"
             "\r\n\r\nhttps://jassari.test.kuva.hel.ninja/approve/{{ youth_profile.approval_token }}"
             "/{{ youth_profile.profile_access_token }}\r\n\r\nTämä viesti on lähetetty järjestelmästä automaattisesti. "
@@ -117,14 +117,14 @@ def generate_notifications():
         )
         fi_subject = "Nuorisojäsenyys vahvistettu"
         fi_html = (
-            "Hei {{ youth_profile.profile.first_name }},\r\n<br /><br />\r\n{{ youth_profile.approver_first_name }} on "
+            "Hei {{ youth_name }},\r\n<br /><br />\r\n{{ youth_profile.approver_first_name }} on "
             "vahvistanut nuorisojäsenyytesi. Kirjaudu Jässäri-palveluun nähdäksesi omat tietosi:\r\n<br /><br />\r\n"
             '<a href="https://jassari.test.kuva.hel.ninja">https://jassari.test.kuva.hel.ninja</a>\r\n<br /><br />\r\n'
             "<i>Tämä viesti on lähetetty järjestelmästä automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia "
             "ei käsitellä.</i>"
         )
         fi_text = (
-            "Hei {{ youth_profile.profile.first_name }},\r\n\r\n{{ youth_profile.approver_first_name }} on vahvistanut "
+            "Hei {{ youth_name }},\r\n\r\n{{ youth_profile.approver_first_name }} on vahvistanut "
             "nuorisojäsenyytesi. Kirjaudu Jässäri-palveluun nähdäksesi omat tietosi:\r\n\r\n"
             "https://jassari.test.kuva.hel.ninja\r\n\r\nTämä viesti on lähetetty järjestelmästä automaattisesti. Älä "
             "vastaa tähän viestiin, sillä vastauksia ei käsitellä."
