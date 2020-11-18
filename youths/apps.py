@@ -10,5 +10,3 @@ class YouthsConfig(AppConfig):
 
     def ready(self):
         import youths.signals  # noqa isort:skip
-
-        # TODO push youth profile errors GraphQLView

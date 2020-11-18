@@ -11,9 +11,7 @@ from common_utils.consts import PERMISSION_DENIED_ERROR
 from youths.tests.factories import YouthProfileFactory
 
 
-@pytest.mark.parametrize(
-    "use_proper_profile_id", [True, False],
-)
+@pytest.mark.parametrize("use_proper_profile_id", [True, False])
 def test_anon_user_query_should_fail(
     rf, youth_profile, anon_user_gql_client, use_proper_profile_id
 ):

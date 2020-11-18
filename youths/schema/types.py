@@ -79,7 +79,7 @@ class YouthProfileNode(DjangoObjectType):
     )
 
     language_at_home = LanguageAtHome(
-        description="The language which is spoken in the youth's home.", required=True,
+        description="The language which is spoken in the youth's home.", required=True
     )
     membership_status = MembershipStatusEnum(
         description="Membership status based on expiration and approved_time fields",
