@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from reversion.admin import VersionAdmin
 
 from youths.models import AdditionalContactPerson, YouthProfile
 
@@ -11,7 +10,7 @@ class AdditionalContactPersonInline(admin.StackedInline):
 
 
 @admin.register(YouthProfile)
-class YouthProfileAdmin(VersionAdmin):
+class YouthProfileAdmin(admin.ModelAdmin):
     inlines = (AdditionalContactPersonInline,)
     list_display = (
         "__str__",

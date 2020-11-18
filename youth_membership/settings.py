@@ -156,7 +156,6 @@ INSTALLED_APPS = [
     "django_filters",
     "parler",
     "corsheaders",
-    "reversion",
     "django_ilmoitin",
     "mailer",
     "graphene_django",
@@ -178,7 +177,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "reversion.middleware.RevisionMiddleware",
 ]
 
 TEMPLATES = [

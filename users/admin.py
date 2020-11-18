@@ -3,13 +3,12 @@ from copy import deepcopy
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
-from reversion.admin import VersionAdmin
 
 User = get_user_model()
 
 
 @admin.register(User)
-class UserAdmin(VersionAdmin, DjangoUserAdmin):
+class UserAdmin(DjangoUserAdmin):
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
         if obj:
