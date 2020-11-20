@@ -1,6 +1,7 @@
 Django
 django-admin-sortable
 django-cors-headers
+django-crum
 django-enumfields
 django-environ
 django-filter
