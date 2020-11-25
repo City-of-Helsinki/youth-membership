@@ -11,7 +11,6 @@ fi
 if [[ "$APPLY_MIGRATIONS" = "1" ]]; then
     echo "Applying database migrations..."
     ./manage.py migrate --noinput
-    ./manage.py migrate reversion zero --noinput
 fi
 
 # Create admin user. Generate password if there isn't one in the environment variables
