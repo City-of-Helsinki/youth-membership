@@ -1,6 +1,7 @@
 #!/bin/bash
 
 python /app/manage.py migrate --noinput
+python /app/manage.py migrate reversion zero --noinput
 
 python /app/manage.py seed_data
 

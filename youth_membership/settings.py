@@ -161,6 +161,7 @@ INSTALLED_APPS = [
     "graphene_django",
     "adminsortable",
     "import_export",
+    "reversion",
     # Local apps
     "users",
     "youths",
