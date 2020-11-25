@@ -33,6 +33,8 @@ Prerequisites:
      * `HELSINKI_PROFILE_AUTH_SCOPE` OAuth/OIDC scope for open-city-profile
      * `HELSINKI_PROFILE_AUTH_CALLBACK_URL` Callback URL used by the UI for fetching OAuth/OIDC authorization token
      for open-city-profile
+     * `AUDIT_LOGGING_ENABLED`, enable audit logging for the backend
+     * `AUDIT_LOG_USERNAME`, audit logs contain the username
 
 2. Run `docker-compose up`
     * The project is now running at [localhost:8081](http://localhost:8081)

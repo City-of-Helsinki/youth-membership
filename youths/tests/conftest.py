@@ -22,6 +22,12 @@ def youth_profile():
 
 
 @pytest.fixture(autouse=True)
+def setup_audit_log(settings):
+    settings.AUDIT_LOGGING_ENABLED = False
+    settings.AUDIT_LOG_USERNAME = False
+
+
+@pytest.fixture(autouse=True)
 def setup_youth_membership_dates(settings):
     settings.YOUTH_MEMBERSHIP_SEASON_END_DATE = 31, 8
     settings.YOUTH_MEMBERSHIP_FULL_SEASON_START_MONTH = 5

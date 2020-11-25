@@ -9,6 +9,7 @@ from django_ilmoitin.utils import send_notification
 from enumfields import EnumField
 from sequences import Sequence
 
+from common_utils.audit_logging import AuditLogModel
 from common_utils.models import SerializableMixin, UUIDModel
 
 from .enums import MembershipStatus, NotificationType
@@ -32,7 +33,7 @@ def calculate_expiration(from_date=None):
     return date(year=expiration_year, month=expiration_month, day=expiration_day)
 
 
-class YouthProfile(UUIDModel, SerializableMixin):
+class YouthProfile(AuditLogModel, UUIDModel, SerializableMixin):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE
     )
