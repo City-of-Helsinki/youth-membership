@@ -32,6 +32,7 @@ review:
         K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
         K8S_SECRET_MAILER_EMAIL_BACKEND: "anymail.backends.mailgun.EmailBackend"
         K8S_SECRET_DEFAULT_FROM_EMAIL: "no-reply@hel.ninja"
+        K8S_SECRET_AUDIT_LOGGING_ENABLED: 1
         POSTGRES_IMAGE: "docker.io/andersinnovations/postgis:11-bitnami"
 
 staging:
@@ -61,6 +62,7 @@ staging:
         K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
         K8S_SECRET_MAILER_EMAIL_BACKEND: "anymail.backends.mailgun.EmailBackend"
         K8S_SECRET_DEFAULT_FROM_EMAIL: "no-reply@hel.ninja"
+        K8S_SECRET_AUDIT_LOGGING_ENABLED: 1
 #        K8S_SECRET_SESSION_COOKIE_SECURE: 1
 
 
@@ -86,6 +88,7 @@ production:
         K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
         K8S_SECRET_MAILER_EMAIL_BACKEND: "anymail.backends.mailgun.EmailBackend"
         K8S_SECRET_DEFAULT_FROM_EMAIL: "no-reply@hel.fi"
+        K8S_SECRET_AUDIT_LOGGING_ENABLED: 1
 #        K8S_SECRET_FORCE_SCRIPT_NAME: "/profiili"
 #        K8S_SECRET_MEDIA_URL: "/profiili/media/"
 #        K8S_SECRET_STATIC_URL: "/profiili/static/"

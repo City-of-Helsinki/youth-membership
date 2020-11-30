@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 import environ
 import sentry_sdk
@@ -49,6 +50,7 @@ env = environ.Env(
     NOTIFICATIONS_ENABLED=(bool, False),
     VERSION=(str, None),
     AUDIT_LOGGING_ENABLED=(bool, False),
+    AUDIT_LOG_USERNAME=(bool, False),
     GDPR_API_ENABLED=(bool, False),
     ENABLE_GRAPHIQL=(bool, False),
     FORCE_SCRIPT_NAME=(str, ""),
@@ -177,6 +179,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "crum.CurrentRequestUserMiddleware",
 ]
 
 TEMPLATES = [
@@ -315,9 +318,21 @@ YOUTH_MEMBERSHIP_STAFF_GROUP = "youth_admin"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "loggers": {"django": {"handlers": ["console"], "level": "ERROR"}},
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+        "audit": {
+            "class": "logging.StreamHandler",
+            "stream": sys.stdout,
+        },
+    },
+    "loggers": {
+        "django": {"handlers": ["console"], "level": "ERROR"},
+        "audit": {"handlers": ["audit"], "level": "DEBUG", "propagate": True},
+    },
 }
 
 
 GDPR_API_ENABLED = env("GDPR_API_ENABLED")
+
+AUDIT_LOGGING_ENABLED = env.bool("AUDIT_LOGGING_ENABLED")
+AUDIT_LOG_USERNAME = env.bool("AUDIT_LOG_USERNAME")
