@@ -1,0 +1,28 @@
+branches: {only: [master, develop]}
+sudo: false
+language: python
+python: 3.8
+cache: pip
+
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+    - postgresql-10
+    - postgresql-client-10
+
+matrix:
+  include:
+    - name: Unit tests
+      env: DATABASE_URL=postgres:///youth_membership
+      services: [postgresql]
+      install: pip install -r requirements.txt -r requirements-dev.txt
+      script: pytest -ra -vv --doctest-modules --cov=.
+      after_success: pip install codecov && codecov
+
+    - name: Coding style
+      install: pip install -r requirements.txt -r requirements-dev.txt
+      script:
+        - flake8
+        - isort -c .
+        - black --check .

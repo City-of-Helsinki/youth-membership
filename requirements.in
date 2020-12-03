@@ -1,0 +1,25 @@
+Django
+django-admin-sortable
+django-cors-headers
+django-crum
+django-enumfields
+django-environ
+django-filter
+django-graphql-jwt
+django-helusers
+django-ilmoitin
+django-import-export
+django-parler
+django-sequences
+djangorestframework
+graphene-django
+graphene-federation
+jmespath
+pillow
+pyyaml
+requests
+requests-oauthlib
+psycopg2
+--no-binary psycopg2
+sentry-sdk
+social-auth-app-django
