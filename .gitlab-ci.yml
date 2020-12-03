@@ -63,7 +63,8 @@ staging:
         K8S_SECRET_MAILER_EMAIL_BACKEND: "anymail.backends.mailgun.EmailBackend"
         K8S_SECRET_DEFAULT_FROM_EMAIL: "no-reply@hel.ninja"
         K8S_SECRET_AUDIT_LOGGING_ENABLED: 1
-#        K8S_SECRET_SESSION_COOKIE_SECURE: 1
+        K8S_SECRET_SESSION_COOKIE_SECURE: 1
+        K8S_SECRET_CSRF_COOKIE_SECURE: 1
 
 
 production:
@@ -89,14 +90,7 @@ production:
         K8S_SECRET_MAILER_EMAIL_BACKEND: "anymail.backends.mailgun.EmailBackend"
         K8S_SECRET_DEFAULT_FROM_EMAIL: "no-reply@hel.fi"
         K8S_SECRET_AUDIT_LOGGING_ENABLED: 1
-#        K8S_SECRET_FORCE_SCRIPT_NAME: "/profiili"
-#        K8S_SECRET_MEDIA_URL: "/profiili/media/"
-#        K8S_SECRET_STATIC_URL: "/profiili/static/"
-#        K8S_SECRET_CSRF_COOKIE_NAME: "profiili-prod-csrftoken"
-#        K8S_SECRET_CSRF_COOKIE_PATH: "/profiili/"
-#        K8S_SECRET_CSRF_COOKIE_SECURE: 1
-#        K8S_SECRET_SESSION_COOKIE_NAME: "profiili-prod-sessionid"
-#        K8S_SECRET_SESSION_COOKIE_PATH: "/profiili/"
-#        K8S_SECRET_SESSION_COOKIE_SECURE: 1
+        K8S_SECRET_CSRF_COOKIE_SECURE: 1
+        K8S_SECRET_SESSION_COOKIE_SECURE: 1
 #        K8S_SECRET_USE_X_FORWARDED_HOST: 1
 #        K8S_SECRET_CSRF_TRUSTED_ORIGINS: "api.hel.fi"
