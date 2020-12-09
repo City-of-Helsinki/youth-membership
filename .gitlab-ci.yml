@@ -36,9 +36,6 @@ review:
         POSTGRES_IMAGE: "docker.io/andersinnovations/postgis:11-bitnami"
 
 staging:
-    only:
-        refs:
-            - develop
     variables:
         K8S_SECRET_ALLOWED_HOSTS: "*"
         K8S_SECRET_DEBUG: 0
