@@ -37,8 +37,8 @@ class Command(BaseCommand):
             ADGroup.objects.get_by_natural_key = lambda name: ADGroup.objects.get(
                 name=name
             )
-            YouthProfile.objects.get_by_natural_key = lambda uuid: YouthProfile.objects.get(
-                id=uuid
+            YouthProfile.objects.get_by_natural_key = (
+                lambda uuid: YouthProfile.objects.get(id=uuid)
             )
 
             max_membership_number = 0
