@@ -68,77 +68,170 @@ def delete_contact_persons(youth_profile: YouthProfile, data):
         ).delete()
 
 
+notification_templates = {
+    NotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED.value: {
+        "fi": {
+            "subject": (
+                "{{ youth_name }} on lähettänyt hyväksyttäväksesi Helsingin kaupungin nuorisopalvelujen "
+                "jäsenyyshakemuksen"
+            ),
+            "html": (
+                "Hei {{ youth_profile.approver_first_name }},<br /><br />{{ youth_name }} on lähettänyt "
+                "hyväksyttäväksesi Helsingin kaupungin nuorisopalvelujen jäsenyyshakemuksen. Jäsenyys on maksuton. "
+                "Hyväksymällä hakemuksen, {{ youth_name }} voi käydä nuorisotalolla ja saa kivoja etuja. Mikäli "
+                "tiedoissa on virheitä, pyydä nuorta muuttamaan tiedot ja lähettämään sinulle uusi varmistusviesti. "
+                "Käy antamassa vahvistus Jässäri-palvelussa käyttäen tätä linkkiä:<br /><br />"
+                '<a href="https://jassari.hel.fi/approve/{{ youth_profile.approval_token }}/'
+                '{{ youth_profile.profile_access_token }}">https://jassari.hel.fi/approve/'
+                "{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}</a><br /><br />"
+                "<i>Tämä viesti on lähetetty järjestelmästä automaattisesti. Älä vastaa tähän viestiin, sillä "
+                "vastauksia ei käsitellä.</i>"
+            ),
+            "text": (
+                "Hei {{ youth_profile.approver_first_name }},\r\n\r\n{{ youth_name }} on lähettänyt hyväksyttäväksesi "
+                "Helsingin kaupungin nuorisopalvelujen jäsenyyshakemuksen. Jäsenyys on maksuton. Hyväksymällä "
+                "hakemuksen, {{ youth_name }} voi käydä nuorisotalolla ja saa kivoja etuja. Mikäli tiedoissa on "
+                "virheitä, pyydä nuorta muuttamaan tiedot ja lähettämään sinulle uusi varmistusviesti. Käy antamassa "
+                "vahvistus Jässäri-palvelussa käyttäen tätä linkkiä:\r\n\r\n"
+                "https://jassari.hel.fi/approve/{{ youth_profile.approval_token }}/"
+                "{{ youth_profile.profile_access_token }}\r\n\r\n"
+                "Tämä viesti on lähetetty järjestelmistä automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia "
+                "ei käsitellä."
+            ),
+        },
+        "sv": {
+            "subject": (
+                "{{ youth_name }} har skickat dig en ansökan om medlemskap i Helsingfors stads ungdomstjänster för "
+                "godkännande."
+            ),
+            "html": (
+                "Hej {{ youth_profile.approver_first_name }},<br /><br />{{ youth_name }} har skickat dig en ansökan "
+                "om medlemskap i Helsingfors stads ungdomstjänster för godkännande. Medlemskapet är kostnadsfritt. Om "
+                "du godkänner ansökan, kan {{ youth_name }} delta i ungdomsgårdarnas verksamhet och få trevliga "
+                "förmåner. Om det finns fel i uppgifterna, be den unga att korrigera dem och sedan skicka ett nytt "
+                "bekräftelsemeddelande till dig. Du kan ge ditt godkännande med Jässäri-tjänsten via denna länk:"
+                '<br /><br /><a href="https://jassari.hel.fi/approve/{{ youth_profile.approval_token }}/'
+                '{{ youth_profile.profile_access_token }}">https://jassari.hel.fi/approve/'
+                "{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}</a><br /><br />"
+                "<i>Det här meddelandet skickades automatiskt från våra system. Svara inte på det här meddelandet "
+                "eftersom svaren inte kommer att behandlas.</i>"
+            ),
+            "text": (
+                "Hej {{ youth_profile.approver_first_name }},\r\n\r\n{{ youth_name }} har skickat dig en ansökan "
+                "om medlemskap i Helsingfors stads ungdomstjänster för godkännande. Medlemskapet är kostnadsfritt. "
+                "Om du godkänner ansökan, kan {{ youth_name }} delta i ungdomsgårdarnas verksamhet och få trevliga "
+                "förmåner. Om det finns fel i uppgifterna, be den unga att korrigera dem och sedan skicka ett nytt "
+                "bekräftelsemeddelande till dig. Du kan ge ditt godkännande med Jässäri-tjänsten via denna länk:"
+                "\r\n\r\nhttps://jassari.hel.fi/approve/{{ youth_profile.approval_token }}/"
+                "{{ youth_profile.profile_access_token }}\r\n\r\nDet här meddelandet skickades automatiskt från våra "
+                "system. Svara inte på det här meddelandet eftersom svaren inte kommer att behandlas."
+            ),
+        },
+        "en": {
+            "subject": (
+                "{{ youth_name }} has sent a membership application for the City of Helsinki’s Youth Services for your "
+                "approval."
+            ),
+            "html": (
+                "Hi {{ youth_profile.approver_first_name }},<br /><br />{{ youth_name }} has sent a membership "
+                "application for the City of Helsinki’s Youth Services for your approval. The membership is free of "
+                "charge. If you approve the application, {{ youth_name }} may visit Youth Centres and enjoy fun "
+                "benefits. If the information is incorrect, ask the youth to change it and send a new approval request "
+                "to you. You can give your approval using the Jässäri service via this link:<br /><br />"
+                '<a href="https://jassari.hel.fi/approve/{{ youth_profile.approval_token }}/'
+                '{{ youth_profile.profile_access_token }}">https://jassari.hel.fi/approve/'
+                "{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}</a><br /><br />"
+                "<i>This message was sent automatically from our system. Please do not reply to this message as the "
+                "replies will not be processed.</i>"
+            ),
+            "text": (
+                "Hi {{ youth_profile.approver_first_name }},\r\n\r\n{{ youth_name }} has sent a membership application "
+                "for the City of Helsinki’s Youth Services for your approval. The membership is free of charge. If you "
+                "approve the application, {{ youth_name }} may visit Youth Centres and enjoy fun benefits. If the "
+                "information is incorrect, ask the youth to change it and send a new approval request to you. You can "
+                "give your approval using the Jässäri service via this link:\r\n\r\nhttps://jassari.hel.fi/approve/"
+                "{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}\r\n\r\n"
+                "This message was sent automatically from our system. Please do not reply to this message as the "
+                "replies will not be processed."
+            ),
+        },
+    },
+    NotificationType.YOUTH_PROFILE_CONFIRMED.value: {
+        "fi": {
+            "subject": "{{ youth_profile.approver_first_name }} on hyväksynyt nuorisopalveluiden jäsenyytesi",
+            "html": (
+                "Tervetuloa Helsingin kaupungin nuorisopalveluiden jäseneksi! {{ youth_profile.approver_first_name }} "
+                "on hyväksynyt jäsenyytesi. Digitaalinen jäsenkorttisi löytyy täältä: "
+                '<a href="https://jassari.hel.fi">https://jassari.hel.fi</a><br /><br />'
+                "Lisätietoa nuorisopalveluiden jäsenyydestä ja sen eduista voit lukea osoitteesta "
+                '<a href="https://jassari.munstadi.fi/">https://jassari.munstadi.fi/</a>.<br /><br /><i>Tämä viesti on '
+                "lähetetty järjestelmästä automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia ei "
+                "käsitellä.</i>"
+            ),
+            "text": (
+                "Tervetuloa Helsingin kaupungin nuorisopalveluiden jäseneksi! {{ youth_profile.approver_first_name }} "
+                "on hyväksynyt jäsenyytesi. Digitaalinen jäsenkorttisi löytyy täältä: https://jassari.hel.fi\r\n\r\n"
+                "Lisätietoa nuorisopalveluiden jäsenyydestä ja sen eduista voit lukea osoitteesta "
+                "https://jassari.munstadi.fi\r\n\r\nTämä viesti on lähetetty järjestelmästä automaattisesti. Älä "
+                "vastaa tähän viestiin, sillä vastauksia ei käsitellä."
+            ),
+        },
+        "sv": {
+            "subject": (
+                "{{ youth_profile.approver_first_name }} har godkänt ditt edlemskap i Helsingfors stads ungdomstjänster"
+            ),
+            "html": (
+                "Välkommen som medlem i Helsingfors stads ungdomstjänster! {{ youth_profile.approver_first_name }} har "
+                "godkänt ditt edlemskap i Helsingfors stads ungdomstjänster. Ditt digitala medlemskort kan hittas här: "
+                '<a href="https://jassari.hel.fi">https://jassari.hel.fi</a><br /><br />'
+                "Mer information om medlemskapet i ungdomstjänsterna och förmånerna finns på adressen "
+                '<a href="https://jassari.munstadi.fi/sv/">https://jassari.munstadi.fi/sv/<a/><br /><br />'
+                "<i>Det här meddelandet skickades automatiskt från våra system. Svara inte på det här meddelandet "
+                "eftersom svaren inte kommer att behandlas.</i>"
+            ),
+            "text": (
+                "Välkommen som medlem i Helsingfors stads ungdomstjänster! {{ youth_profile.approver_first_name }} har "
+                "godkänt ditt edlemskap i Helsingfors stads ungdomstjänster. Ditt digitala medlemskort kan hittas här: "
+                "https://jassari.hel.fi\r\n\r\nMer information om medlemskapet i ungdomstjänsterna och "
+                "förmånerna finns på adressen https://jassari.munstadi.fi/sv/.\r\n\r\nDet här meddelandet skickades "
+                "automatiskt från våra system. Svara inte på det här meddelandet eftersom svaren inte kommer att "
+                "behandlas."
+            ),
+        },
+        "en": {
+            "subject": "{{ youth_profile.approver_first_name }} has approved your Youth Services membership",
+            "html": (
+                "Welcome to the Youth Services of the City of Helsinki! {{ youth_profile.approver_first_name }} has "
+                "approved your membership. Your digital membership card can be found here: "
+                '<a href="https://jassari.hel.fi">https://jassari.hel.fi</a><br /><br />For more information on the '
+                "Youth Services membership and its perks, please visit "
+                '<a href="https://jassari.munstadi.fi/en/">https://jassari.munstadi.fi/en/</a><br /><br />'
+                "<i>This message was sent automatically from our system. Please do not reply to this message as the "
+                "replies will not be processed.</i>"
+            ),
+            "text": (
+                "Welcome to the Youth Services of the City of Helsinki! {{ youth_profile.approver_first_name }} has "
+                "approved your membership. Your digital memberhsip card can be found here: "
+                "https://jassari.hel.fi\r\n\r\nFor more information on the Youth Services membership and its perks, "
+                "please visit https://jassari.munstadi.fi/en/.\r\n\r\nThis message was sent automatically from our "
+                "system. Please do not reply to this message as the replies will not be processed."
+            ),
+        },
+    },
+}
+
+
 @transaction.atomic
 def generate_notifications():
     """Creates Youth Profile notifications if they don't already exist."""
+    for notification_type, translations in notification_templates.items():
 
-    if not NotificationTemplate.objects.filter(
-        type=NotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED.value
-    ).exists():
-        template = NotificationTemplate(
-            type=NotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED.value
-        )
-        fi_subject = "Vahvista nuorisojäsenyys"
-        fi_html = (
-            "Hei {{ youth_profile.approver_first_name }},<br /><br />{{ youth_name }} on "
-            "pyytänyt sinua vahvistamaan nuorisojäsenyytensä. Käy antamassa vahvistus Jässäri-palvelussa käyttäen "
-            'tätä linkkiä:<br /><br /><a href="https://jassari.test.kuva.hel.ninja/approve'
-            '/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}">'
-            "https://jassari.test.kuva.hel.ninja/approve/{{ youth_profile.approval_token }}"
-            "/{{ youth_profile.profile_access_token }}</a><br /><br /><i>Tämä viesti on lähetetty järjestelmästä "
-            "automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia ei käsitellä.</i>"
-        )
-        fi_text = (
-            "Hei {{ youth_profile.approver_first_name }},\r\n\r\n{{ youth_name }} on pyytänyt "
-            "sinua vahvistamaan nuorisojäsenyytensä. Käy antamassa vahvistus Jässäri-palvelussa käyttäen tätä linkkiä:"
-            "\r\n\r\nhttps://jassari.test.kuva.hel.ninja/approve/{{ youth_profile.approval_token }}"
-            "/{{ youth_profile.profile_access_token }}\r\n\r\nTämä viesti on lähetetty järjestelmästä automaattisesti. "
-            "Älä vastaa tähän viestiin, sillä vastauksia ei käsitellä."
-        )
-        template.set_current_language("fi")
-        template.subject = fi_subject
-        template.body_html = fi_html
-        template.body_text = fi_text
-        template.set_current_language("sv")
-        template.subject = fi_subject + " SV TRANSLATION NEEDED"
-        template.body_html = fi_html + "<p>SV TRANSLATION NEEDED</p>"
-        template.body_text = fi_text + "<p>SV TRANSLATION NEEDED</p>"
-        template.set_current_language("en")
-        template.subject = fi_subject + " EN TRANSLATION NEEDED"
-        template.body_html = fi_html + "<p>EN TRANSLATION NEEDED</p>"
-        template.body_text = fi_text + "<p>EN TRANSLATION NEEDED</p>"
-        template.save()
+        if not NotificationTemplate.objects.filter(type=notification_type).exists():
+            template = NotificationTemplate(type=notification_type)
 
-    if not NotificationTemplate.objects.filter(
-        type=NotificationType.YOUTH_PROFILE_CONFIRMED.value
-    ).exists():
-        template = NotificationTemplate(
-            type=NotificationType.YOUTH_PROFILE_CONFIRMED.value
-        )
-        fi_subject = "Nuorisojäsenyys vahvistettu"
-        fi_html = (
-            "Hei {{ youth_name }},\r\n<br /><br />\r\n{{ youth_profile.approver_first_name }} on "
-            "vahvistanut nuorisojäsenyytesi. Kirjaudu Jässäri-palveluun nähdäksesi omat tietosi:\r\n<br /><br />\r\n"
-            '<a href="https://jassari.test.kuva.hel.ninja">https://jassari.test.kuva.hel.ninja</a>\r\n<br /><br />\r\n'
-            "<i>Tämä viesti on lähetetty järjestelmästä automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia "
-            "ei käsitellä.</i>"
-        )
-        fi_text = (
-            "Hei {{ youth_name }},\r\n\r\n{{ youth_profile.approver_first_name }} on vahvistanut "
-            "nuorisojäsenyytesi. Kirjaudu Jässäri-palveluun nähdäksesi omat tietosi:\r\n\r\n"
-            "https://jassari.test.kuva.hel.ninja\r\n\r\nTämä viesti on lähetetty järjestelmästä automaattisesti. Älä "
-            "vastaa tähän viestiin, sillä vastauksia ei käsitellä."
-        )
-        template.set_current_language("fi")
-        template.subject = fi_subject
-        template.body_html = fi_html
-        template.body_text = fi_text
-        template.set_current_language("sv")
-        template.subject = fi_subject + " SV TRANSLATION NEEDED"
-        template.body_html = fi_html + "<p>SV TRANSLATION NEEDED</p>"
-        template.body_text = fi_text + "<p>SV TRANSLATION NEEDED</p>"
-        template.set_current_language("en")
-        template.subject = fi_subject + " EN TRANSLATION NEEDED"
-        template.body_html = fi_html + "<p>EN TRANSLATION NEEDED</p>"
-        template.body_text = fi_text + "<p>EN TRANSLATION NEEDED</p>"
-        template.save()
+            for lang, values in translations.items():
+                template.set_current_language(lang)
+                template.subject = values["subject"]
+                template.body_html = values["html"]
+                template.body_text = values["text"]
+            template.save()
