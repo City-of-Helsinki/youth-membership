@@ -17,15 +17,6 @@ def autouse_db(db):
 @pytest.fixture(autouse=True)
 def setup_helsinki_profile_settings(settings):
     settings.HELSINKI_PROFILE_API_URL = "https://localhost"
-    settings.HELSINKI_PROFILE_AUTH_SCOPE = "https://api.hel.fi/auth/helsinkiprofile"
-    settings.HELSINKI_PROFILE_AUTH_CALLBACK_URL = "https://localhost/callback"
-
-
-@pytest.fixture(autouse=True)
-def setup_oauth_settings(settings):
-    settings.SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = "https://localhost"
-    settings.SOCIAL_AUTH_TUNNISTAMO_KEY = "key"
-    settings.SOCIAL_AUTH_TUNNISTAMO_SECRET = "secret"
 
 
 @pytest.fixture(autouse=True)

@@ -25,8 +25,6 @@ review:
         K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
         K8S_SECRET_OIDC_CLIENT_ID: "$GL_QA_OIDC_CLIENT_ID"
         K8S_SECRET_OIDC_CLIENT_SECRET: "$GL_QA_OIDC_CLIENT_SECRET"
-        K8S_SECRET_HELSINKI_PROFILE_AUTH_SCOPE: "https://api.hel.fi/auth/helsinkiprofile"
-        K8S_SECRET_HELSINKI_PROFILE_AUTH_CALLBACK_URL: "https://jassari.test.kuva.hel.ninja/callback"
         K8S_SECRET_HELSINKI_PROFILE_API_URL: "https://profiili-api.test.kuva.hel.ninja/graphql/"
         K8S_SECRET_MAIL_MAILGUN_KEY: "$GL_MAILGUN_API_KEY"
         K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
@@ -53,8 +51,6 @@ staging:
         K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
         K8S_SECRET_OIDC_CLIENT_ID: "$GL_QA_OIDC_CLIENT_ID"
         K8S_SECRET_OIDC_CLIENT_SECRET: "$GL_QA_OIDC_CLIENT_SECRET"
-        K8S_SECRET_HELSINKI_PROFILE_AUTH_SCOPE: "https://api.hel.fi/auth/helsinkiprofile"
-        K8S_SECRET_HELSINKI_PROFILE_AUTH_CALLBACK_URL: "https://jassari.test.kuva.hel.ninja/callback"
         K8S_SECRET_HELSINKI_PROFILE_API_URL: "https://profiili-api.test.kuva.hel.ninja/graphql/"
         K8S_SECRET_MAIL_MAILGUN_KEY: "$GL_MAILGUN_API_KEY"
         K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
@@ -81,8 +77,6 @@ production:
         K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
         K8S_SECRET_OIDC_CLIENT_ID: "$GL_STABLE_OIDC_CLIENT_ID"
         K8S_SECRET_OIDC_CLIENT_SECRET: "$GL_STABLE_OIDC_CLIENT_SECRET"
-        K8S_SECRET_HELSINKI_PROFILE_AUTH_SCOPE: "https://api.hel.fi/auth/helsinkiprofile"
-        K8S_SECRET_HELSINKI_PROFILE_AUTH_CALLBACK_URL: "https://jassari.hel.fi/callback"
         K8S_SECRET_HELSINKI_PROFILE_API_URL: "https://api.hel.fi/profiili/graphql/"
         K8S_SECRET_MAIL_MAILGUN_KEY: "$GL_MAILGUN_API_KEY"
         K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"

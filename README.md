@@ -21,7 +21,8 @@ Prerequisites:
    * Set entrypoint/startup variables according to taste.
      * `DEBUG`, controls debug mode on/off
      * `TOKEN_AUTH_*`, settings for [tunnistamo](https://github.com/City-of-Helsinki/tunnistamo) authentication service
-     * `OIDC_CLIENT_SECRET` tunnistamo client secret for enabling OIDC admin loging and authorization code flows
+     * `OIDC_CLIENT_ID` tunnistamo client id for enabling OIDC admin login
+     * `OIDC_CLIENT_SECRET` tunnistamo client secret for enabling OIDC admin login
      * `GDPR_API_ENABLED`, enable the GDPR API for youth profiles
      * `ENABLE_GRAPHIQL`, enables GraphiQL interface for `/graphql/`
      * `APPLY_MIGRATIONS`, applies migrations on startup
@@ -30,9 +31,6 @@ Prerequisites:
      * `ADMIN_USER_PASSWORD`, the admin user's password. If this is not given, a random password is generated
      and written into stdout when an admin user is created automatically.
      * `HELSINKI_PROFILE_API_URL` URL for the Helsinki profile GraphQL API
-     * `HELSINKI_PROFILE_AUTH_SCOPE` OAuth/OIDC scope for open-city-profile
-     * `HELSINKI_PROFILE_AUTH_CALLBACK_URL` Callback URL used by the UI for fetching OAuth/OIDC authorization token
-     for open-city-profile
      * `AUDIT_LOGGING_ENABLED`, enable audit logging for the backend
      * `AUDIT_LOG_USERNAME`, audit logs contain the username
 
