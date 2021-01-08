@@ -22,6 +22,13 @@ def youth_profile():
 
 
 @pytest.fixture(autouse=True)
+def setup_token_auth_url(settings):
+    issuer = "https://test_issuer"
+    settings.SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = issuer
+    settings.OIDC_API_TOKEN_AUTH["ISSUER"] = issuer
+
+
+@pytest.fixture(autouse=True)
 def setup_audit_log(settings):
     settings.AUDIT_LOGGING_ENABLED = False
     settings.AUDIT_LOG_USERNAME = False
@@ -36,6 +43,8 @@ def setup_youth_membership_dates(settings):
 @pytest.fixture(autouse=True)
 def setup_gdpr_api(settings):
     settings.GDPR_API_ENABLED = True
+    settings.GDPR_API_QUERY_SCOPE = "jassariapi.gdprquery"
+    settings.GDPR_API_DELETE_SCOPE = "jassariapi.gdprdelete"
 
 
 @pytest.fixture

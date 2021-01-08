@@ -17,6 +17,7 @@ pytest
 pytest-cov
 pytest-django
 pytest-factoryboy
+python-jose
 pytest-lazy-fixture
 pytest-mock
 requests-mock
