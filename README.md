@@ -24,6 +24,8 @@ Prerequisites:
      * `OIDC_CLIENT_ID` tunnistamo client id for enabling OIDC admin login
      * `OIDC_CLIENT_SECRET` tunnistamo client secret for enabling OIDC admin login
      * `GDPR_API_ENABLED`, enable the GDPR API for youth profiles
+     * `GDPR_API_QUERY_SCOPE` OAuth scope required for GDPR query operation
+     * `GDPR_API_DELETE_SCOPE` OAuth scope required for GDPR delete operation
      * `ENABLE_GRAPHIQL`, enables GraphiQL interface for `/graphql/`
      * `APPLY_MIGRATIONS`, applies migrations on startup
      * `CREATE_ADMIN_USER`, creates an admin user with credentials `kuva-admin`:(password, see below)
