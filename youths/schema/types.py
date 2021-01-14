@@ -103,7 +103,7 @@ class YouthProfileNode(DjangoObjectType):
     def get_node(cls, info, id):
         node = super().get_node(info, id)
         user = info.context.user
-        if user_is_admin(user) or node.user == user:
+        if node and (user_is_admin(user) or node.user == user):
             return node
         return None
 
@@ -146,6 +146,6 @@ class ProfileNode(DjangoObjectType):
     def get_node(cls, info, id):
         node = super().get_node(info, id)
         user = info.context.user
-        if user_is_admin(user) or node.user == user:
+        if node and (user_is_admin(user) or node.user == user):
             return node
         return None
