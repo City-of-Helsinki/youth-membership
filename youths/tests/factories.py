@@ -5,6 +5,7 @@ import factory
 from django.utils import timezone
 from graphql_relay import to_global_id
 
+from common_utils.profile import ProfileAPI
 from users.factories import UserFactory
 from youths.models import AdditionalContactPerson, YouthProfile
 
@@ -26,6 +27,9 @@ class RestrictedProfileAPIResponse(MyProfileAPIResponse):
     """Data returned from ProfileAPI.fetch_profile_with_temporary_access_token."""
 
     email = factory.Faker("email")
+    language = factory.Faker(
+        "random_element", elements=ProfileAPI.profile_langs.values()
+    )
 
 
 class ProfileAPITokenResponse(factory.DictFactory):

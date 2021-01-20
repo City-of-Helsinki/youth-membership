@@ -424,7 +424,7 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
                 "youth_profile": youth_profile,
                 "youth_name": profile_data["first_name"],
             },
-            language=youth_profile.language_at_home.value,
+            language=profile_data["language"],
         )
         return ApproveYouthProfileMutation(youth_profile=youth_profile)
 

@@ -10,6 +10,7 @@ from common_utils.profile import ProfileAPI
 PROFILE_ID = "UHJvZmlsZU5vZGU6NWIzNjQwNmQtZGE5NS00Y2IwLTg4ZDgtMmVjNmY4MGU5ZmM5"
 FIRST_NAME = "Test"
 LAST_NAME = "Person"
+PROFILE_LANGUAGE = "fi"
 
 # RestrictedProfileNode:5b36406d-da95-4cb0-88d8-2ec6f80e9fc9
 RESTRICTED_PROFILE_ID = (
@@ -85,5 +86,6 @@ def test_fetch_profile_with_temporary_access_token(
         "first_name": FIRST_NAME,
         "last_name": LAST_NAME,
         "email": EMAIL,
+        "language": PROFILE_LANGUAGE,
     }
     assert profile == expected_data
