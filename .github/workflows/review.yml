@@ -60,8 +60,8 @@ jobs:
           K8S_SECRET_OIDC_CLIENT_ID: ${{ secrets.GH_QA_OIDC_CLIENT_ID }}
           K8S_SECRET_OIDC_CLIENT_SECRET: ${{ secrets.GH_QA_OIDC_CLIENT_SECRET }}
           K8S_SECRET_HELSINKI_PROFILE_AUTH_SCOPE: "https://api.hel.fi/auth/helsinkiprofile"
-          K8S_SECRET_HELSINKI_PROFILE_AUTH_CALLBACK_URL: "https://jassari.test.kuva.hel.ninja/callback"
-          K8S_SECRET_HELSINKI_PROFILE_API_URL: "https://profiili-api.test.kuva.hel.ninja/graphql/"
+          K8S_SECRET_HELSINKI_PROFILE_AUTH_CALLBACK_URL: "https://jassari.${{ env.BASE_DOMAIN }}/callback"
+          K8S_SECRET_HELSINKI_PROFILE_API_URL: "https://profiili-api.${{ env.BASE_DOMAIN }}/graphql/"
           K8S_SECRET_MAIL_MAILGUN_KEY: ${{ secrets.GH_MAILGUN_API_KEY }}
           K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
           K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
