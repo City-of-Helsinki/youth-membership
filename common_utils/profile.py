@@ -1,3 +1,5 @@
+import logging
+
 import jmespath
 import requests
 from django.conf import settings
@@ -6,6 +8,8 @@ from django.utils.dateparse import parse_datetime
 from requests.auth import AuthBase
 
 from common_utils.exceptions import ProfileAPIError
+
+logger = logging.getLogger(__name__)
 
 
 class BearerAuth(AuthBase):
@@ -23,6 +27,12 @@ class ProfileAPI:
     """Client for fetching open-city-profile related data."""
 
     timeout = 5
+
+    profile_langs = {
+        "FINNISH": "fi",
+        "SWEDISH": "sv",
+        "ENGLISH": "en",
+    }
 
     def __init__(self):
         self.check_settings()
@@ -43,6 +53,13 @@ class ProfileAPI:
                 raise ProfileAPIError(
                     "Required information not available from the Helsinki profile API."
                 )
+
+    def parse_language(self, language):
+        if language in self.profile_langs:
+            return self.profile_langs[language]
+
+        logger.warning(f"ProfileAPI doesn't map the language: {language}")
+        return self.profile_langs["FINNISH"]
 
     def fetch_profile(self, api_token: str, id: str) -> dict:
         """Fetch profile data for the given profile ID. Requires staff level permission"""
@@ -113,6 +130,7 @@ class ProfileAPI:
                     primaryEmail {
                         email
                     }
+                    language
                 }
             }
         """
@@ -123,13 +141,17 @@ class ProfileAPI:
                 first_name: firstName
                 last_name: lastName
                 email: primaryEmail.email
+                language: language
             }
         """
         )
         data = self.do_query(query, variables={"token": temporary_token})
 
         parsed_data = path.search(data)
-        self.contains_keys(parsed_data, ["id", "first_name", "last_name", "email"])
+        self.contains_keys(
+            parsed_data, ["id", "first_name", "last_name", "email", "language"]
+        )
+        parsed_data["language"] = self.parse_language(parsed_data["language"])
         return parsed_data
 
     def create_temporary_access_token(self, api_token: str) -> dict:

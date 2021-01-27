@@ -6,7 +6,8 @@
             "lastName": "Person",
             "primaryEmail": {
                 "email": "testi@example.com"
-            }
+            },
+            "language": "FINNISH"
         }
     }
 }
