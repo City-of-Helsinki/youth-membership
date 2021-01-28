@@ -53,7 +53,7 @@ jobs:
           K8S_SECRET_ENABLE_GRAPHIQL: 1
           K8S_SECRET_TOKEN_AUTH_ACCEPTED_AUDIENCE: "https://api.hel.fi/auth/jassariapi"
           K8S_SECRET_TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX: "jassariapi"
-          K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso-test/openid"
+          K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.${{ env.BASE_DOMAIN }}/openid"
           K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
           K8S_SECRET_OIDC_CLIENT_ID: ${{ secrets.GH_QA_OIDC_CLIENT_ID }}
           K8S_SECRET_OIDC_CLIENT_SECRET: ${{ secrets.GH_QA_OIDC_CLIENT_SECRET }}
