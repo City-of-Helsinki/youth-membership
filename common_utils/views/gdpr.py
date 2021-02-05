@@ -38,7 +38,9 @@ class GDPRScopesPermission(IsAuthenticated):
         return False
 
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.user
+        if obj.user:
+            return request.user == obj.user
+        return False
 
 
 class GDPRAPIView(APIView):
