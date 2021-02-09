@@ -86,7 +86,10 @@ class GDPRAPIView(APIView):
         """
         try:
             with transaction.atomic():
-                self.get_object().delete()
+                obj = self.get_object()
+                user = obj.user
+                obj.delete()
+                user.delete()
                 self.check_dry_run()
         except DryRunException:
             # Deletion is possible. Due to dry run, transaction is rolled back.
