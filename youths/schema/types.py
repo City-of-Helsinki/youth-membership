@@ -1,5 +1,3 @@
-from datetime import date
-
 import django_filters
 import graphene
 from django.core.exceptions import PermissionDenied
@@ -13,7 +11,7 @@ from graphql_jwt.decorators import login_required
 from common_utils.graphql import CountConnection
 
 from ..enums import MembershipStatus, YouthLanguage
-from ..models import AdditionalContactPerson, calculate_expiration, YouthProfile
+from ..models import AdditionalContactPerson, YouthProfile
 from ..utils import user_is_admin
 
 with override("en"):
@@ -89,11 +87,6 @@ class YouthProfileNode(DjangoObjectType):
         description="Tells if the membership is currently renewable or not",
         required=True,
     )
-
-    def resolve_renewable(self: YouthProfile, info, **kwargs):
-        return bool(self.approved_time) and self.expiration != calculate_expiration(
-            date.today()
-        )
 
     def resolve_profile(self: YouthProfile, info, **kwargs):
         return self

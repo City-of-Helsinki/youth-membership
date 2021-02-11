@@ -123,6 +123,12 @@ class YouthProfile(AuditLogModel, UUIDModel, SerializableMixin):
             return MembershipStatus.ACTIVE
         return MembershipStatus.PENDING
 
+    @property
+    def renewable(self):
+        return bool(self.approved_time) and self.expiration != calculate_expiration(
+            date.today()
+        )
+
     def __str__(self):
         if self.user:
             return "{} {} ({})".format(
