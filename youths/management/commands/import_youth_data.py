@@ -54,6 +54,8 @@ class Command(BaseCommand):
                 last=max_membership_number
             )
 
+            YouthProfile.objects.update(approval_token="")
+
             admin_group = generate_admin_group()
             for ad_group in ADGroup.objects.all():
                 ADGroupMapping.objects.create(group=admin_group, ad_group=ad_group)
