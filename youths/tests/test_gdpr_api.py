@@ -1,6 +1,7 @@
 import datetime
 
 import pytest
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from helusers.settings import api_token_auth_settings
 from jose import jwt
@@ -8,6 +9,8 @@ from jose import jwt
 from youths.models import YouthProfile
 
 from .keys import rsa_key
+
+User = get_user_model()
 
 TRUE_VALUES = ["true", "True", "TRUE", "1", 1, True]
 FALSE_VALUES = ["false", "False", "FALSE", "0", 0, False]
@@ -97,6 +100,7 @@ def test_delete_profile_dry_run_data(
 
     assert response.status_code == 204
     assert YouthProfile.objects.count() == 1
+    assert User.objects.count() == 1
 
 
 @pytest.mark.parametrize("true_value", TRUE_VALUES)
@@ -114,6 +118,7 @@ def test_delete_profile_dry_run_query_params(
 
     assert response.status_code == 204
     assert YouthProfile.objects.count() == 1
+    assert User.objects.count() == 1
 
 
 def test_delete_profile(api_client, youth_profile, requests_mock, settings):
@@ -127,6 +132,7 @@ def test_delete_profile(api_client, youth_profile, requests_mock, settings):
 
     assert response.status_code == 204
     assert YouthProfile.objects.count() == 0
+    assert User.objects.count() == 0
 
 
 @pytest.mark.parametrize("false_value", FALSE_VALUES)
@@ -144,6 +150,7 @@ def test_delete_profile_dry_run_query_params_false(
 
     assert response.status_code == 204
     assert YouthProfile.objects.count() == 0
+    assert User.objects.count() == 0
 
 
 @pytest.mark.parametrize("false_value", FALSE_VALUES)
@@ -162,6 +169,7 @@ def test_delete_profile_dry_run_data_false(
 
     assert response.status_code == 204
     assert YouthProfile.objects.count() == 0
+    assert User.objects.count() == 0
 
 
 def test_gdpr_api_requires_authentication(api_client, youth_profile, snapshot):
@@ -242,3 +250,4 @@ def test_gdpr_delete_requires_correct_scope(
     else:
         assert response.status_code == 403
         assert YouthProfile.objects.count() == 1
+        assert User.objects.count() == 1

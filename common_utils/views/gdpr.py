@@ -38,7 +38,9 @@ class GDPRScopesPermission(IsAuthenticated):
         return False
 
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.user
+        if obj.user:
+            return request.user == obj.user
+        return False
 
 
 class GDPRAPIView(APIView):
@@ -84,7 +86,10 @@ class GDPRAPIView(APIView):
         """
         try:
             with transaction.atomic():
-                self.get_object().delete()
+                obj = self.get_object()
+                user = obj.user
+                obj.delete()
+                user.delete()
                 self.check_dry_run()
         except DryRunException:
             # Deletion is possible. Due to dry run, transaction is rolled back.
