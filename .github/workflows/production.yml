@@ -56,7 +56,7 @@ jobs:
           K8S_SECRET_SKIP_DATABASE_CHECK: 1
           K8S_SECRET_VERSION: ${{ github.sha }}
           K8S_SECRET_TOKEN_AUTH_ACCEPTED_AUDIENCE: "https://api.hel.fi/auth/jassariapiprod"
-          K8S_SECRET_TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX: "jassariapi"
+          K8S_SECRET_TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX: "jassariapiprod"
           K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso/openid"
           K8S_SECRET_TOKEN_AUTH_REQUIRE_SCOPE: 1
           K8S_SECRET_OIDC_CLIENT_ID: ${{ secrets.GH_STABLE_OIDC_CLIENT_ID }}
