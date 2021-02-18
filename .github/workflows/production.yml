@@ -49,8 +49,8 @@ jobs:
           K8S_SECRET_DEBUG: 0
           K8S_SECRET_SECRET_KEY: ${{ secrets.GH_STABLE_DJANGO_SECRET_KEY }}
           K8S_SECRET_GDPR_API_ENABLED: 1
-          K8S_SECRET_GDPR_API_QUERY_SCOPE: "jassariapi.gdprquery"
-          K8S_SECRET_GDPR_API_DELETE_SCOPE: "jassariapi.gdprdelete"
+          K8S_SECRET_GDPR_API_QUERY_SCOPE: "jassariapiprod.gdprquery"
+          K8S_SECRET_GDPR_API_DELETE_SCOPE: "jassariapiprod.gdprdelete"
           K8S_SECRET_SENTRY_DSN: ${{ secrets.GH_SENTRY_DSN }}
           K8S_SECRET_SENTRY_ENVIRONMENT: "production"
           K8S_SECRET_SKIP_DATABASE_CHECK: 1
