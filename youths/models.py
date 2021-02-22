@@ -103,30 +103,22 @@ class YouthProfile(AuditLogModel, UUIDModel, SerializableMixin):
 
     @property
     def membership_status(self):
-        if self.expiration <= date.today():
+        if self.expiration < date.today():
+            # Membership is considered valid on the expiration date
             return MembershipStatus.EXPIRED
-        elif self.approved_time and self.approved_time <= timezone.now():
-            # Status RENEWING implemented naively. Calculates the expiration for the existing approval time and checks
-            # if expiration is set explicitly => status == EXPIRED. If expiration is greater than calculated expiration
-            # for the current period, do one of the following:
-            #
-            # 1. If calculated expiration for approval time is in the past, membership is considered expired
-            # 2. Otherwise status of the youth profile is RENEWING
-            approved_period_expiration = calculate_expiration(self.approved_time.date())
-            if self.expiration < approved_period_expiration:
-                return MembershipStatus.EXPIRED
-            elif self.expiration > approved_period_expiration:
-                if date.today() <= approved_period_expiration:
-                    return MembershipStatus.RENEWING
-                else:
-                    return MembershipStatus.EXPIRED
-            return MembershipStatus.ACTIVE
-        return MembershipStatus.PENDING
+        elif not self.approved_time:
+            return MembershipStatus.PENDING
+        elif self.expiration > calculate_expiration(self.approved_time.date()):
+            # If expiration is greater than the calculated expiration for the current period,
+            # status is considered to be RENEWING, since it requires additional approval from a guardian.
+            return MembershipStatus.RENEWING
+        return MembershipStatus.ACTIVE
 
     @property
     def renewable(self):
-        return bool(self.approved_time) and self.expiration != calculate_expiration(
-            date.today()
+        return self.membership_status == MembershipStatus.EXPIRED or (
+            bool(self.approved_time)
+            and self.expiration != calculate_expiration(date.today())
         )
 
     def __str__(self):

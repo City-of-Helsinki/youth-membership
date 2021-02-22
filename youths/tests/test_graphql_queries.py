@@ -1,10 +1,8 @@
+import datetime
 import uuid
-from datetime import date
 from string import Template
 
 import pytest
-from django.utils import timezone
-from freezegun import freeze_time
 from graphql_relay.node.node import to_global_id
 
 from common_utils.consts import PERMISSION_DENIED_ERROR
@@ -197,33 +195,12 @@ def test_anon_user_query_with_token(rf, youth_profile, anon_user_gql_client):
     assert dict(executed["data"]) == expected_data
 
 
-def test_youth_profile_should_show_correct_membership_status(rf, user_gql_client):
+def test_youth_profile_returns_membership_status_and_renewable_flag(
+    rf, user_gql_client
+):
     request = rf.post("/graphql")
     request.user = user_gql_client.user
     youth_profile = YouthProfileFactory(user=user_gql_client.user)
-
-    query = """
-        {
-            myYouthProfile {
-                membershipStatus
-            }
-        }
-    """
-    expected_data = {"myYouthProfile": {"membershipStatus": "PENDING"}}
-    executed = user_gql_client.execute(query, context=request)
-    assert dict(executed["data"]) == expected_data
-
-    youth_profile.set_approved()
-    youth_profile.save()
-    expected_data = {"myYouthProfile": {"membershipStatus": "ACTIVE"}}
-    executed = user_gql_client.execute(query, context=request)
-    assert dict(executed["data"]) == expected_data
-
-    youth_profile.expiration = date.today()
-    youth_profile.save()
-    expected_data = {"myYouthProfile": {"membershipStatus": "EXPIRED"}}
-    executed = user_gql_client.execute(query, context=request)
-    assert dict(executed["data"]) == expected_data
 
     query = """
         {
@@ -233,39 +210,27 @@ def test_youth_profile_should_show_correct_membership_status(rf, user_gql_client
             }
         }
     """
+    expected_data = {
+        "myYouthProfile": {"membershipStatus": "PENDING", "renewable": False}
+    }
+    executed = user_gql_client.execute(query, context=request)
+    assert dict(executed["data"]) == expected_data
 
-    with freeze_time("2020-05-01"):
-        youth_profile.expiration = date(2020, 8, 31)
-        youth_profile.approved_time = date(2019, 8, 1)
-        youth_profile.save()
-        expected_data = {
-            "myYouthProfile": {"membershipStatus": "ACTIVE", "renewable": True}
-        }
-        executed = user_gql_client.execute(query, context=request)
-        assert dict(executed["data"]) == expected_data
+    youth_profile.set_approved()
+    youth_profile.save()
+    expected_data = {
+        "myYouthProfile": {"membershipStatus": "ACTIVE", "renewable": False}
+    }
+    executed = user_gql_client.execute(query, context=request)
+    assert dict(executed["data"]) == expected_data
 
-    with freeze_time("2020-09-01"):
-        youth_profile.expiration = date(2021, 8, 31)
-        youth_profile.approved_time = date(2020, 4, 30)
-        youth_profile.save()
-        expected_data = {
-            "myYouthProfile": {"membershipStatus": "EXPIRED", "renewable": False}
-        }
-        executed = user_gql_client.execute(query, context=request)
-        assert dict(executed["data"]) == expected_data
-
-        youth_profile.approved_time = timezone.datetime(2020, 1, 1)
-        youth_profile.expiration = date(2021, 8, 31)
-        youth_profile.save()
-        expected_data = {
-            "myYouthProfile": {"membershipStatus": "RENEWING", "renewable": False}
-        }
-        with freeze_time("2020-05-01"):
-            executed = user_gql_client.execute(query, context=request)
-            assert dict(executed["data"]) == expected_data
-        with freeze_time("2020-08-31"):
-            executed = user_gql_client.execute(query, context=request)
-            assert dict(executed["data"]) == expected_data
+    youth_profile.expiration = datetime.date.today() - datetime.timedelta(days=1)
+    youth_profile.save()
+    expected_data = {
+        "myYouthProfile": {"membershipStatus": "EXPIRED", "renewable": True}
+    }
+    executed = user_gql_client.execute(query, context=request)
+    assert dict(executed["data"]) == expected_data
 
 
 @pytest.mark.parametrize(
