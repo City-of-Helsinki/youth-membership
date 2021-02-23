@@ -26,6 +26,7 @@ class YouthProfileAdmin(admin.ModelAdmin):
         "membership_number",
         "user__first_name",
         "user__last_name",
+        "user__email",
         "school_name",
         "school_class",
     )
