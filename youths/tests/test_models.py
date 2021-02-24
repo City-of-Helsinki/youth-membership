@@ -1,9 +1,14 @@
+import datetime
+
 import pytest
+import pytz
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from freezegun import freeze_time
 
+from youths.enums import MembershipStatus
 from youths.models import YouthProfile
 from youths.tests.factories import AdditionalContactPersonFactory
 from youths.utils import generate_admin_group, user_is_admin
@@ -119,6 +124,121 @@ def test_additional_contact_person_runs_full_clean_when_saving(youth_profile):
     with pytest.raises(ValidationError):
         acp.email = "notanemail"
         acp.save()
+
+
+@pytest.mark.parametrize(
+    "current_date,approved_time,expiration,status,renewable",
+    [
+        # Past the full season renewal date (approval)
+        (
+            "2020-05-10",
+            datetime.datetime(2019, 8, 1),
+            datetime.date(2020, 8, 31),
+            MembershipStatus.ACTIVE,
+            True,
+        ),
+        # Not yet past the full season renewal date
+        (
+            "2020-04-11",
+            datetime.datetime(2019, 8, 1),
+            datetime.date(2020, 8, 31),
+            MembershipStatus.ACTIVE,
+            False,
+        ),
+        # Waiting for approval by a guardian
+        (
+            "2020-05-12",
+            None,
+            datetime.date(2020, 8, 31),
+            MembershipStatus.PENDING,
+            False,
+        ),
+        # Past the expiration date
+        (
+            "2019-09-01",
+            datetime.datetime(2019, 1, 1),
+            datetime.date(2019, 8, 31),
+            MembershipStatus.EXPIRED,
+            True,
+        ),
+        # Expired pending registration
+        (
+            "2020-05-14",
+            None,
+            datetime.date(2019, 8, 31),
+            MembershipStatus.EXPIRED,
+            True,
+        ),
+        # Stale renewal i.e. has already expired
+        (
+            "2020-09-15",
+            datetime.datetime(2019, 4, 30),
+            datetime.date(2020, 8, 31),
+            MembershipStatus.EXPIRED,
+            True,
+        ),
+        # Approved after already expired
+        (
+            "2020-09-16",
+            datetime.datetime(2020, 9, 16),
+            datetime.date(2020, 8, 31),
+            MembershipStatus.EXPIRED,
+            True,
+        ),
+        # Full season renewal (next year)
+        (
+            "2020-05-17",
+            datetime.datetime(2020, 1, 1),
+            datetime.date(2021, 8, 31),
+            MembershipStatus.RENEWING,
+            False,
+        ),
+        # Short season renewal
+        (
+            "2020-04-18",
+            datetime.datetime(2019, 1, 1),
+            datetime.date(2020, 8, 31),
+            MembershipStatus.RENEWING,
+            False,
+        ),
+        # Last day of validity
+        (
+            "2020-08-31",
+            datetime.datetime(2019, 8, 1),
+            datetime.date(2020, 8, 31),
+            MembershipStatus.ACTIVE,
+            True,
+        ),
+        # Cancelled membership (calculated expiration, based on approved time, is after the expiration date)
+        (
+            "2020-05-15",
+            datetime.datetime(2020, 1, 1),
+            datetime.date(2020, 5, 14),
+            MembershipStatus.EXPIRED,
+            True,
+        ),
+        # Cancelled to a specific date, but still valid
+        (
+            "2020-05-15",
+            datetime.datetime(2020, 1, 1),
+            datetime.date(2020, 5, 16),
+            MembershipStatus.ACTIVE,
+            True,
+        ),
+    ],
+)
+def test_youth_profile_should_show_correct_membership_status(
+    rf, youth_profile, current_date, approved_time, expiration, status, renewable
+):
+    youth_profile.approved_time = (
+        approved_time.replace(tzinfo=pytz.UTC) if approved_time else approved_time
+    )
+    youth_profile.expiration = expiration
+    youth_profile.save()
+
+    with freeze_time(current_date):
+        assert youth_profile.membership_status == status
+        assert youth_profile.renewable == renewable
 
 
 @pytest.mark.parametrize(

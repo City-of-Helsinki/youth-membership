@@ -957,7 +957,7 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
                 }
             }
         """
-        expected_data = {"myYouthProfile": {"membershipStatus": "EXPIRED"}}
+        expected_data = {"myYouthProfile": {"membershipStatus": "RENEWING"}}
         executed = user_gql_client.execute(query, context=request)
         assert dict(executed["data"]) == expected_data
 
@@ -1539,7 +1539,7 @@ def test_normal_user_can_cancel_youth_membership(rf, user_gql_client):
     YouthProfileFactory(user=user_gql_client.user, approved_time=datetime.now())
 
     today = date.today()
-    expiration = today + timedelta(days=1)
+    expiration = today - timedelta(days=1)
     expiration_string = expiration.strftime("%Y-%m-%d")
 
     t = Template(
@@ -1569,9 +1569,10 @@ def test_normal_user_can_cancel_youth_membership(rf, user_gql_client):
 
 
 def test_normal_user_can_cancel_youth_membership_now(rf, user_gql_client):
+    """YouthProfile is ACTIVE on the expiration day, EXPIRED on the day after it."""
     request = rf.post("/graphql")
     request.user = user_gql_client.user
-    YouthProfileFactory(user=user_gql_client.user, approved_time=datetime.now())
+    yp = YouthProfileFactory(user=user_gql_client.user, approved_time=datetime.now())
 
     query = """
         mutation{
@@ -1589,9 +1590,15 @@ def test_normal_user_can_cancel_youth_membership_now(rf, user_gql_client):
     expected_data = {
         "youthProfile": {
             "expiration": date.today().strftime("%Y-%m-%d"),
-            "membershipStatus": "EXPIRED",
+            "membershipStatus": "ACTIVE",
         }
     }
 
     executed = user_gql_client.execute(query, context=request)
     assert dict(executed["data"]["cancelMyYouthProfile"]) == expected_data
+    yp.refresh_from_db()
+    assert yp.membership_status == MembershipStatus.ACTIVE
+
+    with freeze_time(datetime.now() + timedelta(days=1)):
+        yp.refresh_from_db()
+        assert yp.membership_status == MembershipStatus.EXPIRED
