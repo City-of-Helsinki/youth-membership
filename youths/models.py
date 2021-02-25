@@ -131,7 +131,7 @@ class YouthProfile(AuditLogModel, UUIDModel, SerializableMixin):
     def renewable(self):
         return self.membership_status == MembershipStatus.EXPIRED or (
             bool(self.approved_time)
-            and self.expiration != calculate_expiration(date.today())
+            and self.expiration < calculate_expiration(date.today())
         )
 
     def __str__(self):

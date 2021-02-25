@@ -185,7 +185,7 @@ def test_additional_contact_person_runs_full_clean_when_saving(youth_profile):
             MembershipStatus.EXPIRED,
             True,
         ),
-        # Full season renewal (next year)
+        # Full season renewal (next year), membership is active, but renewal waiting for approval
         (
             "2020-05-17",
             datetime.datetime(2020, 1, 1),
@@ -199,6 +199,14 @@ def test_additional_contact_person_runs_full_clean_when_saving(youth_profile):
             datetime.datetime(2020, 1, 1),
             datetime.date(2021, 8, 31),
             MembershipStatus.PENDING,
+            False,
+        ),
+        # Renewal, expiration set two years into the future
+        (
+            "2020-02-25",
+            datetime.datetime(2021, 2, 25),
+            datetime.date(2022, 8, 31),
+            MembershipStatus.RENEWING,
             False,
         ),
         # Short season renewal, membership is expired, but it's waiting for approval
