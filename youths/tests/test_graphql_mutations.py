@@ -957,7 +957,7 @@ def test_youth_profile_expiration_should_renew_and_be_approvable(
                 }
             }
         """
-        expected_data = {"myYouthProfile": {"membershipStatus": "RENEWING"}}
+        expected_data = {"myYouthProfile": {"membershipStatus": "PENDING"}}
         executed = user_gql_client.execute(query, context=request)
         assert dict(executed["data"]) == expected_data
 

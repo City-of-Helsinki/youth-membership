@@ -103,14 +103,27 @@ class YouthProfile(AuditLogModel, UUIDModel, SerializableMixin):
 
     @property
     def membership_status(self):
+        """Current membership status of the youth profile.
+
+        - ACTIVE = membership is active
+        - PENDING = membership is waiting for approval and is either inactive or expired
+        - RENEWING = membership is active, but renewal is waiting for approval
+        - EXPIRED = membership has expired
+        """
         if self.expiration < date.today():
             # Membership is considered valid on the expiration date
             return MembershipStatus.EXPIRED
         elif not self.approved_time:
             return MembershipStatus.PENDING
-        elif self.expiration > calculate_expiration(self.approved_time.date()):
-            # If expiration is greater than the calculated expiration for the current period,
-            # status is considered to be RENEWING, since it requires additional approval from a guardian.
+
+        approved_period_expiration = calculate_expiration(self.approved_time.date())
+        if self.expiration > approved_period_expiration:
+            # If current expiration is greater than the approved expiration, the status is
+            # considered to be RENEWING, since it requires additional approval from a guardian.
+            # If approved expiration date is in the past, the status is PENDING.
+            if approved_period_expiration < date.today():
+                return MembershipStatus.PENDING
+
             return MembershipStatus.RENEWING
         return MembershipStatus.ACTIVE
 
