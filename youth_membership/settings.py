@@ -62,6 +62,7 @@ env = environ.Env(
     SESSION_COOKIE_PATH=(str, ""),
     SESSION_COOKIE_SECURE=(bool, None),
     USE_X_FORWARDED_HOST=(bool, None),
+    USE_X_FORWARDED_FOR=(bool, False),
     CSRF_TRUSTED_ORIGINS=(list, []),
 )
 if os.path.exists(env_file):
@@ -109,6 +110,8 @@ if env("SESSION_COOKIE_PATH"):
 
 if env("SESSION_COOKIE_SECURE") is not None:
     SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE")
+
+USE_X_FORWARDED_FOR = env.bool("USE_X_FORWARDED_FOR")
 
 if env("USE_X_FORWARDED_HOST") is not None:
     USE_X_FORWARDED_HOST = env("USE_X_FORWARDED_HOST")
@@ -326,7 +329,11 @@ LOGGING = {
     },
     "loggers": {
         "django": {"handlers": ["console"], "level": "ERROR"},
-        "audit": {"handlers": ["audit"], "level": "DEBUG", "propagate": True},
+        "common_utils.audit_logging": {
+            "handlers": ["audit"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": True,
+        },
     },
 }
 

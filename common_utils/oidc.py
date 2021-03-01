@@ -1,4 +1,10 @@
 from helusers.oidc import ApiTokenAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+
+from common_utils.signals import (
+    token_authentication_failed,
+    token_authentication_successful,
+)
 
 
 class GraphQLApiTokenAuthentication(ApiTokenAuthentication):
@@ -13,8 +19,17 @@ class GraphQLApiTokenAuthentication(ApiTokenAuthentication):
     """
 
     def authenticate(self, request, **kwargs):
-        user_auth_tuple = super().authenticate(request)
+        try:
+            user_auth_tuple = super().authenticate(request)
+        except AuthenticationFailed as e:
+            token_authentication_failed.send(
+                sender=__name__, error=e.detail, request=request
+            )
+            raise
         if not user_auth_tuple:
             return None
         user, auth = user_auth_tuple
+        token_authentication_successful.send(
+            sender=__name__, user=user, request=request
+        )
         return user
