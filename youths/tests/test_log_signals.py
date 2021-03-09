@@ -22,7 +22,7 @@ def get_log_records(caplog):
     return [
         log[2]
         for log in caplog.record_tuples
-        if log[0] == "audit" and log[1] == logging.INFO
+        if log[0] == "common_utils.audit_logging" and log[1] == logging.INFO
     ]
 
 
