@@ -14,7 +14,6 @@ review:
         K8S_SECRET_ALLOWED_HOSTS: "*"
         K8S_SECRET_DEBUG: 1
         K8S_SECRET_ADMIN_USER_PASSWORD: "admin"
-        K8S_SECRET_GDPR_API_ENABLED: 1
         K8S_SECRET_GDPR_API_QUERY_SCOPE: "jassariapi.gdprquery"
         K8S_SECRET_GDPR_API_DELETE_SCOPE: "jassariapi.gdprdelete"
         K8S_SECRET_SENTRY_DSN: "$GL_SENTRY_DSN"
@@ -41,7 +40,6 @@ staging:
         K8S_SECRET_ALLOWED_HOSTS: "*"
         K8S_SECRET_DEBUG: 0
         K8S_SECRET_SECRET_KEY: "$GL_QA_DJANGO_SECRET_KEY"
-        K8S_SECRET_GDPR_API_ENABLED: 1
         K8S_SECRET_GDPR_API_QUERY_SCOPE: "jassariapi.gdprquery"
         K8S_SECRET_GDPR_API_DELETE_SCOPE: "jassariapi.gdprdelete"
         K8S_SECRET_SENTRY_DSN: "$GL_SENTRY_DSN"
@@ -71,7 +69,6 @@ production:
         K8S_SECRET_ALLOWED_HOSTS: "*"
         K8S_SECRET_DEBUG: 0
         K8S_SECRET_SECRET_KEY: "$GL_STABLE_DJANGO_SECRET_KEY"
-        K8S_SECRET_GDPR_API_ENABLED: 1
         K8S_SECRET_GDPR_API_QUERY_SCOPE: "jassariapi.gdprquery"
         K8S_SECRET_GDPR_API_DELETE_SCOPE: "jassariapi.gdprdelete"
         K8S_SECRET_SENTRY_DSN: "$GL_SENTRY_DSN"

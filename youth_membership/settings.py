@@ -50,7 +50,6 @@ env = environ.Env(
     VERSION=(str, None),
     AUDIT_LOGGING_ENABLED=(bool, False),
     AUDIT_LOG_USERNAME=(bool, False),
-    GDPR_API_ENABLED=(bool, False),
     GDPR_API_QUERY_SCOPE=(str, ""),
     GDPR_API_DELETE_SCOPE=(str, ""),
     ENABLE_GRAPHIQL=(bool, False),
@@ -338,9 +337,9 @@ LOGGING = {
 }
 
 
-GDPR_API_ENABLED = env("GDPR_API_ENABLED")
 GDPR_API_QUERY_SCOPE = env("GDPR_API_QUERY_SCOPE")
 GDPR_API_DELETE_SCOPE = env("GDPR_API_DELETE_SCOPE")
+GDPR_API_MODEL = "youths.YouthProfile"
 
 AUDIT_LOGGING_ENABLED = env.bool("AUDIT_LOGGING_ENABLED")
 AUDIT_LOG_USERNAME = env.bool("AUDIT_LOG_USERNAME")

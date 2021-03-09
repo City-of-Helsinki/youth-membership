@@ -50,7 +50,6 @@ jobs:
           K8S_SECRET_ALLOWED_HOSTS: "*"
           K8S_SECRET_DEBUG: 1
           K8S_SECRET_ADMIN_USER_PASSWORD: "admin"
-          K8S_SECRET_GDPR_API_ENABLED: 1
           K8S_SECRET_GDPR_API_QUERY_SCOPE: "jassariapi.gdprquery"
           K8S_SECRET_GDPR_API_DELETE_SCOPE: "jassariapi.gdprdelete"
           K8S_SECRET_SENTRY_DSN: ${{ secrets.GH_SENTRY_DSN }}

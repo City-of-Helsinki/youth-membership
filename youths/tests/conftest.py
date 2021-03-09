@@ -42,7 +42,6 @@ def setup_youth_membership_dates(settings):
 
 @pytest.fixture(autouse=True)
 def setup_gdpr_api(settings):
-    settings.GDPR_API_ENABLED = True
     settings.GDPR_API_QUERY_SCOPE = "jassariapi.gdprquery"
     settings.GDPR_API_DELETE_SCOPE = "jassariapi.gdprdelete"
 

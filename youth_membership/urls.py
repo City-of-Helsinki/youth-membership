@@ -19,7 +19,7 @@ urlpatterns = [
             )
         ),
     ),
-    path("gdpr-api/v1/profiles/", include("youths.urls")),
+    path("gdpr-api/", include("helsinki_gdpr.urls")),
 ]
 
 

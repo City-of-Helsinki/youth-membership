@@ -7,10 +7,11 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_ilmoitin.utils import send_notification
 from enumfields import EnumField
+from helsinki_gdpr.models import SerializableMixin
 from sequences import Sequence
 
 from common_utils.audit_logging import AuditLogModel
-from common_utils.models import SerializableMixin, UUIDModel
+from common_utils.models import UUIDModel
 
 from .enums import MembershipStatus, NotificationType
 from .enums import YouthLanguage as LanguageAtHome
