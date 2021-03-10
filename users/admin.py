@@ -14,12 +14,13 @@ User = get_user_model()
 class UserAdmin(DjangoUserAdmin):
     list_display = (
         "uuid",
+        "get_youthprofile_uuid_link",
         "email",
         "first_name",
         "last_name",
         "is_staff",
     )
-    search_fields = ("uuid", "first_name", "last_name", "email")
+    search_fields = ("uuid", "first_name", "last_name", "email", "youthprofile__id")
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
