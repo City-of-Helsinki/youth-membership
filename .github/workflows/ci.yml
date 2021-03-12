@@ -61,38 +61,51 @@ jobs:
       - name: Coverage
         run: codecov
 
-  coding-style:
-    name: Coding style
+  black:
+    name: Coding style - black
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
+      - name: Checkout
         uses: actions/checkout@v2
+      - name: Run black
+        uses: psf/black@stable
+        with:
+          args: ". --check"
 
-      - name: Set up Python 3.8
+  flake8:
+    name: Coding style - flake8
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: 3.8
 
-      - name: Cache pip packages
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-pip-modules
-        with:
-          path: ~/.pip-cache
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements-dev.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
       - name: Install dependencies
-        run: pip install -r requirements.txt -r requirements-dev.txt
+        run: pip install flake8 pep8-naming flake8-bugbear
+      - name: Run flake8
+        uses: liskin/gh-problem-matcher-wrap@v1
+        with:
+          linters: flake8
+          run: flake8
 
-      - name: Linting
-        run: flake8
+  isort:
+    name: Coding style - isort
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
-      - name: Import sorting
-        run: isort -c .
-
-      - name: Formatting
-        run: black --check .
+      - name: Install dependencies
+        run: pip install isort
+      - name: Run isort
+        uses: liskin/gh-problem-matcher-wrap@v1
+        with:
+          linters: isort
+          run: isort -c .
