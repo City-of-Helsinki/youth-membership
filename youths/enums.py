@@ -15,6 +15,7 @@ class YouthLanguage(Enum):
     ARABIC = "ar"
     ESTONIAN = "et"
     RUSSIAN = "ru"
+    FRENCH = "fr"
 
     class Labels:
         FINNISH = _("Finnish")
@@ -24,6 +25,7 @@ class YouthLanguage(Enum):
         ARABIC = _("Arabic")
         ESTONIAN = _("Estonian")
         RUSSIAN = _("Russian")
+        FRENCH = _("French")
 
     # @classmethod
     # def to_graphene_enum(cls):
