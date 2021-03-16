@@ -251,6 +251,8 @@ PARLER_LANGUAGES = {
     "default": {"fallbacks": ["fi"], "hide_untranslated": False},
 }
 
+PARLER_ENABLE_CACHING = False
+
 # Notification settings
 
 NOTIFICATIONS_ENABLED = True
