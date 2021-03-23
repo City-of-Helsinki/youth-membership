@@ -137,7 +137,16 @@ WSGI_APPLICATION = "youth_membership.wsgi.application"
 if env("FORCE_SCRIPT_NAME"):
     FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
 
-LANGUAGES = (("fi", "Finnish"), ("en", "English"), ("sv", "Swedish"))
+LANGUAGES = (
+    ("fi", "Finnish"),
+    ("en", "English"),
+    ("sv", "Swedish"),
+    ("fr", "French"),
+    ("ru", "Russian"),
+    ("so", "Somali"),
+    ("ar", "Arabic"),
+    ("et", "Estonian"),
+)
 
 LANGUAGE_CODE = "fi"
 TIME_ZONE = "Europe/Helsinki"
@@ -247,7 +256,16 @@ AUTHENTICATION_BACKENDS = [
 # Django-parler
 
 PARLER_LANGUAGES = {
-    None: ({"code": "fi"}, {"code": "en"}, {"code": "sv"}),
+    None: (
+        {"code": "fi"},
+        {"code": "en"},
+        {"code": "sv"},
+        {"code": "fr"},
+        {"code": "ru"},
+        {"code": "so"},
+        {"code": "ar"},
+        {"code": "et"},
+    ),
     "default": {"fallbacks": ["fi"], "hide_untranslated": False},
 }
 
