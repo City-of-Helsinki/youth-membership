@@ -50,3 +50,12 @@
     {% endif %}
 {% endwith %}
 {%- endmacro %}
+
+{% macro link(label, href) -%}
+<a
+    href="{{ href }}"
+    style="color: #0e04c7;text-decoration: none;"
+>
+    {{ label }}
+</a>
+{%- endmacro %}
