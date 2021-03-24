@@ -178,9 +178,7 @@ def generate_notifications(save=False):
                             EMAIL_GENERATED_PATH, html_path
                         )
 
-                        save_template(
-                            generated_template_filepath, generated_template_filepath
-                        )
+                        save_template(generated_template_filepath, template_html_base)
 
                         logger.info(
                             f"Saved template into filesystem: {template} (html/{lang})"
