@@ -1,0 +1,7 @@
+Hi {{ youth_profile.approver_first_name }},
+
+{{ youth_name }} has sent a membership application for the City of Helsinki’s Youth Services for your approval. The membership is free of charge. If you approve the application, {{ youth_name }} may visit Youth Centres and enjoy fun benefits. If the information is incorrect, ask the youth to change it and send a new approval request to you. You can give your approval using the Jässäri service via this link:
+
+{{ youth_membership_ui_base_url }}/en/approve/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}
+
+This message was sent automatically from our system. Please do not reply to this message as the replies will not be processed.

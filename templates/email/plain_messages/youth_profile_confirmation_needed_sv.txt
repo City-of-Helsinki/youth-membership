@@ -1,0 +1,7 @@
+Hej {{ youth_profile.approver_first_name }},
+
+{{ youth_name }} har skickat dig en ansökan om medlemskap i Helsingfors stads ungdomstjänster för godkännande. Medlemskapet är kostnadsfritt. Om du godkänner ansökan, kan {{ youth_name }} delta i ungdomsgårdarnas verksamhet och få trevliga förmåner. Om det finns fel i uppgifterna, be den unga att korrigera dem och sedan skicka ett nytt bekräftelsemeddelande till dig. Du kan ge ditt godkännande med Jässäri-tjänsten via denna länk:
+
+{{ youth_membership_ui_base_url }}/sv/approve/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}
+
+Det här meddelandet skickades automatiskt från våra system. Svara inte på det här meddelandet eftersom svaren inte kommer att behandlas.

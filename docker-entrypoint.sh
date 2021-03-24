@@ -22,6 +22,9 @@ if [[ "$CREATE_ADMIN_USER" = "1" ]]; then
     fi
 fi
 
+python ./scripts/load_notification_templates.py
+echo "Notification templates loaded"
+
 # Start server
 if [[ ! -z "$@" ]]; then
     "$@"

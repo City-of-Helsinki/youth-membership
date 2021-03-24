@@ -80,3 +80,5 @@ jobs:
           K8S_SECRET_DATABASE_DB: ${{ secrets.K8S_SECRET_DATABASE_DB_STAGING }}
           K8S_SECRET_DATABASE_USERNAME: ${{ secrets.K8S_SECRET_DATABASE_USERNAME_STAGING }}
           K8S_SECRET_DATABASE_PASSWORD: ${{ secrets.K8S_SECRET_DATABASE_PASSWORD_STAGING }}
+          K8S_SECRET_EMAIL_TEMPLATE_IMAGE_SOURCE: https://jassari.test.kuva.hel.ninja/email-templates
+          K8S_SECRET_EMAIL_TEMPLATE_YOUTH_MEMBERSHIP_UI_BASE_URL: https://jassari.test.kuva.hel.ninja

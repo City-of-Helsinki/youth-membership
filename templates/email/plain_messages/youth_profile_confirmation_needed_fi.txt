@@ -1,0 +1,7 @@
+Hei {{ youth_profile.approver_first_name }},
+
+{{ youth_name }} on lähettänyt hyväksyttäväksesi Helsingin kaupungin nuorisopalvelujen jäsenyyshakemuksen. Jäsenyys on maksuton. Hyväksymällä hakemuksen, {{ youth_name }} voi käydä nuorisotalolla ja saa kivoja etuja. Mikäli tiedoissa on virheitä, pyydä nuorta muuttamaan tiedot ja lähettämään sinulle uusi varmistusviesti. Käy antamassa vahvistus Jässäri-palvelussa käyttäen tätä linkkiä:
+
+{{ youth_membership_ui_base_url }}/fi/approve/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}
+
+Tämä viesti on lähetetty järjestelmistä automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia ei käsitellä.

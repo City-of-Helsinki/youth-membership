@@ -1,0 +1,52 @@
+{% macro buttonLink(label, href) -%}
+<a
+    href="{{ href }}"
+    style="
+        background: rgb(0, 0, 191);
+        padding: 20px 32px;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 500;
+        height: 24px;
+        line-height: 24px;
+        text-align: center;
+        display: inline-block;
+        text-decoration: none;
+    "
+    >{{ label }}</a
+>
+{%- endmacro %}
+
+{% macro logo(variant="header", lang="fi") -%}
+{% with image_path, alt = [image_location + "/helsinki-logo-" + variant + "-" + lang + ".png", "Helsinki" if lang == "fi" else "Helsingfors"] %}
+    {% if variant == "header" %}
+        <img
+            src="{{ image_path }}"
+            alt="{{ alt }}"
+            style="
+                display: block;
+                height: 44px;
+                margin-bottom: 40px;
+                max-width: 100%;
+                outline: 0;
+                width: auto;
+            "
+        />
+    {% endif %}
+    {% if variant == "footer" %}
+        <img
+            src="{{ image_path }}"
+            alt="{{ alt }}"
+            style="
+                display: block;
+                height: 60px;
+                margin-bottom: 24px;
+                margin-top: 56px;
+                max-width: 100%;
+                outline: 0;
+                width: auto;
+            "
+        />
+    {% endif %}
+{% endwith %}
+{%- endmacro %}

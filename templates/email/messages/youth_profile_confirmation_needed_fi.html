@@ -1,0 +1,16 @@
+{% extends "base_template_fi.html" %}
+
+{% block content %}
+{% raw %}
+Hei {{ youth_profile.approver_first_name }},
+</br>
+</br>
+{{ youth_name }} on lähettänyt hyväksyttäväksesi Helsingin kaupungin nuorisopalvelujen jäsenyyshakemuksen. Jäsenyys on maksuton.
+</br>
+</br>
+Hyväksymällä hakemuksen, {{ youth_name }} voi käydä nuorisotalolla ja saa kivoja etuja. Mikäli tiedoissa on virheitä, pyydä nuorta muuttamaan tiedot ja lähettämään sinulle uusi varmistusviesti. Käy antamassa vahvistus Jässäri-palvelussa käyttäen tätä linkkiä:
+</br>
+</br>
+{% endraw %}
+{{ macros.buttonLink("Tarkastele hakemusta", "{{ youth_membership_ui_base_url }}/fi/approve/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}")  }}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base_template_en.html" %}
+
+{% block content %}
+{% raw %}
+Welcome to the Youth Services of the City of Helsinki! {{ youth_profile.approver_first_name }} has approved your membership. Your digital memberhsip card can be found here:
+</br>
+</br>
+{% endraw %}
+{{ macros.buttonLink(label="Jässäri", href="{{ youth_membership_ui_base_url }}/en/") }}
+{% raw %}
+</br>
+</br>
+For more information on the Youth Services membership and its perks, please visit https://jassari.munstadi.fi/en/.
+{% endraw %}
+{% endblock %}
