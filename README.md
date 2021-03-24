@@ -129,13 +129,13 @@ commit.
 * Run `pytest`.
 
 
-## Scripts
+## Management Commands
 
-### load_notification_templates.py
+### common_utils/generate_notifications_from_templates
 
 Example invocation
 ```bash
-docker-compose exec django python scripts/load_notification_templates.py --dev
+docker-compose exec django python /app/manage.py generate_notifications_from_templates --dev
 ```
 
 The scripts uses the email templates under `templates/email` to generates notifications for supported languages. The script overwrites existing notifications. It has been configured to be executed when the docker container is ran.
