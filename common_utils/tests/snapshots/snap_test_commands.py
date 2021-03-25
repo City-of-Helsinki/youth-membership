@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 snapshots[
-    "test_command_generate_notifications_from_templates_generates_notifications_files 1"
+    "test_command_generate_notifications_from_templates_generates_correct_looking_notifications 1"
 ] = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" dir="ltr">
     <head>
@@ -227,8 +227,7 @@ Welcome to the Youth Services of the City of Helsinki! {{ youth_profile.approver
         display: inline-block;
         text-decoration: none;
     "
-    >Jässäri</a
->
+>Jässäri <img src="http://localhost:3000/email-templates/hds-icon-arrow-right.png" style="vertical-align: middle; margin-left: 12px;" /></a>
 
 </br>
 </br>
