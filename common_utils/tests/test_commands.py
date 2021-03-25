@@ -1,6 +1,7 @@
 import os
 
 from django.core.management import call_command
+from django.test import override_settings
 from django_ilmoitin.models import NotificationTemplate
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -16,6 +17,10 @@ def test_command_generate_notifications_from_templates_generates_notifications()
     assert NotificationTemplate.objects.count() > 0
 
 
+@override_settings(
+    EMAIL_TEMPLATE_IMAGE_SOURCE="https://jassari.test.kuva.hel.ninja/email-templates",
+    EMAIL_TEMPLATE_YOUTH_MEMBERSHIP_UI_BASE_URL="https://jassari.test.kuva.hel.ninja",
+)
 def test_command_generate_notifications_from_templates_generates_correct_looking_notifications(
     snapshot,
 ):

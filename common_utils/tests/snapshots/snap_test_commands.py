@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots[
@@ -123,7 +124,7 @@ snapshots[
                                         
     
         <img
-            src="http://localhost:3000/email-templates/helsinki-logo-header-fi.png"
+            src="https://jassari.test.kuva.hel.ninja/email-templates/helsinki-logo-header-fi.png"
             alt="Helsinki"
             style="
                 display: block;
@@ -227,7 +228,7 @@ Welcome to the Youth Services of the City of Helsinki! {{ youth_profile.approver
         display: inline-block;
         text-decoration: none;
     "
->Jässäri <img src="http://localhost:3000/email-templates/hds-icon-arrow-right.png" style="vertical-align: middle; margin-left: 12px;" /></a>
+>Jässäri <img src="https://jassari.test.kuva.hel.ninja/email-templates/hds-icon-arrow-right.png" style="vertical-align: middle; margin-left: 12px;" /></a>
 
 </br>
 </br>
@@ -248,7 +249,7 @@ This message was sent automatically from our system. Please do not reply to this
                             </tbody>
                         </table>
                         <img
-                            src="http://localhost:3000/email-templates/koro-footer.png"
+                            src="https://jassari.test.kuva.hel.ninja/email-templates/koro-footer.png"
                             alt=""
                             style="display: block; height: auto; margin: 0; max-width: 100%; outline: 0; width: 760px"
                         />
@@ -315,7 +316,7 @@ This message was sent automatically from our system. Please do not reply to this
     
     
         <img
-            src="http://localhost:3000/email-templates/helsinki-logo-footer-fi.png"
+            src="https://jassari.test.kuva.hel.ninja/email-templates/helsinki-logo-footer-fi.png"
             alt="Helsinki"
             style="
                 display: block;
