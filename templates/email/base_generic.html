@@ -28,7 +28,7 @@
                 font-style: normal;
             }
         </style>
-        <title>{% raw %}{{ subject }}{% endraw %}</title>
+        <title>{% block title %}{% endblock %}</title>
     </head>
 
     <body
@@ -139,7 +139,7 @@
                                                 word-wrap: normal;
                                             "
                                         >
-                                            {% raw %}{{ subject }}{% endraw %}
+                                            {{ self.title() }}
                                         </h2>
                                         <hr style="background: rgb(0, 0, 191); border: none; height: 5px" />
                                     </th>

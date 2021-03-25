@@ -38,7 +38,7 @@ snapshots[
                 font-style: normal;
             }
         </style>
-        <title>{{ subject }}</title>
+        <title>Helsinki City Youth Services membership application</title>
     </head>
 
     <body
@@ -165,7 +165,7 @@ snapshots[
                                                 word-wrap: normal;
                                             "
                                         >
-                                            {{ subject }}
+                                            Helsinki City Youth Services membership application
                                         </h2>
                                         <hr style="background: rgb(0, 0, 191); border: none; height: 5px" />
                                     </th>
