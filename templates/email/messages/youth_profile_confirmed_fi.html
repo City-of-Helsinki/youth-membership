@@ -1,8 +1,9 @@
 {% extends "base_template_fi.html" %}
 
+{% block title %}Tervetuloa Helsingin kaupungin nuorisopalveluiden jäseneksi!{% endblock %}
 {% block content %}
 {% raw %}
-Tervetuloa Helsingin kaupungin nuorisopalveluiden jäseneksi! {{ youth_profile.approver_first_name }} on hyväksynyt jäsenyytesi. Digitaalinen jäsenkorttisi löytyy täältä:
+{{ youth_profile.approver_first_name }} on hyväksynyt jäsenyytesi. Digitaalinen jäsenkorttisi löytyy täältä:
 </br>
 </br>
 {% endraw %}

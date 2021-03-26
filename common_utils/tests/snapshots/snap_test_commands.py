@@ -39,7 +39,7 @@ snapshots[
                 font-style: normal;
             }
         </style>
-        <title>Helsinki City Youth Services membership application</title>
+        <title>Welcome to the Youth Services of the City of Helsinki!</title>
     </head>
 
     <body
@@ -166,7 +166,7 @@ snapshots[
                                                 word-wrap: normal;
                                             "
                                         >
-                                            Helsinki City Youth Services membership application
+                                            Welcome to the Youth Services of the City of Helsinki!
                                         </h2>
                                         <hr style="background: rgb(0, 0, 191); border: none; height: 5px" />
                                     </th>
@@ -210,7 +210,7 @@ snapshots[
                                     >
                                         
 
-Welcome to the Youth Services of the City of Helsinki! {{ youth_profile.approver_first_name }} has approved your membership. Your digital memberhsip card can be found here:
+{{ youth_profile.approver_first_name }} has approved your membership. Your digital memberhsip card can be found here:
 </br>
 </br>
 

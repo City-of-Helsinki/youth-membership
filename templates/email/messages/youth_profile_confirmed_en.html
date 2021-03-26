@@ -1,8 +1,9 @@
 {% extends "base_template_en.html" %}
 
+{% block title %}Welcome to the Youth Services of the City of Helsinki!{% endblock %}
 {% block content %}
 {% raw %}
-Welcome to the Youth Services of the City of Helsinki! {{ youth_profile.approver_first_name }} has approved your membership. Your digital memberhsip card can be found here:
+{{ youth_profile.approver_first_name }} has approved your membership. Your digital memberhsip card can be found here:
 </br>
 </br>
 {% endraw %}

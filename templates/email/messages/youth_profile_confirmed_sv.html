@@ -1,8 +1,9 @@
 {% extends "base_template_sv.html" %}
 
+{% block title %}Välkommen som medlem i Helsingfors stads ungdomstjänster!{% endblock %}
 {% block content %}
 {% raw %}
-Välkommen som medlem i Helsingfors stads ungdomstjänster! {{ youth_profile.approver_first_name }} har godkänt ditt edlemskap i Helsingfors stads ungdomstjänster. Ditt digitala medlemskort kan hittas här:
+{{ youth_profile.approver_first_name }} har godkänt ditt edlemskap i Helsingfors stads ungdomstjänster. Ditt digitala medlemskort kan hittas här:
 </br>
 </br>
 {% endraw %}
