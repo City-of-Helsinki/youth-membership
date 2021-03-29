@@ -67,8 +67,7 @@ def generate_email_template(template_source_path, save=False):
             return rendered
 
         except Exception:
-            print("Unexpected error:", sys.exc_info()[0])
-            raise
+            logger.exception("Error in generating the templates.")
 
 
 def create_generated_folder():
