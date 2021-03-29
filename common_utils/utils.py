@@ -1,27 +1,23 @@
 import json
 import logging
 import os
-import sys
 from pathlib import PurePath
 
 from crum import get_current_request
 from django.conf import settings
 from django.db import transaction
+from django.template.loader import render_to_string
 from django.utils.translation import override
 from django_ilmoitin.models import NotificationTemplate
-from jinja2 import Environment, FileSystemLoader
 from parler.utils.context import switch_language
 
+from youth_membership.settings import BASE_DIR
 from youths.enums import NotificationType as YouthNotificationType
 
 logger = logging.getLogger(__name__)
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(PROJECT_ROOT)
-EMAIL_TEMPLATES_PATH = os.path.join(PROJECT_ROOT, "templates", "email")
-EMAIL_MESSAGES_PATH = os.path.join(EMAIL_TEMPLATES_PATH, "messages")
-EMAIL_PLAIN_MESSAGES_PATH = os.path.join(EMAIL_TEMPLATES_PATH, "plain_messages")
-EMAIL_GENERATED_PATH = os.path.join(EMAIL_TEMPLATES_PATH, "generated")
+EMAIL_TEMPLATES_PATH = os.path.join(BASE_DIR, "templates")
+EMAIL_GENERATED_PATH = os.path.join(EMAIL_TEMPLATES_PATH, "email", "generated")
 
 
 def read_json_file(main: str, *args: str) -> dict:
@@ -52,24 +48,6 @@ def get_original_client_ip():
     return client_ip
 
 
-def generate_email_template(template_source_path, save=False):
-    with open(template_source_path, "r") as template_source_file:
-        template_source = template_source_file.read()
-        template = Environment(
-            loader=FileSystemLoader(EMAIL_TEMPLATES_PATH)
-        ).from_string(template_source)
-
-        try:
-            rendered = template.render(
-                image_location=settings.EMAIL_TEMPLATE_IMAGE_SOURCE
-            )
-
-            return rendered
-
-        except Exception:
-            logger.exception("Error in generating the templates.")
-
-
 def create_generated_folder():
     if not os.path.exists(EMAIL_GENERATED_PATH):
         os.makedirs(EMAIL_GENERATED_PATH)
@@ -97,44 +75,44 @@ notifications = {
                 "{{ youth_name }} on lähettänyt hyväksyttäväksesi Helsingin kaupungin nuorisopalvelujen "
                 "jäsenyyshakemuksen"
             ),
-            "html": "youth_profile_confirmation_needed_fi.html",
-            "plain": "youth_profile_confirmation_needed_fi.txt",
+            "html": "email/messages/youth_profile_confirmation_needed_fi.html",
+            "plain": "email/plain_messages/youth_profile_confirmation_needed_fi.txt",
         },
         "sv": {
             "subject": (
                 "{{ youth_name }} har skickat dig en ansökan om medlemskap i Helsingfors stads ungdomstjänster för "
                 "godkännande."
             ),
-            "html": "youth_profile_confirmation_needed_sv.html",
-            "plain": "youth_profile_confirmation_needed_sv.txt",
+            "html": "email/messages/youth_profile_confirmation_needed_sv.html",
+            "plain": "email/plain_messages/youth_profile_confirmation_needed_sv.txt",
         },
         "en": {
             "subject": (
                 "{{ youth_name }} has sent a membership application for the City of Helsinki’s Youth Services for "
                 "your approval."
             ),
-            "html": "youth_profile_confirmation_needed_en.html",
-            "plain": "youth_profile_confirmation_needed_en.txt",
+            "html": "email/messages/youth_profile_confirmation_needed_en.html",
+            "plain": "email/plain_messages/youth_profile_confirmation_needed_en.txt",
         },
     },
     YouthNotificationType.YOUTH_PROFILE_CONFIRMED: {
         "fi": {
             "subject": "{{ youth_profile.approver_first_name }} on hyväksynyt nuorisopalveluiden jäsenyytesi",
-            "html": "youth_profile_confirmed_fi.html",
-            "plain": "youth_profile_confirmed_fi.txt",
+            "html": "email/messages/youth_profile_confirmed_fi.html",
+            "plain": "email/plain_messages/youth_profile_confirmed_fi.txt",
         },
         "sv": {
             "subject": (
                 "{{ youth_profile.approver_first_name }} har godkänt ditt edlemskap i Helsingfors stads",
                 "ungdomstjänster",
             ),
-            "html": "youth_profile_confirmed_sv.html",
-            "plain": "youth_profile_confirmed_sv.txt",
+            "html": "email/messages/youth_profile_confirmed_sv.html",
+            "plain": "email/plain_messages/youth_profile_confirmed_sv.txt",
         },
         "en": {
             "subject": "{{ youth_profile.approver_first_name }} has approved your Youth Services membership",
-            "html": "youth_profile_confirmed_en.html",
-            "plain": "youth_profile_confirmed_en.txt",
+            "html": "email/messages/youth_profile_confirmed_en.html",
+            "plain": "email/plain_messages/youth_profile_confirmed_en.txt",
         },
     },
 }
@@ -160,14 +138,13 @@ def generate_notifications(save=False):
                 template.subject = values.get("subject")
 
                 if html_path := values.get("html"):
-                    html_template_path = os.path.join(EMAIL_MESSAGES_PATH, html_path)
-                    template_html_base = generate_email_template(
-                        html_template_path, save
+                    template_html_base = render_to_string(
+                        html_path,
+                        {"image_location": settings.EMAIL_TEMPLATE_IMAGE_SOURCE},
                     )
-
                     if save:
                         generated_template_filepath = os.path.join(
-                            EMAIL_GENERATED_PATH, html_path
+                            EMAIL_GENERATED_PATH, os.path.basename(html_path)
                         )
 
                         save_template(generated_template_filepath, template_html_base)
@@ -182,7 +159,7 @@ def generate_notifications(save=False):
 
                 if plain_path := values.get("plain"):
                     plain_text_template_path = os.path.join(
-                        EMAIL_PLAIN_MESSAGES_PATH, plain_path
+                        EMAIL_TEMPLATES_PATH, plain_path
                     )
                     template_text_base = get_file_content(plain_text_template_path)
 

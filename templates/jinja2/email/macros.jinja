@@ -17,7 +17,7 @@
 {%- endmacro %}
 
 {% macro logo(variant="header", lang="fi") -%}
-{% with image_path, alt = [image_location + "/helsinki-logo-" + variant + "-" + lang + ".png", "Helsinki" if lang == "fi" else "Helsingfors"] %}
+{% with image_path, alt = [image_location + "/helsinki-logo-" + variant + "-" + lang + ".png", "Helsingfors" if lang == "sv" else "Helsinki"] %}
     {% if variant == "header" %}
         <img
             src="{{ image_path }}"

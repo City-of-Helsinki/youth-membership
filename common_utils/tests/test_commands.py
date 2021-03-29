@@ -4,9 +4,7 @@ from django.core.management import call_command
 from django.test import override_settings
 from django_ilmoitin.models import NotificationTemplate
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-EMAIL_TEMPLATES_PATH = os.path.join(PROJECT_ROOT, "templates", "email")
-EMAIL_GENERATED_PATH = os.path.join(EMAIL_TEMPLATES_PATH, "generated")
+from common_utils.utils import EMAIL_GENERATED_PATH
 
 
 def test_command_generate_notifications_from_templates_generates_notifications():
