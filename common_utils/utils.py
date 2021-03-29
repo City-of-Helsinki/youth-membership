@@ -15,13 +15,6 @@ from parler.utils.context import switch_language
 from youths.enums import NotificationType as YouthNotificationType
 
 logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-logger.setLevel(logging.DEBUG)
-# create console handler and set level to debug
-handler.setLevel(logging.DEBUG)
-
-# add ch to logger
-logger.addHandler(handler)
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(PROJECT_ROOT)

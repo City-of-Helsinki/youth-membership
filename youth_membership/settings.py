@@ -339,6 +339,10 @@ LOGGING = {
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": True,
         },
+        "common_utils.utils": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
     },
 }
 
