@@ -1,0 +1,5 @@
+Tervetuloa Helsingin kaupungin nuorisopalveluiden jäseneksi! {{ youth_profile.approver_first_name }} on hyväksynyt jäsenyytesi. Digitaalinen jäsenkorttisi löytyy täältä: {{ youth_membership_ui_base_url }}/fi/
+
+Lisätietoa nuorisopalveluiden jäsenyydestä ja sen eduista voit lukea osoitteesta https://jassari.munstadi.fi
+
+Tämä viesti on lähetetty järjestelmästä automaattisesti. Älä vastaa tähän viestiin, sillä vastauksia ei käsitellä.

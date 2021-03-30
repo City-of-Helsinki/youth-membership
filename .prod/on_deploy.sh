@@ -3,6 +3,7 @@
 python /app/manage.py migrate --noinput
 
 python /app/manage.py seed_data
+python /app/manage.py generate_notifications_from_templates
 
 # Generate the admin user using the password given in the environment variables.
 # If no password is set, the admin user gets a generated password which will

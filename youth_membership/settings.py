@@ -47,6 +47,8 @@ env = environ.Env(
     MAIL_MAILGUN_DOMAIN=(str, ""),
     MAIL_MAILGUN_API=(str, ""),
     NOTIFICATIONS_ENABLED=(bool, False),
+    EMAIL_TEMPLATE_IMAGE_SOURCE=(str, ""),
+    EMAIL_TEMPLATE_YOUTH_MEMBERSHIP_UI_BASE_URL=(str, ""),
     VERSION=(str, None),
     AUDIT_LOGGING_ENABLED=(bool, False),
     AUDIT_LOG_USERNAME=(bool, False),
@@ -197,11 +199,7 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates"
-            )
-        ],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -211,7 +209,11 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
             ]
         },
-    }
+    },
+    {
+        "BACKEND": "django.template.backends.jinja2.Jinja2",
+        "DIRS": [os.path.join(BASE_DIR, "templates/jinja2")],
+    },
 ]
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
@@ -283,6 +285,10 @@ if env("MAIL_MAILGUN_KEY"):
     }
 EMAIL_BACKEND = "mailer.backend.DbBackend"
 MAILER_EMAIL_BACKEND = env("MAILER_EMAIL_BACKEND")
+EMAIL_TEMPLATE_IMAGE_SOURCE = env("EMAIL_TEMPLATE_IMAGE_SOURCE")
+EMAIL_TEMPLATE_YOUTH_MEMBERSHIP_UI_BASE_URL = env(
+    "EMAIL_TEMPLATE_YOUTH_MEMBERSHIP_UI_BASE_URL"
+)
 
 # Graphene
 
@@ -352,6 +358,10 @@ LOGGING = {
             "handlers": ["audit"],
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": True,
+        },
+        "common_utils.utils": {
+            "handlers": ["console"],
+            "level": "INFO",
         },
     },
 }

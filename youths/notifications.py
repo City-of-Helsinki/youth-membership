@@ -1,3 +1,4 @@
+from django.conf import settings
 from django_ilmoitin.dummy_context import COMMON_CONTEXT, dummy_context
 from django_ilmoitin.registry import notifications
 
@@ -18,6 +19,7 @@ dummy_context.update(
         COMMON_CONTEXT: {
             "youth_name": "YOUTH NAME",
             "youth_profile": {"approver_first_name": "APPROVER FIRST NAME"},
+            "youth_membership_ui_base_url": settings.EMAIL_TEMPLATE_YOUTH_MEMBERSHIP_UI_BASE_URL,
         },
         NotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED.value: {
             "youth_profile": {

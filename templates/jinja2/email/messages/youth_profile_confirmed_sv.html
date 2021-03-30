@@ -1,0 +1,15 @@
+{% extends "email/base_template_sv.html" %}
+
+{% block title %}Välkommen som medlem i Helsingfors stads ungdomstjänster!{% endblock %}
+{% block content %}
+{% raw %}
+{{ youth_profile.approver_first_name }} har godkänt ditt edlemskap i Helsingfors stads ungdomstjänster. Ditt digitala medlemskort kan hittas här:
+</br>
+</br>
+{% endraw %}
+{{ macros.buttonLink(label="Jässäri", href="{{ youth_membership_ui_base_url }}/sv/") }}
+{% raw %}
+</br>
+</br>
+Mer information om medlemskapet i ungdomstjänsterna och förmånerna finns på adressen{% endraw %} {{ macros.link("https://jassari.munstadi.fi/sv/", "https://jassari.munstadi.fi/sv/") }}.
+{% endblock %}

@@ -81,3 +81,4 @@ venv/
 .pytest_cache/
 docker-compose.env.yaml
 .vscode/settings.json
+templates/email/generated

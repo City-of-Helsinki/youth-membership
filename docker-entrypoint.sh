@@ -11,6 +11,8 @@ fi
 if [[ "$APPLY_MIGRATIONS" = "1" ]]; then
     echo "Applying database migrations..."
     ./manage.py migrate --noinput
+    ./manage.py seed_data
+    ./manage.py generate_notifications_from_templates
 fi
 
 # Create admin user. Generate password if there isn't one in the environment variables

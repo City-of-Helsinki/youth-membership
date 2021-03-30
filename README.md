@@ -129,6 +129,19 @@ commit.
 * Run `pytest`.
 
 
+## Management Commands
+
+### common_utils/generate_notifications_from_templates
+
+Example invocation
+```bash
+docker-compose exec django python /app/manage.py generate_notifications_from_templates --dev
+```
+
+The scripts uses the email templates under `templates/email` to generates notifications for supported languages. The script overwrites existing notifications. It has been configured to be executed when the docker container is ran.
+
+The `--dev` flag instructs the script to save the generated templates under `generated` so they can be debugged or previewed in a browser.
+
 ## Issue tracking
 
 * [Github issue list](https://github.com/City-of-Helsinki/youth-membership/issues)

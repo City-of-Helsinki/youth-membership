@@ -1,0 +1,10 @@
+{% extends "email/base_generic.html" %}
+
+{% block lang %}sv{% endblock %}
+{% block header_logo %}{{ macros.logo(lang="sv") }}{% endblock %}
+{% block disclaimer %}
+Det här meddelandet skickades automatiskt från våra system. Svara inte på det här meddelandet eftersom svaren inte
+kommer att behandlas.
+{% endblock %}
+{% block footer_logo %}{{ macros.logo(variant="footer", lang="sv") }}{% endblock %}
+{% block copyright %}Alla rättigheter förbehållna{% endblock %}

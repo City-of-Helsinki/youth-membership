@@ -72,3 +72,6 @@ jobs:
           K8S_SECRET_DEFAULT_FROM_EMAIL: "no-reply@hel.ninja"
           K8S_SECRET_AUDIT_LOGGING_ENABLED: 1
           K8S_SECRET_AUDIT_LOG_USERNAME: ${{ secrets.AUDIT_LOG_USERNAME }}
+          K8S_SECRET_EMAIL_TEMPLATE_IMAGE_SOURCE: https://jassari.test.kuva.hel.ninja/email-templates
+          K8S_SECRET_EMAIL_TEMPLATE_YOUTH_MEMBERSHIP_UI_BASE_URL: https://jassari.test.kuva.hel.ninja
+
