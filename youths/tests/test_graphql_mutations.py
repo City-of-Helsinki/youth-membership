@@ -1,6 +1,7 @@
 import json
 from datetime import date, datetime, timedelta
 from string import Template
+from unittest.mock import ANY
 
 import pytest
 from django.utils import timezone
@@ -90,6 +91,7 @@ def test_normal_user_can_create_youth_profile_mutation(
     assert mocked_notification.call_args.kwargs["context"] == {
         "youth_profile": YouthProfile.objects.get(pk=profile_id),
         "youth_name": my_profile_api_response["first_name"],
+        "youth_membership_ui_base_url": ANY,
     }
 
 
@@ -505,6 +507,7 @@ def test_normal_user_can_resend_request_notification_on_update(
         assert mocked_notification.call_args.kwargs["context"] == {
             "youth_profile": YouthProfile.objects.get(pk=youth_profile.pk),
             "youth_name": my_profile_api_response["first_name"],
+            "youth_membership_ui_base_url": ANY,
         }
     else:
         assert youth_profile.approval_token == original_approval_token
@@ -817,6 +820,7 @@ def test_approving_with_token_sends_confirmation_message(
     assert mocked_notification.call_args.kwargs["context"] == {
         "youth_profile": YouthProfile.objects.get(pk=youth_profile.pk),
         "youth_name": restricted_profile_response["first_name"],
+        "youth_membership_ui_base_url": ANY,
     }
     assert (
         mocked_notification.call_args.kwargs["email"]
@@ -1043,6 +1047,7 @@ def test_youth_profile_renewal_sends_approval_message_for_a_minor(
         assert mocked_notification.call_args.kwargs["context"] == {
             "youth_profile": YouthProfile.objects.get(pk=youth_profile.pk),
             "youth_name": my_profile_api_response["first_name"],
+            "youth_membership_ui_base_url": ANY,
         }
 
 
