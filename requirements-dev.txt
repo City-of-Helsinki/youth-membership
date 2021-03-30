@@ -164,7 +164,7 @@ python-jose==3.2.0
     # via
     #   -c requirements.txt
     #   -r requirements-dev.in
-pyyaml==5.3.1
+pyyaml==5.4
     # via
     #   -c requirements.txt
     #   pre-commit
