@@ -80,7 +80,11 @@ class YouthProfile(AuditLogModel, UUIDModel, SerializableMixin):
         send_notification(
             email=self.approver_email,
             notification_type=NotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED.value,
-            context={"youth_profile": self, "youth_name": youth_name},
+            context={
+                "youth_profile": self,
+                "youth_name": youth_name,
+                "youth_membership_ui_base_url": settings.EMAIL_TEMPLATE_YOUTH_MEMBERSHIP_UI_BASE_URL,
+            },
             language=self.language_at_home.value,
         )
         self.approval_notification_timestamp = timezone.now()

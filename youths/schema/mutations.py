@@ -1,6 +1,7 @@
 from datetime import date
 
 import graphene
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django_ilmoitin.utils import send_notification
@@ -423,6 +424,7 @@ class ApproveYouthProfileMutation(relay.ClientIDMutation):
             context={
                 "youth_profile": youth_profile,
                 "youth_name": profile_data["first_name"],
+                "youth_membership_ui_base_url": settings.EMAIL_TEMPLATE_YOUTH_MEMBERSHIP_UI_BASE_URL,
             },
             language=profile_data["language"],
         )
