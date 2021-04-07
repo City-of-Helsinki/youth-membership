@@ -214,21 +214,26 @@ snapshots[
 <br />
 <br />
 
-<a
-    href="{{ youth_membership_ui_base_url }}/en/"
-    style="
-        background: rgb(0, 0, 191);
-        padding: 20px 32px;
-        color: #ffffff;
-        font-size: 16px;
-        font-weight: 500;
-        height: 24px;
-        line-height: 24px;
-        text-align: center;
-        display: inline-block;
-        text-decoration: none;
-    "
->Jässäri <img src="https://jassari.test.kuva.hel.ninja/email-templates/hds-icon-arrow-right.png" style="vertical-align: middle; margin-left: 12px;" /></a>
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:separate;line-height:100%;">
+    <tr>
+        <td align="center" bgcolor="#0000BF" role="presentation" style="border:none;cursor:auto;padding: 20px 32px;background:#0000BF;" valign="middle">
+            <a
+                href="{{ youth_membership_ui_base_url }}/en/"
+                style="
+                    background: #0000BF;
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 500;
+                    height: 24px;
+                    line-height: 24px;
+                    text-align: center;
+                    display: inline-block;
+                    text-decoration: none;
+                "
+            >Jässäri <img src="https://jassari.test.kuva.hel.ninja/email-templates/hds-icon-arrow-right.png" style="vertical-align: middle; margin-left: 12px;" /></a>
+        </td>
+    </tr>
+</table>
 
 <br />
 <br />
