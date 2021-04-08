@@ -211,27 +211,32 @@ snapshots[
                                         
 
 {{ youth_profile.approver_first_name }} has approved your membership. Your digital memberhsip card can be found here:
-</br>
-</br>
+<br />
+<br />
 
-<a
-    href="{{ youth_membership_ui_base_url }}/en/"
-    style="
-        background: rgb(0, 0, 191);
-        padding: 20px 32px;
-        color: #ffffff;
-        font-size: 16px;
-        font-weight: 500;
-        height: 24px;
-        line-height: 24px;
-        text-align: center;
-        display: inline-block;
-        text-decoration: none;
-    "
->Jässäri <img src="https://jassari.test.kuva.hel.ninja/email-templates/hds-icon-arrow-right.png" style="vertical-align: middle; margin-left: 12px;" /></a>
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:separate;line-height:100%;">
+    <tr>
+        <td align="center" bgcolor="#0000BF" role="presentation" style="border:none;cursor:auto;padding: 20px 32px;background:#0000BF;" valign="middle">
+            <a
+                href="{{ youth_membership_ui_base_url }}/en/"
+                style="
+                    background: #0000BF;
+                    color: #ffffff;
+                    font-size: 16px;
+                    font-weight: 500;
+                    height: 24px;
+                    line-height: 24px;
+                    text-align: center;
+                    display: inline-block;
+                    text-decoration: none;
+                "
+            >Jässäri <img src="https://jassari.test.kuva.hel.ninja/email-templates/hds-icon-arrow-right.png" style="vertical-align: middle; margin-left: 12px;" /></a>
+        </td>
+    </tr>
+</table>
 
-</br>
-</br>
+<br />
+<br />
 For more information on the Youth Services membership and its perks, please visit <a
     href="https://jassari.munstadi.fi/en/"
     style="color: #0e04c7;text-decoration: none;"
@@ -239,8 +244,8 @@ For more information on the Youth Services membership and its perks, please visi
     https://jassari.munstadi.fi/en/
 </a>.
 
-                                        </br>
-                                        </br>
+                                        <br />
+                                        <br />
                                         <span style="font-size: 16px; color: #666666;">
 This message was sent automatically from our system. Please do not reply to this message as the replies will not be processed.
 </span>
