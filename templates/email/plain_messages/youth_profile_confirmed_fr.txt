@@ -1,0 +1,5 @@
+Bienvenue ! Vous êtes désormais membre des services pour la jeunesse de la ville de Helsinki ! {{ youth_profile.approver_first_name }} a accepté votre adhésion. Votre carte de membre électronique se trouve ici : {{ youth_membership_ui_base_url }}/fr/
+
+En savoir plus sur l'adhésion aux services de la jeunesse à l'adresse https://jassari.munstadi.fi
+
+Ce message a été envoyé automatiquement par le système. Ne répondez pas à ce message, car les réponses ne seront pas traitées.

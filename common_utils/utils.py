@@ -70,52 +70,45 @@ def get_file_content(filepath):
 
 notifications = {
     YouthNotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED: {
-        "fi": {
-            "subject": (
-                "{{ youth_name }} on lähettänyt hyväksyttäväksesi Helsingin kaupungin nuorisopalvelujen "
-                "jäsenyyshakemuksen"
-            ),
-            "html": "email/messages/youth_profile_confirmation_needed_fi.html",
-            "plain": "email/plain_messages/youth_profile_confirmation_needed_fi.txt",
-        },
-        "sv": {
-            "subject": (
-                "{{ youth_name }} har skickat dig en ansökan om medlemskap i Helsingfors stads ungdomstjänster för "
-                "godkännande."
-            ),
-            "html": "email/messages/youth_profile_confirmation_needed_sv.html",
-            "plain": "email/plain_messages/youth_profile_confirmation_needed_sv.txt",
-        },
-        "en": {
-            "subject": (
-                "{{ youth_name }} has sent a membership application for the City of Helsinki’s Youth Services for "
-                "your approval."
-            ),
-            "html": "email/messages/youth_profile_confirmation_needed_en.html",
-            "plain": "email/plain_messages/youth_profile_confirmation_needed_en.txt",
-        },
+        "fi": "{{ youth_name }} on lähettänyt hyväksyttäväksesi Helsingin kaupungin nuorisopalvelujen "
+        "jäsenyyshakemuksen",
+        "sv": "{{ youth_name }} har skickat dig en ansökan om medlemskap i Helsingfors stads ungdomstjänster för "
+        "godkännande",
+        "en": "{{ youth_name }} has sent a membership application for the City of Helsinki’s Youth Services for your "
+        "approval",
+        "fr": "{{ youth_name }} a envoyé une demande d'adhésion aux services pour la jeunesse de la ville de Helsinki "
+        "pour la soumettre à votre acceptation",
+        "ru": "{{ youth_name }} отправил/а вам для одобрения заявление о регистрации в сервисе для молодежи "
+        "муниципалитета Хельсинки",
+        "et": "{{ youth_name }} on saatnud kinnitamiseks Helsingi linna noorsoosteenuste liikmesuse taotluse",
+        "so": "{{ youth_name }} ayaa kuu soo diray dalabka xubinimada adeegyada magaalada Helsinki si aad u "
+        "ooggolaato",
+        "ar": "{{ youth_name }} قد أرسل من أجل موافقتك طلب العضوية لخدمات الشباب لمدينة هلسنكي",
     },
     YouthNotificationType.YOUTH_PROFILE_CONFIRMED: {
-        "fi": {
-            "subject": "{{ youth_profile.approver_first_name }} on hyväksynyt nuorisopalveluiden jäsenyytesi",
-            "html": "email/messages/youth_profile_confirmed_fi.html",
-            "plain": "email/plain_messages/youth_profile_confirmed_fi.txt",
-        },
-        "sv": {
-            "subject": (
-                "{{ youth_profile.approver_first_name }} har godkänt ditt edlemskap i Helsingfors stads",
-                "ungdomstjänster",
-            ),
-            "html": "email/messages/youth_profile_confirmed_sv.html",
-            "plain": "email/plain_messages/youth_profile_confirmed_sv.txt",
-        },
-        "en": {
-            "subject": "{{ youth_profile.approver_first_name }} has approved your Youth Services membership",
-            "html": "email/messages/youth_profile_confirmed_en.html",
-            "plain": "email/plain_messages/youth_profile_confirmed_en.txt",
-        },
+        "fi": "{{ youth_profile.approver_first_name }} on hyväksynyt nuorisopalveluiden jäsenyytesi",
+        "sv": "{{ youth_profile.approver_first_name }} har godkänt ditt edlemskap i Helsingfors stads ungdomstjänster",
+        "en": "{{ youth_profile.approver_first_name }} has approved your Youth Services membership",
+        "fr": "{{ youth_profile.approver_first_name }} a accepté votre adhésion aux services pour la jeunesse",
+        "ru": "{{ youth_profile.approver_first_name }} одобрил/а ваше членство в сервисе для молодежи",
+        "et": "{{ youth_profile.approver_first_name }} on kinnitanud noorsooteenuste liikmesuse",
+        "so": "{{ youth_profile.approver_first_name }} ayaa la aqbalay xubinimadaadii adeegga dhallinyarada",
+        "ar": "{{ youth_profile.approver_first_name }} قد وافق على عضويتك لدى خدمات الشباب",
     },
 }
+
+
+def get_notification_template_location(notification_type, lang):
+    if notification_type == YouthNotificationType.YOUTH_PROFILE_CONFIRMATION_NEEDED:
+        return {
+            "html": f"email/messages/youth_profile_confirmation_needed_{lang}.html",
+            "plain": f"email/plain_messages/youth_profile_confirmation_needed_{lang}.txt",
+        }
+    elif notification_type == YouthNotificationType.YOUTH_PROFILE_CONFIRMED:
+        return {
+            "html": f"email/messages/youth_profile_confirmed_{lang}.html",
+            "plain": f"email/plain_messages/youth_profile_confirmed_{lang}.txt",
+        }
 
 
 @transaction.atomic
@@ -132,39 +125,43 @@ def generate_notifications(save=False):
             type=notification_type.value,
         )
 
-        for lang, values in translations.items():
+        for lang, subject in translations.items():
 
             with override(lang), switch_language(template, lang):
-                template.subject = values.get("subject")
+                template.subject = subject
+                template_location = get_notification_template_location(
+                    notification_type, lang
+                )
 
-                if html_path := values.get("html"):
-                    template_html_base = render_to_string(
-                        html_path,
-                        {"image_location": settings.EMAIL_TEMPLATE_IMAGE_SOURCE},
+                # Html template generation
+                template_html_base = render_to_string(
+                    template_location["html"],
+                    {"image_location": settings.EMAIL_TEMPLATE_IMAGE_SOURCE},
+                )
+                if save:
+                    generated_template_filepath = os.path.join(
+                        EMAIL_GENERATED_PATH,
+                        os.path.basename(template_location["html"]),
                     )
-                    if save:
-                        generated_template_filepath = os.path.join(
-                            EMAIL_GENERATED_PATH, os.path.basename(html_path)
-                        )
 
-                        save_template(generated_template_filepath, template_html_base)
+                    save_template(generated_template_filepath, template_html_base)
 
-                        logger.info(
-                            f"Saved template into filesystem: {template} (html/{lang})"
-                        )
-
-                    template.body_html = str(template_html_base)
-
-                    logger.info(f"Generated template: {template} (html/{lang})")
-
-                if plain_path := values.get("plain"):
-                    plain_text_template_path = os.path.join(
-                        EMAIL_TEMPLATES_PATH, plain_path
+                    logger.info(
+                        f"Saved template into filesystem: {template} (html/{lang})"
                     )
-                    template_text_base = get_file_content(plain_text_template_path)
 
-                    template.body_text = str(template_text_base)
+                template.body_html = str(template_html_base)
 
-                    logger.info(f"Generated template: {template} (plain/{lang})")
+                logger.info(f"Generated template: {template} (html/{lang})")
+
+                # Plain template generation
+                plain_text_template_path = os.path.join(
+                    EMAIL_TEMPLATES_PATH, template_location["plain"]
+                )
+                template_text_base = get_file_content(plain_text_template_path)
+
+                template.body_text = str(template_text_base)
+
+                logger.info(f"Generated template: {template} (plain/{lang})")
 
                 template.save()

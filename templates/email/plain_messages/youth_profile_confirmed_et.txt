@@ -1,0 +1,5 @@
+Tere tulemast Helsingi linna noorsooteenuste liikmeks! {{ youth_profile.approver_first_name }} on liikmesuse kinnitanud. Digitaalse liikmekaardi leiad siit: {{ youth_membership_ui_base_url }}/et/
+
+Noorsooteenuste liikmesuse ja kaasnevate soodustuste kohta saad lugeda siit: https://jassari.munstadi.fi
+
+Sõnum saadeti süsteemist automaatselt. Palume sellele sõnumile mitte vastata, sest vastuseid ei loeta.

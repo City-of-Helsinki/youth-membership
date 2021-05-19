@@ -1,0 +1,5 @@
+Kusoo dhawow xubinimada adeegga dhalinyarada ee magaalada Helsinki! {{ youth_profile.approver_first_name }} waa la ogolaaday xubinimadaadii. Kaadhka xabinimadaada ee dhigijitalka ah halkan baad ka helaysaa: {{ youth_membership_ui_base_url }}/so/
+
+Waxaad ka akhrin kartaa macluumaad dheeraad ah oo ku sahabsan xubinimada adeegga dhallinyarada cinwaankan https://jassari.munstadi.fi
+
+Fariintan waxaa kuu soo diray nidaamka si ootamaatik ah. Haka jawaabin fariintan, mid maaha la falaqaynayo ama lagaaga soo jawaabo.

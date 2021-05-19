@@ -1,0 +1,15 @@
+{% extends "email/base_template_ar.html" %}
+
+{% block title %}أهلاً وسهلاً بكم كعضو لدى خدمات الشباب لمدينة هلسنكي! {% endblock %}
+{% block content %}
+{% raw %}
+{{ youth_profile.approver_first_name }} قد وافق على عضويتك. بطاقتك الرقمية للعضوية تجدها من هنا:
+<br />
+<br />
+{% endraw %}
+{{ macros.buttonLink(label="Jässäri", href="{{ youth_membership_ui_base_url }}/ar/") }}
+{% raw %}
+<br />
+<br />
+معلومات إضافية عن العضوية لدى خدمات الشباب وعن ميزاتها من الممكن قراءتها من الرابط  {% endraw %} {{ macros.link("https://jassari.munstadi.fi", "https://jassari.munstadi.fi") }}.
+{% endblock %}
