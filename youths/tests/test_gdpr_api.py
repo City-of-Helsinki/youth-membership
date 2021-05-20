@@ -2,11 +2,13 @@ import datetime
 
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from freezegun import freeze_time
 from helusers.settings import api_token_auth_settings
 from jose import jwt
 
 from youths.models import YouthProfile
 
+from .factories import YouthProfileFactory
 from .keys import rsa_key
 
 User = get_user_model()
@@ -50,9 +52,11 @@ def get_api_token_for_user_with_scopes(user, scopes: list, requests_mock):
     return auth_header
 
 
+@freeze_time("2021-03-01")
 def test_get_profile_information_from_gdpr_api(
-    api_client, youth_profile, snapshot, requests_mock, settings
+    api_client, snapshot, requests_mock, settings
 ):
+    youth_profile = YouthProfileFactory()
     auth_header = get_api_token_for_user_with_scopes(
         youth_profile.user, [settings.GDPR_API_QUERY_SCOPE], requests_mock
     )
