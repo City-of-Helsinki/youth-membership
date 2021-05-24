@@ -4,7 +4,7 @@
 *.egg-info/
 *.log
 *.manifest
-*.mo
+#*.mo
 *.pid
 *.pot
 *.py[cod]
