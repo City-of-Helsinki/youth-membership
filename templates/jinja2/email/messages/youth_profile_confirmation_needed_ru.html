@@ -1,0 +1,17 @@
+{% extends "email/base_template_ru.html" %}
+
+{% block title %}Helsingin kaupungin nuorisopalvelujen jäsenyyshakemus{% endblock %}
+{% block content %}
+{% raw %}
+Уважаемый/ая {{ youth_profile.approver_first_name }},
+<br />
+<br />
+{{ youth_name }} отправил/а вам для одобрения заявление о регистрации в сервисе для молодежи муниципалитета Хельсинки. Членство в сервисе бесплатно.
+<br />
+<br />
+Если вы одобрите заявление, {{ youth_name }} сможет посещать молодежные досуговые центры и получит новые полезные возможности. Если в информации допущены ошибки, попросите подростка изменить указанные сведения и отправить вам новое сообщение для одобрения. Для того, чтобы одобрить заявление в сервисе для молодежи Jässäri, пройдите по этой ссылке:
+<br />
+<br />
+{% endraw %}
+{{ macros.buttonLink("Tarkastele hakemusta", "{{ youth_membership_ui_base_url }}/ru/approve/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}")  }}
+{% endblock %}
