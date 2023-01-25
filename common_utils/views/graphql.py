@@ -105,7 +105,7 @@ class SentryGraphQLView(BaseGraphQLView):
     def format_error(error):
         def get_error_code(exception):
             """Get the most specific error code for the exception via superclass"""
-            for exception in exception.mro():
+            for exception in exception.mro():  # noqa B020
                 try:
                     return error_codes[exception]
                 except KeyError:

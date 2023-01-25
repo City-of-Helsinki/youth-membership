@@ -25,6 +25,7 @@ from youths.tests.factories import (
 )
 
 
+@freeze_time("2020-05-02")
 def test_normal_user_can_create_youth_profile_mutation(
     rf, user_gql_client, mocker, my_profile_api_response, token_response
 ):
