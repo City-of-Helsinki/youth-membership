@@ -7,7 +7,7 @@ trigger:
   batch: true
   tags:
     include:
-      - release-*
+      - youth-membership-v*
   paths:
     exclude:
     - README.md
