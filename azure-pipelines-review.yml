@@ -21,6 +21,11 @@ pr:
   branches:
     include:
     - master
+  paths:
+    exclude:
+    - '*release-please*'
+    - '**/*.md'
+    - '.github/'
 
 # By default, use self-hosted agents
 pool: Default

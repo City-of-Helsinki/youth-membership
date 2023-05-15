@@ -1,0 +1,11 @@
+{
+  "bootstrap-sha": "b3a092f1ee9860c36802af866b42c6a259de79d3",
+  "sequential-calls": true,
+  "packages": {
+    ".": {
+      "release-type": "python",
+      "package-name": "youth-membership"
+    }
+  },
+  "plugins": ["sentence-case"]
+}

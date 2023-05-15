@@ -11,8 +11,9 @@ trigger:
     - master
   paths:
     exclude:
-    - README.md
-    - CHANGELOG.md
+    - '*release-please*'
+    - '**/*.md'
+    - '.github/'
 
 # Pull request (PR) triggers cause a pipeline to run whenever a pull request is 
 # opened with one of the specified target branches, or when updates are made to 
