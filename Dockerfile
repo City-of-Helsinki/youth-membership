@@ -9,7 +9,7 @@ COPY --chown=appuser:appuser requirements-prod.txt /app/requirements-prod.txt
 RUN apt-install.sh \
     build-essential \
     libpq-dev \
-    netcat \
+    netcat-traditional \
     && pip install -U pip \
     && pip install --no-cache-dir -r /app/requirements.txt \
     && pip install --no-cache-dir -r /app/requirements-prod.txt \
