@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.2](https://github.com/City-of-Helsinki/youth-membership/compare/youth-membership-v1.2.1...youth-membership-v1.2.2) (2023-06-29)
+
+
+### Bug Fixes
+
+* Netcat installation error ([0f32947](https://github.com/City-of-Helsinki/youth-membership/commit/0f3294765fab4fce78629437fcd2f9cdaae4abc9))
+* Version number to __init__.py ([aa644cc](https://github.com/City-of-Helsinki/youth-membership/commit/aa644cc9029bc908959fa0a9c41f903962af2688))
+
 ## [1.2.1](https://github.com/City-of-Helsinki/youth-membership/compare/youth-membership-v1.2.0...youth-membership-v1.2.1) (2023-05-15)
 
 
