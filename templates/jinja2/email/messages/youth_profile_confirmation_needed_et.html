@@ -1,0 +1,17 @@
+{% extends "email/base_template_et.html" %}
+
+{% block title %}Helsingin kaupungin nuorisopalvelujen jäsenyyshakemus{% endblock %}
+{% block content %}
+{% raw %}
+Tere! {{ youth_profile.approver_first_name }},
+<br />
+<br />
+{{ youth_name }} on saatnud kinnitamiseks Helsingi linna noorsoosteenuste liikmesuse taotluse. Liikmesus on tasuta.
+<br />
+<br />
+Kui kinnitate taotluse, saab {{ youth_name }} käia noortekeskuses ja kasutada toredaid soodustusi. Juhul kui andmetes on vigu, paluge noorel neid muuta ja teile uus kinnitussõnum saata. Kinnitamiseks minge järgmise lingi kaudu Jässäri teenusesse:
+<br />
+<br />
+{% endraw %}
+{{ macros.buttonLink("Tarkastele hakemusta", "{{ youth_membership_ui_base_url }}/et/approve/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}")  }}
+{% endblock %}

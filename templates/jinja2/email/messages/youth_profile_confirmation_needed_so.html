@@ -1,0 +1,17 @@
+{% extends "email/base_template_so.html" %}
+
+{% block title %}Helsingin kaupungin nuorisopalvelujen jäsenyyshakemus{% endblock %}
+{% block content %}
+{% raw %}
+Salaan {{ youth_profile.approver_first_name }},
+<br />
+<br />
+{{ youth_name }} ayaa kuu soo diray dalabka xubinimada adeegyada magaalada Helsinki si aad u ooggolaato. Xubinimadu waa lacag la'aan.
+<br />
+<br />
+Marka la aqbalo dalabka, {{ youth_name }} waa la booqan karaa xarunta dhalinyarada waxaana la heli karaa waxyaabo xiiso leh. Hadii uu macluumaadku qaldanyahay, ka dalbo dhallinyarada inay badalaan macluumaadkaaga iyo inay kusoo diraan fariinta hubantida. Gal oo ku soo xaqiiji adigu adeegga Jässäri adiga oo isticmaalaya linkigan:
+<br />
+<br />
+{% endraw %}
+{{ macros.buttonLink("Tarkastele hakemusta", "{{ youth_membership_ui_base_url }}/so/approve/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}")  }}
+{% endblock %}

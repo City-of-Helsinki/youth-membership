@@ -1,0 +1,7 @@
+Tere! {{ youth_profile.approver_first_name }},
+
+{{ youth_name }} on saatnud kinnitamiseks Helsingi linna noorsoosteenuste liikmesuse taotluse. Liikmesus on tasuta. Kui kinnitate taotluse, saab {{ youth_name }} käia noortekeskuses ja kasutada toredaid soodustusi. Juhul kui andmetes on vigu, paluge noorel neid muuta ja teile uus kinnitussõnum saata. Kinnitamiseks minge järgmise lingi kaudu Jässäri teenusesse:
+
+{{ youth_membership_ui_base_url }}/et/approve/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}
+
+Sõnum saadeti süsteemist automaatselt. Palume sellele sõnumile mitte vastata, sest vastuseid ei loeta.

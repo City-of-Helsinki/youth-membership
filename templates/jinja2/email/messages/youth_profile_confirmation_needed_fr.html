@@ -1,0 +1,17 @@
+{% extends "email/base_template_fr.html" %}
+
+{% block title %}Helsingin kaupungin nuorisopalvelujen jäsenyyshakemus{% endblock %}
+{% block content %}
+{% raw %}
+Bonjour {{ youth_profile.approver_first_name }},
+<br />
+<br />
+{{ youth_name }} a envoyé une demande d'adhésion aux services pour la jeunesse de la ville de Helsinki pour la soumettre à votre acceptation. L'adhésion est gratuite.
+<br />
+<br />
+En acceptant la demande, {{ youth_name }}, vous pouvez aller dans les MJC et bénéficier de chouettes avantages. En cas de données erronées, veuillez demander au jeune de les modifier et de vous adresser un nouveau message de confirmation. Veuillez faire votre confirmation sur le service Jässäri en utilisant le lien suivant :
+<br />
+<br />
+{% endraw %}
+{{ macros.buttonLink("Tarkastele hakemusta", "{{ youth_membership_ui_base_url }}/fr/approve/{{ youth_profile.approval_token }}/{{ youth_profile.profile_access_token }}")  }}
+{% endblock %}

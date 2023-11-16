@@ -1,0 +1,15 @@
+{% extends "email/base_template_so.html" %}
+
+{% block title %}Kusoo dhawow xubinimada adeegga dhalinyarada ee magaalada Helsinki!{% endblock %}
+{% block content %}
+{% raw %}
+{{ youth_profile.approver_first_name }} waa la ogolaaday xubinimadaadii. Kaadhka xabinimadaada ee dhigijitalka ah halkan baad ka helaysaa:
+<br />
+<br />
+{% endraw %}
+{{ macros.buttonLink(label="Jässäri", href="{{ youth_membership_ui_base_url }}/so/") }}
+{% raw %}
+<br />
+<br />
+Waxaad ka akhrin kartaa macluumaad dheeraad ah oo ku sahabsan xubinimada adeegga dhallinyarada cinwaankan {% endraw %} {{ macros.link("https://jassari.munstadi.fi", "https://jassari.munstadi.fi") }}.
+{% endblock %}

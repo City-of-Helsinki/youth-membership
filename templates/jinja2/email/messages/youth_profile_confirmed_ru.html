@@ -1,0 +1,15 @@
+{% extends "email/base_template_ru.html" %}
+
+{% block title %}Добро пожаловать в сервис для подростков муниципалитета Хельсинки!{% endblock %}
+{% block content %}
+{% raw %}
+{{ youth_profile.approver_first_name }} одобрил/а ваше вступление в сервис. Электронный членский билет можно загрузить здесь:
+<br />
+<br />
+{% endraw %}
+{{ macros.buttonLink(label="Jässäri", href="{{ youth_membership_ui_base_url }}/ru/") }}
+{% raw %}
+<br />
+<br />
+С дополнительной информацией о членстве в сервисе для молодежи и его преимуществах вы можете ознакомиться по адресу {% endraw %} {{ macros.link("https://jassari.munstadi.fi", "https://jassari.munstadi.fi") }}.
+{% endblock %}
